@@ -1,0 +1,93 @@
+[
+  {
+    "name": "Sugár Bowling",
+    "discount": "25%",
+    "category": "Bowling",
+    "redeem": "QR kód a helyszínen",
+    "description": "",
+    "address": "",
+    "steps": [],
+    "conditions": ""
+  },
+  {
+    "name": "Magic Rooms",
+    "discount": "25%",
+    "category": "Szabadulószoba",
+    "redeem": "QR kód a helyszínen",
+    "description": "",
+    "address": "",
+    "steps": [],
+    "conditions": ""
+  },
+  {
+    "name": "SugárMozi",
+    "discount": "20%",
+    "category": "Mozi",
+    "redeem": "QR kód a helyszínen",
+    "description": "",
+    "address": "",
+    "steps": [],
+    "conditions": ""
+  },
+  {
+    "name": "TimeHeist",
+    "discount": "20%",
+    "category": "Szabadulószoba",
+    "redeem": "QR kód a helyszínen",
+    "description": "",
+    "address": "",
+    "steps": [],
+    "conditions": ""
+  },
+  {
+    "name": "Szelfimúzeum",
+    "discount": "15%",
+    "category": "Élmény",
+    "redeem": "Mondd a pénztárnál: \"SideQuest\"",
+    "description": "",
+    "address": "",
+    "steps": [],
+    "conditions": ""
+  },
+  {
+    "name": "Baltadobálás",
+    "discount": "10%",
+    "category": "Élmény",
+    "redeem": "QR kód a helyszínen",
+    "description": "",
+    "address": "",
+    "steps": [],
+    "conditions": ""
+  },
+  {
+    "name": "Leonoria Kvízbox",
+    "discount": "10%",
+    "category": "Kvíz",
+    "redeem": "Mondd a pénztárnál: \"SideQuest\"",
+    "description": "",
+    "address": "",
+    "steps": [],
+    "conditions": ""
+  },
+  {
+    "name": "Base Bar",
+    "discount": "10%",
+    "category": "Bár",
+    "redeem": "Mondd a pultnál: \"SideQuest\"",
+    "description": "",
+    "address": "",
+    "steps": [],
+    "conditions": ""
+  },
+  {
+    "name": "Pixity",
+    "discount": "10%",
+    "category": "Élmény",
+    "redeem": "Online kuponkód",
+    "code": "SIDEQUEST10",
+    "description": "",
+    "address": "",
+    "steps": [],
+    "conditions": ""
+  }
+]
