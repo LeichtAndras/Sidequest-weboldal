@@ -5,7 +5,7 @@
     "category": "Bowling",
     "redeem": "QR kód a helyszínen",
     "description": "",
-    "address": "",
+    "address": "Budapest, Örs vezér tere 24, 1148",
     "steps": [],
     "conditions": ""
   },
@@ -13,11 +13,15 @@
     "name": "Magic Rooms",
     "discount": "25%",
     "category": "Szabadulószoba",
-    "redeem": "QR kód a helyszínen",
+    "redeem": "Add meg foglaláskor a kódot",
     "description": "",
     "address": "",
-    "steps": [],
-    "conditions": ""
+    "steps": [
+      "Foglalj időpontot hétköznapra",
+      "Az utalás közleményébe írd be: 1KVD25",
+      "A kedvezményt a helyszínen kapod meg"
+    ],
+    "conditions": "Csak hétköznap érvényes. A kedvezmény a helyszínen érvényesül, nem online kuponkód."
   },
   {
     "name": "SugárMozi",
@@ -25,7 +29,7 @@
     "category": "Mozi",
     "redeem": "QR kód a helyszínen",
     "description": "",
-    "address": "",
+    "address": "Budapest, Örs vezér tere 24, 1148",
     "steps": [],
     "conditions": ""
   },
@@ -35,7 +39,7 @@
     "category": "Szabadulószoba",
     "redeem": "QR kód a helyszínen",
     "description": "",
-    "address": "",
+    "address": "Budapest, Liliom u. 5, 1094",
     "steps": [],
     "conditions": ""
   },
@@ -45,7 +49,7 @@
     "category": "Élmény",
     "redeem": "Mondd a pénztárnál: \"SideQuest\"",
     "description": "",
-    "address": "",
+    "address": "Budapest, Paulay Ede u. 43, 1061",
     "steps": [],
     "conditions": ""
   },
@@ -55,7 +59,7 @@
     "category": "Élmény",
     "redeem": "QR kód a helyszínen",
     "description": "",
-    "address": "",
+    "address": "Budapest, Dohány u. 30/A, 1074",
     "steps": [],
     "conditions": ""
   },
@@ -65,7 +69,7 @@
     "category": "Kvíz",
     "redeem": "Mondd a pénztárnál: \"SideQuest\"",
     "description": "",
-    "address": "",
+    "address": "Budapest, Jókai u. 18, 1066",
     "steps": [],
     "conditions": ""
   },
@@ -75,7 +79,7 @@
     "category": "Bár",
     "redeem": "Mondd a pultnál: \"SideQuest\"",
     "description": "",
-    "address": "",
+    "address": "Budapest, Paulay Ede u. 2, 1061",
     "steps": [],
     "conditions": ""
   },
@@ -86,7 +90,7 @@
     "redeem": "Online kuponkód",
     "code": "SIDEQUEST10",
     "description": "",
-    "address": "",
+    "address": "Budapest, Lomb u. 27, 1139",
     "steps": [],
     "conditions": ""
   }
