@@ -33,7 +33,7 @@ export default function App() {
       <div className="mx-auto w-full max-w-[480px] px-5 pt-10 pb-10">
         <header className="text-center">
           <img
-            src="/logo.png"
+            src="/sidequest-logo.png"
             alt="SideQuest"
             width={180}
             height={177}
