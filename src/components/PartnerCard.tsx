@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { Partner } from '../types'
 import CouponCode from './CouponCode'
 import PartnerDetails from './PartnerDetails'
@@ -27,6 +28,7 @@ export function hasDetails(partner: Partner) {
 }
 
 export default function PartnerCard({ partner, featured = false, open, onToggle }: Props) {
+  const [imageFailed, setImageFailed] = useState(false)
   const value = partner.discount.replace(/[^\d.,]/g, '')
   const unit = partner.discount.replace(/[\d.,]/g, '')
   const expandable = hasDetails(partner)
@@ -34,13 +36,20 @@ export default function PartnerCard({ partner, featured = false, open, onToggle 
 
   const head = (
     <>
-      {partner.image ? (
-        <img
-          src={partner.image}
-          alt={partner.name}
-          loading="lazy"
-          className="h-[140px] w-full object-cover"
-        />
+      {partner.image && !imageFailed ? (
+        <div className="relative">
+          <img
+            src={partner.image}
+            alt={partner.name}
+            loading="lazy"
+            onError={() => setImageFailed(true)}
+            style={partner.imagePosition ? { objectPosition: partner.imagePosition } : undefined}
+            className={`h-[140px] w-full object-cover ${
+              partner.brightenImage ? 'brightness-[1.35] contrast-[1.15] saturate-[1.1]' : ''
+            }`}
+          />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-linear-to-b from-transparent to-surface" />
+        </div>
       ) : null}
 
       <div className="p-4">
