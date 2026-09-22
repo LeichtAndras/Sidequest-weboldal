@@ -34,31 +34,42 @@ export default function PartnerCard({ partner, featured = false, open, onToggle 
 
   const head = (
     <>
-      <div className="flex items-start justify-between gap-2.5">
-        <div className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1.5">
-          <h2 className="text-[1.08rem] leading-tight font-semibold text-cream">{partner.name}</h2>
-          <span className="rounded-full bg-accent/15 px-2 py-0.5 text-[0.7rem] font-medium text-accent">
-            {partner.category}
-          </span>
-        </div>
-        <p className="shrink-0 text-right leading-none font-extrabold tracking-tight text-accent tabular-nums">
-          <span className="text-[2.3rem]">{value}</span>
-          <span className="text-[1.3rem]">{unit}</span>
-        </p>
-      </div>
+      {partner.image ? (
+        <img
+          src={partner.image}
+          alt={partner.name}
+          loading="lazy"
+          className="h-[140px] w-full object-cover"
+        />
+      ) : null}
 
-      <div className="mt-3 flex items-start justify-between gap-2.5">
-        <p className="flex items-start gap-2 text-[0.9rem] leading-snug text-cream/70">
-          <RedeemIcon partner={partner} />
-          <span>{partner.redeem}</span>
-        </p>
-        {expandable ? (
-          <ChevronIcon
-            className={`h-5 w-5 shrink-0 text-cream/70 transition-transform duration-200 ${
-              open ? 'rotate-180' : ''
-            }`}
-          />
-        ) : null}
+      <div className="p-4">
+        <div className="flex items-start justify-between gap-2.5">
+          <div className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1.5">
+            <h2 className="text-[1.08rem] leading-tight font-semibold text-cream">{partner.name}</h2>
+            <span className="rounded-full bg-accent/15 px-2 py-0.5 text-[0.7rem] font-medium text-accent">
+              {partner.category}
+            </span>
+          </div>
+          <p className="shrink-0 text-right leading-none font-extrabold tracking-tight text-accent tabular-nums">
+            <span className="text-[2.3rem]">{value}</span>
+            <span className="text-[1.3rem]">{unit}</span>
+          </p>
+        </div>
+
+        <div className="mt-3 flex items-start justify-between gap-2.5">
+          <p className="flex items-start gap-2 text-[0.9rem] leading-snug text-cream/70">
+            <RedeemIcon partner={partner} />
+            <span>{partner.redeem}</span>
+          </p>
+          {expandable ? (
+            <ChevronIcon
+              className={`h-5 w-5 shrink-0 text-cream/70 transition-transform duration-200 ${
+                open ? 'rotate-180' : ''
+              }`}
+            />
+          ) : null}
+        </div>
       </div>
     </>
   )
@@ -75,12 +86,12 @@ export default function PartnerCard({ partner, featured = false, open, onToggle 
           onClick={onToggle}
           aria-expanded={open}
           aria-controls={panelId}
-          className="block w-full cursor-pointer p-4 text-left"
+          className="block w-full cursor-pointer text-left"
         >
           {head}
         </button>
       ) : (
-        <div className="p-4">{head}</div>
+        <div>{head}</div>
       )}
 
       {partner.code ? (

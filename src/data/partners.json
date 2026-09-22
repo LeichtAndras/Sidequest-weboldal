@@ -4,9 +4,14 @@
     "discount": "25%",
     "category": "Bowling",
     "redeem": "QR kód a helyszínen",
+    "image": "",
     "description": "Bowling, biliárd és darts egy helyen, a Sugár tetején. Jó választás, ha többen vagytok és nem akartok sokat tervezni. Pályát érdemes előre foglalni, hétvégén gyorsan betelik.",
     "address": "Sugár Bowling, Budapest, Örs vezér tere 24, 1148",
-    "steps": [],
+    "steps": [
+      "Menj el a helyszínre",
+      "Olvasd be a SideQuest QR kódot a telefonoddal",
+      "Mutasd a kedvezményt fizetés előtt"
+    ],
     "conditions": ""
   },
   {
@@ -14,6 +19,7 @@
     "discount": "25%",
     "category": "Szabadulószoba",
     "redeem": "Add meg foglaláskor a kódot",
+    "image": "",
     "description": "Szabadulószobák egész sorozata, a Harry Potter hangulatútól a Jumanjiig. Az egyik legjobbra értékelt hely a városban, kezdőknek is működik.",
     "address": "",
     "steps": [
@@ -28,9 +34,14 @@
     "discount": "20%",
     "category": "Mozi",
     "redeem": "QR kód a helyszínen",
+    "image": "",
     "description": "Sokkal nyugodtabb, mint a belvárosi multiplexek, és a jegy is olcsóbb. Ha csak le akartok ülni egy filmre kapkodás nélkül, ez jó választás.",
     "address": "Sugár Mozi, Budapest, Örs vezér tere 24, 1148",
-    "steps": [],
+    "steps": [
+      "Menj el a helyszínre",
+      "Olvasd be a SideQuest QR kódot a telefonoddal",
+      "Mutasd a kedvezményt a jegyvásárlásnál"
+    ],
     "conditions": ""
   },
   {
@@ -38,9 +49,14 @@
     "discount": "20%",
     "category": "Szabadulószoba",
     "redeem": "QR kód a helyszínen",
+    "image": "",
     "description": "Szabadulószobák a Ferencvárosban, látványos díszletekkel. Csapatban működik a legjobban, mert sok múlik azon, hogy beszéltek-e egymással.",
     "address": "Budapest, Liliom u. 5, 1094",
-    "steps": [],
+    "steps": [
+      "Menj el a helyszínre",
+      "Olvasd be a SideQuest QR kódot a telefonoddal",
+      "Mutasd a kedvezményt fizetés előtt"
+    ],
     "conditions": ""
   },
   {
@@ -48,9 +64,14 @@
     "discount": "15%",
     "category": "Élmény",
     "redeem": "Mondd a pénztárnál: \"SideQuest\"",
+    "image": "",
     "description": "Színes termek egymás után, mindegyik fotózásra kitalálva. Gyorsan végigmegy az ember rajta, viszont tele lesz a galéria.",
     "address": "Budapest, Paulay Ede u. 43, 1061",
-    "steps": [],
+    "steps": [
+      "Menj el a helyszínre",
+      "Mondd a pénztárnál, hogy SideQuest",
+      "A kedvezményt a jegy árából vonják le"
+    ],
     "conditions": ""
   },
   {
@@ -58,9 +79,14 @@
     "discount": "10%",
     "category": "Élmény",
     "redeem": "QR kód a helyszínen",
+    "image": "",
     "description": "Pont az, amit a neve mond, oktatással és biztonsági felügyelettel. Meglepően addiktív, és tökéletes, ha valami szokatlanra vágytok.",
     "address": "Budapest, Dohány u. 30/A, 1074",
-    "steps": [],
+    "steps": [
+      "Menj el a helyszínre",
+      "Olvasd be a SideQuest QR kódot a telefonoddal",
+      "Mutasd a kedvezményt fizetés előtt"
+    ],
     "conditions": ""
   },
   {
@@ -68,9 +94,14 @@
     "discount": "10%",
     "category": "Kvíz",
     "redeem": "Mondd a pénztárnál: \"SideQuest\"",
+    "image": "",
     "description": "Kvízjáték, ami úgy van felépítve, mint egy tévéshow, saját műsorvezetővel. Választhattok témát, szóval nem kell történelemzseninek lenni. Szülinapra különösen jó.",
     "address": "Budapest, Jókai u. 18, 1066",
-    "steps": [],
+    "steps": [
+      "Menj el a helyszínre",
+      "Mondd a pénztárnál, hogy SideQuest",
+      "A kedvezményt a fizetésnél kapod meg"
+    ],
     "conditions": ""
   },
   {
@@ -78,9 +109,14 @@
     "discount": "10%",
     "category": "Bár",
     "redeem": "Mondd a pultnál: \"SideQuest\"",
+    "image": "",
     "description": "Kis belvárosi bár a Paulay Ede utcában, nyugodt hangulattal. Nem bulihely, inkább az a fajta, ahol le lehet ülni beszélgetni.",
     "address": "Budapest, Paulay Ede u. 2, 1061",
-    "steps": [],
+    "steps": [
+      "Menj el a helyszínre",
+      "Mondd a pultnál, hogy SideQuest",
+      "A kedvezményt a fizetésnél kapod meg"
+    ],
     "conditions": ""
   },
   {
@@ -89,9 +125,14 @@
     "category": "Élmény",
     "redeem": "Online kuponkód",
     "code": "SIDEQUEST10",
+    "image": "",
     "description": "Interaktív mozgásos játékok, ahol futni és ugrani kell a pontokért. Izzadós, de ez a lényege. Sportcuccban gyere, és hozz vizet.",
     "address": "Budapest, Lomb u. 27, 1139",
-    "steps": [],
+    "steps": [
+      "Foglalj időpontot az oldalukon",
+      "A fizetésnél írd be a kuponkódot: SIDEQUEST10",
+      "A kedvezmény automatikusan levonásra kerül"
+    ],
     "conditions": ""
   }
 ]

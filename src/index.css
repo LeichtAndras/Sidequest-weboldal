@@ -39,3 +39,45 @@ body {
   outline-offset: 2px;
   border-radius: 12px;
 }
+
+/* Vizszintesen gorgetheto szurosor, lathato gorgetosav nelkul */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Kartyak finom beuszasa alulrol */
+.reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 450ms ease-out,
+    transform 450ms ease-out;
+}
+
+.reveal-in {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+    transition-delay: 0ms !important;
+  }
+
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

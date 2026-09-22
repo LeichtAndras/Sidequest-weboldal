@@ -1,16 +1,32 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import partnersData from './data/partners.json'
 import PartnerCard from './components/PartnerCard'
+import CategoryFilter, { ALL } from './components/CategoryFilter'
+import Reveal from './components/Reveal'
 import { InstagramIcon, TikTokIcon } from './components/Icons'
 import type { Partner } from './types'
 
 const partners = partnersData as Partner[]
 
-const toNumber = (discount: string) => Number.parseFloat(discount.replace(/[^\d.,]/g, '').replace(',', '.'))
+const toNumber = (discount: string) =>
+  Number.parseFloat(discount.replace(/[^\d.,]/g, '').replace(',', '.'))
+
 const topDiscount = Math.max(...partners.map((partner) => toNumber(partner.discount)))
+const categories = [...new Set(partners.map((partner) => partner.category))]
 
 export default function App() {
   const [openPartner, setOpenPartner] = useState<string | null>(null)
+  const [category, setCategory] = useState(ALL)
+
+  const visible = useMemo(
+    () => (category === ALL ? partners : partners.filter((partner) => partner.category === category)),
+    [category],
+  )
+
+  function selectCategory(next: string) {
+    setCategory(next)
+    setOpenPartner(null)
+  }
 
   return (
     <div className="min-h-dvh bg-ink">
@@ -20,23 +36,33 @@ export default function App() {
             src="/logo.png"
             alt="SideQuest"
             width={180}
-            className="mx-auto w-[180px] mix-blend-screen"
+            height={177}
+            fetchPriority="high"
+            className="mx-auto h-auto w-[180px] mix-blend-screen"
           />
           <p className="mt-2 text-[1.02rem] text-cream/70">Budapest legjobb helyei, olcsóbban.</p>
+          <p className="mt-1.5 text-[0.85rem] font-medium text-accent">
+            {partners.length} hely Budapesten, akár {topDiscount}% kedvezménnyel
+          </p>
           <div className="mx-auto mt-6 h-px w-16 bg-accent/50" />
         </header>
 
-        <main className="mt-8 flex flex-col gap-3.5">
-          {partners.map((partner) => (
-            <PartnerCard
-              key={partner.name}
-              partner={partner}
-              featured={toNumber(partner.discount) === topDiscount}
-              open={openPartner === partner.name}
-              onToggle={() =>
-                setOpenPartner((current) => (current === partner.name ? null : partner.name))
-              }
-            />
+        <nav aria-label="Kategóriák" className="mt-6">
+          <CategoryFilter categories={categories} active={category} onSelect={selectCategory} />
+        </nav>
+
+        <main key={category} className="mt-5 flex flex-col gap-3.5">
+          {visible.map((partner, index) => (
+            <Reveal key={partner.name} delay={Math.min(index, 4) * 60}>
+              <PartnerCard
+                partner={partner}
+                featured={toNumber(partner.discount) === topDiscount}
+                open={openPartner === partner.name}
+                onToggle={() =>
+                  setOpenPartner((current) => (current === partner.name ? null : partner.name))
+                }
+              />
+            </Reveal>
           ))}
         </main>
 
