@@ -1,4 +1,5 @@
 import type { Partner } from '../types'
+import ShareButton from './ShareButton'
 import { InfoIcon, MapPinIcon } from './Icons'
 
 type Props = { partner: Partner }
@@ -55,6 +56,8 @@ export default function PartnerDetails({ partner }: Props) {
           <span>{partner.conditions}</span>
         </p>
       ) : null}
+
+      <ShareButton partner={partner} />
     </div>
   )
 }

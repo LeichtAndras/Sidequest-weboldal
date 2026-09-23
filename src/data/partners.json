@@ -1,6 +1,7 @@
 [
   {
     "name": "Sugár Bowling",
+    "slug": "sugar-bowling",
     "discount": "25%",
     "category": "Bowling",
     "redeem": "QR kód a helyszínen",
@@ -16,6 +17,7 @@
   },
   {
     "name": "Magic Rooms",
+    "slug": "magic-rooms",
     "discount": "25%",
     "category": "Szabadulószoba",
     "redeem": "Add meg foglaláskor a kódot",
@@ -32,6 +34,7 @@
   },
   {
     "name": "SugárMozi",
+    "slug": "sugarmozi",
     "discount": "20%",
     "category": "Mozi",
     "redeem": "QR kód a helyszínen",
@@ -47,6 +50,7 @@
   },
   {
     "name": "TimeHeist",
+    "slug": "timeheist",
     "discount": "20%",
     "category": "Szabadulószoba",
     "redeem": "QR kód a helyszínen",
@@ -63,6 +67,7 @@
   },
   {
     "name": "Szelfimúzeum",
+    "slug": "szelfimuzeum",
     "discount": "15%",
     "category": "Élmény",
     "redeem": "Mondd a pénztárnál: \"SideQuest\"",
@@ -78,6 +83,7 @@
   },
   {
     "name": "Baltadobálás",
+    "slug": "baltadobalas",
     "discount": "10%",
     "category": "Élmény",
     "redeem": "QR kód a helyszínen",
@@ -94,6 +100,7 @@
   },
   {
     "name": "Leonoria Kvízbox",
+    "slug": "leonoria-kvizbox",
     "discount": "10%",
     "category": "Kvíz",
     "redeem": "Mondd a pénztárnál: \"SideQuest\"",
@@ -109,6 +116,7 @@
   },
   {
     "name": "Base Bar",
+    "slug": "base-bar",
     "discount": "10%",
     "category": "Bár",
     "redeem": "Mondd a pultnál: \"SideQuest\"",
@@ -124,6 +132,7 @@
   },
   {
     "name": "Pixity",
+    "slug": "pixity",
     "discount": "10%",
     "category": "Élmény",
     "redeem": "Online kuponkód",

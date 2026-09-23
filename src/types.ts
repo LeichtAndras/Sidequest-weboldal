@@ -1,5 +1,7 @@
 export type Partner = {
   name: string
+  /** URL resz a megosztashoz, pl. "magic-rooms". Innen jon a /magic-rooms/ cim. */
+  slug: string
   discount: string
   category: string
   redeem: string

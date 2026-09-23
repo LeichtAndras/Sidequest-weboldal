@@ -85,7 +85,8 @@ export default function PartnerCard({ partner, featured = false, open, onToggle 
 
   return (
     <article
-      className={`overflow-hidden rounded-2xl bg-surface ${
+      id={`partner-${partner.slug}`}
+      className={`scroll-mt-4 overflow-hidden rounded-2xl bg-surface ${
         featured ? 'border border-accent' : 'border border-line'
       }`}
     >

@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import partnersData from './data/partners.json'
 import PartnerCard from './components/PartnerCard'
 import CategoryFilter, { ALL } from './components/CategoryFilter'
 import Reveal from './components/Reveal'
 import { InstagramIcon, TikTokIcon } from './components/Icons'
 import type { Partner } from './types'
+import { slugFromPath } from './site'
 
 const partners = partnersData as Partner[]
 
@@ -14,9 +15,70 @@ const toNumber = (discount: string) =>
 const topDiscount = Math.max(...partners.map((partner) => toNumber(partner.discount)))
 const categories = [...new Set(partners.map((partner) => partner.category))]
 
+/** A cimsorbol indulunk: /magic-rooms/ eseten ez a kartya nyilik ki. */
+function partnerACimbol() {
+  if (typeof window === 'undefined') return null
+  const slug = slugFromPath(window.location.pathname)
+  return partners.find((partner) => partner.slug === slug) ?? null
+}
+
 export default function App() {
-  const [openPartner, setOpenPartner] = useState<string | null>(null)
+  const [openPartner, setOpenPartner] = useState<string | null>(() => partnerACimbol()?.name ?? null)
   const [category, setCategory] = useState(ALL)
+
+  // Megosztott linkrol erkezve odagorgetunk a kartyara.
+  useEffect(() => {
+    const partner = partnerACimbol()
+    if (!partner) return
+
+    // A bongeszo sajat gorgetes visszaallitasa felulirna a mienket.
+    const eredetiVisszaallitas = window.history.scrollRestoration
+    if ('scrollRestoration' in window.history) window.history.scrollRestoration = 'manual'
+
+    let megszakit = false
+    const megall = () => {
+      megszakit = true
+    }
+
+    const oda = () => {
+      if (megszakit) return
+      const elem = document.getElementById(`partner-${partner.slug}`)
+      if (!elem) return
+      // Nem offsetTop: a beuszo animacio eltolasa miatt az a kartyara nezve nulla lenne.
+      const cel = elem.getBoundingClientRect().top + window.scrollY - 16
+      window.scrollTo({ top: Math.max(cel, 0) })
+    }
+
+    // Ha a latogato maga gorget vagy erint, tobbet nem mozgatjuk alola az oldalt.
+    window.addEventListener('wheel', megall, { passive: true, once: true })
+    window.addEventListener('touchstart', megall, { passive: true, once: true })
+    window.addEventListener('keydown', megall, { once: true })
+
+    oda()
+    window.addEventListener('load', oda)
+    // A kepek es a betuk elhelyezkedese utan meg egyszer.
+    const idozitok = [window.setTimeout(oda, 120), window.setTimeout(oda, 600)]
+
+    return () => {
+      window.removeEventListener('load', oda)
+      window.removeEventListener('wheel', megall)
+      window.removeEventListener('touchstart', megall)
+      window.removeEventListener('keydown', megall)
+      idozitok.forEach(window.clearTimeout)
+      if ('scrollRestoration' in window.history) {
+        window.history.scrollRestoration = eredetiVisszaallitas
+      }
+    }
+  }, [])
+
+  // A cimsor koveti a nyitott kartyat. replaceState, igy nem ugrik az oldal.
+  useEffect(() => {
+    const partner = partners.find((item) => item.name === openPartner)
+    const utvonal = partner ? `/${partner.slug}/` : '/'
+    if (window.location.pathname !== utvonal) {
+      window.history.replaceState(null, '', utvonal)
+    }
+  }, [openPartner])
 
   const visible = useMemo(
     () => (category === ALL ? partners : partners.filter((partner) => partner.category === category)),
