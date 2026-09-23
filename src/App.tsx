@@ -3,6 +3,7 @@ import partnersData from './data/partners.json'
 import PartnerCard from './components/PartnerCard'
 import CategoryFilter, { ALL } from './components/CategoryFilter'
 import Reveal from './components/Reveal'
+import Subscribe from './components/Subscribe'
 import { InstagramIcon, TikTokIcon } from './components/Icons'
 import type { Partner } from './types'
 import { slugFromPath } from './site'
@@ -136,6 +137,8 @@ export default function App() {
             partnereinkkel azon dolgozunk, hogy ezek a helyek neked olcsóbbak is legyenek.
           </p>
         </section>
+
+        <Subscribe />
 
         <footer className="mt-12 text-center">
           <p className="text-[0.98rem] leading-snug text-cream/70">
