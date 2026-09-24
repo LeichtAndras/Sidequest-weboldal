@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 
 export type UtPont = {
   /** Vizszintes hely szazalekban, 0 a bal szel, 100 a jobb. */
@@ -42,7 +42,7 @@ function utvonalRajz(pontok: UtPont[]) {
 
   for (let i = 1; i < bovitett.length - 2; i++) {
     const tav = Math.max(Math.abs(bovitett[i + 1].y - bovitett[i].y), 1)
-    const lepesek = Math.max(6, Math.round(tav / 9))
+    const lepesek = Math.max(5, Math.round(tav / 14))
     for (let l = 0; l < lepesek; l++) {
       minta.push(
         kozteslLepes(bovitett[i - 1], bovitett[i], bovitett[i + 1], bovitett[i + 2], l / lepesek),
@@ -62,50 +62,69 @@ function utvonalRajz(pontok: UtPont[]) {
 export default function Road({ magassag, pontok }: Props) {
   const kereteRef = useRef<HTMLDivElement>(null)
   const vonalRef = useRef<SVGPathElement>(null)
-  const [hossz, setHossz] = useState(0)
-  const [aranyos, setAranyos] = useState(0)
+  const hosszRef = useRef(0)
+  const csokkentettRef = useRef(false)
 
-  const utvonal = utvonalRajz(pontok)
-  const megallok = pontok.filter((pont) => pont.megallo)
+  // A geometria csak akkor keszul ujra, ha a pontok valoban valtoztak.
+  const utvonal = useMemo(() => utvonalRajz(pontok), [pontok])
+  const megallok = useMemo(() => pontok.filter((pont) => pont.megallo), [pontok])
 
-  useEffect(() => {
+  /**
+   * Gorgeteskor csak ez fut: egy meres es egy stilus ertek. Nincs React
+   * ujrarajzolas, es az utvonal sem szamolodik ujra.
+   */
+  const frissit = useCallback(() => {
     const vonal = vonalRef.current
-    if (!vonal || !utvonal) return
-    setHossz(vonal.getTotalLength())
-  }, [utvonal])
+    const keret = kereteRef.current
+    if (!vonal || !keret) return
 
-  useEffect(() => {
-    const csokkentett = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (csokkentett) {
-      setAranyos(1)
+    if (csokkentettRef.current) {
+      vonal.style.strokeDashoffset = '0'
       return
     }
 
-    const szamol = () => {
-      const keret = kereteRef.current
-      if (!keret) return
-      const doboz = keret.getBoundingClientRect()
-      const also = window.innerHeight * 0.85
-      // A nevezobol levonjuk a kepernyo egy reszet, kulonben a vegso szakasz
-      // sosem rajzolodna ki, mert az oldal aljan is maradna hatralevo resz.
-      const nevezo = Math.max(doboz.height - window.innerHeight * 0.55, 1)
-      setAranyos(Math.min(Math.max((also - doboz.top) / nevezo, 0), 1))
+    const doboz = keret.getBoundingClientRect()
+    const also = window.innerHeight * 0.85
+    // A nevezobol levonjuk a kepernyo egy reszet, kulonben a vegso szakasz
+    // sosem rajzolodna ki, mert az oldal aljan is maradna hatralevo resz.
+    const nevezo = Math.max(doboz.height - window.innerHeight * 0.55, 1)
+    const arany = Math.min(Math.max((also - doboz.top) / nevezo, 0), 1)
+    vonal.style.strokeDashoffset = String(hosszRef.current * (1 - arany))
+  }, [])
+
+  // Uj geometria eseten ujramerjuk a hosszt, es beallitjuk az aktualis allast.
+  useEffect(() => {
+    const vonal = vonalRef.current
+    if (!vonal || !utvonal) return
+    csokkentettRef.current = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    hosszRef.current = vonal.getTotalLength()
+    vonal.style.strokeDasharray = String(hosszRef.current)
+    frissit()
+  }, [utvonal, frissit])
+
+  // Gorgetes: kepkockankent legfeljebb egyszer futunk le.
+  useEffect(() => {
+    if (csokkentettRef.current) return
+
+    let varakozik = false
+    const kezelo = () => {
+      if (varakozik) return
+      varakozik = true
+      window.requestAnimationFrame(() => {
+        varakozik = false
+        frissit()
+      })
     }
 
-    szamol()
-    window.addEventListener('scroll', szamol, { passive: true })
-    window.addEventListener('resize', szamol)
+    window.addEventListener('scroll', kezelo, { passive: true })
+    window.addEventListener('resize', kezelo)
     return () => {
-      window.removeEventListener('scroll', szamol)
-      window.removeEventListener('resize', szamol)
+      window.removeEventListener('scroll', kezelo)
+      window.removeEventListener('resize', kezelo)
     }
-  }, [magassag])
+  }, [frissit])
 
   if (!utvonal || magassag < 20) return null
-
-  const takaras = hossz
-    ? { strokeDasharray: hossz, strokeDashoffset: hossz * (1 - aranyos) }
-    : { strokeDasharray: 1, strokeDashoffset: 1 }
 
   return (
     <div
@@ -126,7 +145,6 @@ export default function Road({ magassag, pontok }: Props) {
               strokeWidth="80"
               strokeLinecap="round"
               vectorEffect="non-scaling-stroke"
-              style={takaras}
             />
           </mask>
         </defs>

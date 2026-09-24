@@ -95,6 +95,7 @@ export default function App() {
   const utSavRef = useRef<HTMLDivElement>(null)
   const [utMagassag, setUtMagassag] = useState(0)
   const [utPontok, setUtPontok] = useState<UtPont[]>([])
+  const utolsoPontok = useRef('')
 
   // Az ut a valodi elrendezesbol epul fel: a szuro alatt indul, minden
   // kartya mellett elhalad, es az oldal aljaig fut. Szures, lenyitas es
@@ -141,7 +142,16 @@ export default function App() {
       })
 
       pontok.push({ x: 24, y: savDoboz.height - 6 })
-      setUtPontok(pontok)
+
+      // Csak akkor frissitunk, ha tenyleg valtozott valami. Igy a felesleges
+      // ujrarajzolas es a geometria ujraszamolasa is elmarad.
+      const ujjlenyomat = pontok
+        .map((pont) => `${pont.x.toFixed(1)},${pont.y.toFixed(1)}`)
+        .join('|')
+      if (ujjlenyomat !== utolsoPontok.current) {
+        utolsoPontok.current = ujjlenyomat
+        setUtPontok(pontok)
+      }
     }
 
     merj()

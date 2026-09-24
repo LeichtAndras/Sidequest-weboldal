@@ -22,6 +22,18 @@ function mutat(element: Element) {
   varakozok.delete(element)
 }
 
+let utemezve = false
+
+/** Gorgeteskor kepkockankent legfeljebb egyszer nezzuk meg a helyzetet. */
+function utemez() {
+  if (utemezve) return
+  utemezve = true
+  window.requestAnimationFrame(() => {
+    utemezve = false
+    ellenoriz()
+  })
+}
+
 function ellenoriz() {
   for (const element of [...varakozok.keys()]) {
     const rect = element.getBoundingClientRect()
@@ -38,8 +50,8 @@ function mindentMutat() {
 function indul() {
   if (figyel) return
   figyel = true
-  window.addEventListener('scroll', ellenoriz, { passive: true })
-  window.addEventListener('resize', ellenoriz)
+  window.addEventListener('scroll', utemez, { passive: true })
+  window.addEventListener('resize', utemez)
   document.addEventListener('visibilitychange', ellenoriz)
   biztositek = window.setTimeout(mindentMutat, BIZTOSITEK)
 }
@@ -47,8 +59,8 @@ function indul() {
 function leall() {
   if (!figyel) return
   figyel = false
-  window.removeEventListener('scroll', ellenoriz)
-  window.removeEventListener('resize', ellenoriz)
+  window.removeEventListener('scroll', utemez)
+  window.removeEventListener('resize', utemez)
   document.removeEventListener('visibilitychange', ellenoriz)
   window.clearTimeout(biztositek)
 }
