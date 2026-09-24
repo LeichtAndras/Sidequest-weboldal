@@ -130,7 +130,13 @@ export default function App() {
             ? -19
             : 19
           : (kozepX(doboz) - 50) * 0.34
-        pontok.push({ x: 50 + eltolas, y: relativY(doboz) + doboz.height / 2, megallo: true })
+        const x = 50 + eltolas
+
+        // A szamozott megallo a kartya folotti hezagba kerul, hogy telefonon
+        // se takarja el a kartya. Az ut ugyanezen az x-en halad tovabb a
+        // kartya mellett, igy a vonal iranya nem valtozik.
+        pontok.push({ x, y: Math.max(relativY(doboz) - 28, 0), megallo: true })
+        pontok.push({ x, y: relativY(doboz) + doboz.height / 2 })
       })
 
       // Az also dobozok mellett, a bal oldali savban halad el, nem alattuk
@@ -251,9 +257,9 @@ export default function App() {
         >
           <h2 className="font-display text-[1.05rem] leading-tight text-cream">Kik vagyunk?</h2>
           <p className="mt-3 text-[0.95rem] leading-relaxed text-cream/70">
-            Budapesti diákok vagyunk, akik unták, hogy mindig ugyanoda megyünk. Elkezdtük felkutatni
-            a város legjobb helyeit, és megmutatni őket TikTokon és Instagramon. Most a
-            partnereinkkel azon dolgozunk, hogy ezek a helyek neked olcsóbbak is legyenek.
+            Budapesti diákok vagyunk. Nekünk is az volt, hogy "menjünk valahova", aztán "jó, de
+            mennyibe kerül", aztán "akkor inkább nem". Most már nem így megy: végigjárjuk a várost,
+            és kedvezményt szerzünk oda, ahova amúgy is mennél.
           </p>
         </section>
 

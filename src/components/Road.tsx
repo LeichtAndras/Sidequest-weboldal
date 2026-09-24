@@ -151,9 +151,11 @@ export default function Road({ magassag, pontok }: Props) {
       {megallok.map((pont, index) => (
         <span
           key={index}
-          className="absolute block h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-cream bg-accent shadow-[0_0_14px_rgba(54,185,240,0.9)]"
+          className="absolute flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-cream bg-accent font-display text-[0.62rem] leading-none text-ink shadow-[0_0_14px_rgba(54,185,240,0.9)]"
           style={{ left: `${pont.x}%`, top: pont.y }}
-        />
+        >
+          {index + 1}
+        </span>
       ))}
 
       {/* Takaro lap: ez fedi a meg fel nem festett szakaszt */}

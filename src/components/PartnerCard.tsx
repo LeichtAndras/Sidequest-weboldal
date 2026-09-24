@@ -43,6 +43,17 @@ function PartnerCard({ partner, featured = false, open, onToggle }: Props) {
   const expandable = hasDetails(partner)
   const panelId = `reszletek-${partner.name.replace(/\s+/g, '-').toLowerCase()}`
 
+  const vanKep = Boolean(partner.image) && !imageFailed
+
+  const matrica = (
+    <span
+      className="rounded-[5px] bg-accent px-2 py-0.5 text-[0.68rem] font-semibold text-ink shadow-[0_2px_6px_rgba(5,32,46,0.6)]"
+      style={{ transform: 'rotate(-3deg)' }}
+    >
+      {partner.category}
+    </span>
+  )
+
   const head = (
     <>
       {partner.image && !imageFailed ? (
@@ -58,6 +69,7 @@ function PartnerCard({ partner, featured = false, open, onToggle }: Props) {
             }`}
           />
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-linear-to-b from-transparent to-surface" />
+          <span className="absolute top-2.5 left-3 inline-block">{matrica}</span>
         </div>
       ) : null}
 
@@ -65,19 +77,15 @@ function PartnerCard({ partner, featured = false, open, onToggle }: Props) {
         <div className="flex items-start justify-between gap-2.5">
           <div className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1.5">
             <h2 className="font-display text-[0.95rem] leading-tight text-cream">{partner.name}</h2>
-            <span
-              className="rounded-[5px] bg-accent px-2 py-0.5 text-[0.68rem] font-semibold text-ink shadow-[0_2px_4px_rgba(5,32,46,0.5)]"
-              style={{ transform: 'rotate(-2.5deg)' }}
-            >
-              {partner.category}
-            </span>
+            {/* Kep nelkuli kartyan a nev mellett marad a helye */}
+            {vanKep ? null : matrica}
           </div>
           <p
-            className="shrink-0 text-right font-display leading-none text-accent"
-            style={{ textShadow: '0 0 16px rgba(54,185,240,0.45)' }}
+            className="-mt-1 shrink-0 text-right font-display leading-none text-accent"
+            style={{ textShadow: '0 0 20px rgba(54,185,240,0.5)' }}
           >
-            <span className="text-[2.6rem]">{value}</span>
-            <span className="text-[1.3rem]">{unit}</span>
+            <span className="text-[3.3rem]">{value}</span>
+            <span className="text-[1.6rem]">{unit}</span>
           </p>
         </div>
 
