@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { memo, useState } from 'react'
 import type { Partner } from '../types'
 import CouponCode from './CouponCode'
 import PartnerDetails from './PartnerDetails'
@@ -35,7 +35,7 @@ export function hasDetails(partner: Partner) {
   )
 }
 
-export default function PartnerCard({ partner, featured = false, open, onToggle }: Props) {
+function PartnerCard({ partner, featured = false, open, onToggle }: Props) {
   const [imageFailed, setImageFailed] = useState(false)
   const doles = dolesSzog(partner.slug)
   const value = partner.discount.replace(/[^\d.,]/g, '')
@@ -142,3 +142,6 @@ export default function PartnerCard({ partner, featured = false, open, onToggle 
     </article>
   )
 }
+
+/** Csak akkor rajzoljuk ujra, ha ennek a kartyanak valtozott valamije. */
+export default memo(PartnerCard)

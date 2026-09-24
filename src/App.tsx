@@ -188,6 +188,19 @@ export default function App() {
     }
   }, [category, openPartner])
 
+  // Kartyankent egy allando fuggveny, kulonben minden meres utan
+  // ujrarajzolodna az osszes kartya.
+  const valtok = useMemo(
+    () =>
+      new Map(
+        partners.map((partner) => [
+          partner.name,
+          () => setOpenPartner((jelenlegi) => (jelenlegi === partner.name ? null : partner.name)),
+        ]),
+      ),
+    [],
+  )
+
   function selectCategory(next: string) {
     setCategory(next)
     setOpenPartner(null)
@@ -220,9 +233,7 @@ export default function App() {
                       partner={partner}
                       featured={toNumber(partner.discount) === topDiscount}
                       open={openPartner === partner.name}
-                      onToggle={() =>
-                        setOpenPartner((current) => (current === partner.name ? null : partner.name))
-                      }
+                      onToggle={valtok.get(partner.name)!}
                     />
                   </Reveal>
 

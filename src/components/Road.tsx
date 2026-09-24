@@ -42,7 +42,7 @@ function utvonalRajz(pontok: UtPont[]) {
 
   for (let i = 1; i < bovitett.length - 2; i++) {
     const tav = Math.max(Math.abs(bovitett[i + 1].y - bovitett[i].y), 1)
-    const lepesek = Math.max(5, Math.round(tav / 14))
+    const lepesek = Math.max(4, Math.round(tav / 20))
     for (let l = 0; l < lepesek; l++) {
       minta.push(
         kozteslLepes(bovitett[i - 1], bovitett[i], bovitett[i + 1], bovitett[i + 2], l / lepesek),
@@ -61,8 +61,7 @@ function utvonalRajz(pontok: UtPont[]) {
 
 export default function Road({ magassag, pontok }: Props) {
   const kereteRef = useRef<HTMLDivElement>(null)
-  const vonalRef = useRef<SVGPathElement>(null)
-  const hosszRef = useRef(0)
+  const takaroRef = useRef<HTMLDivElement>(null)
   const csokkentettRef = useRef(false)
 
   // A geometria csak akkor keszul ujra, ha a pontok valoban valtoztak.
@@ -74,12 +73,12 @@ export default function Road({ magassag, pontok }: Props) {
    * ujrarajzolas, es az utvonal sem szamolodik ujra.
    */
   const frissit = useCallback(() => {
-    const vonal = vonalRef.current
+    const vago = takaroRef.current
     const keret = kereteRef.current
-    if (!vonal || !keret) return
+    if (!vago || !keret) return
 
     if (csokkentettRef.current) {
-      vonal.style.strokeDashoffset = '0'
+      vago.style.transform = `translateY(${keret.offsetHeight}px)`
       return
     }
 
@@ -89,16 +88,15 @@ export default function Road({ magassag, pontok }: Props) {
     // sosem rajzolodna ki, mert az oldal aljan is maradna hatralevo resz.
     const nevezo = Math.max(doboz.height - window.innerHeight * 0.55, 1)
     const arany = Math.min(Math.max((also - doboz.top) / nevezo, 0), 1)
-    vonal.style.strokeDashoffset = String(hosszRef.current * (1 - arany))
+    // A meg fel nem festett szakaszt egy takaro lap fedi, amit csak eltolunk.
+    // Az eltolas a bongeszo osszeallito reteget hasznalja, nem kell ujrarajzolni
+    // sem az utat, sem az oldalt.
+    vago.style.transform = `translateY(${Math.round(arany * doboz.height)}px)`
   }, [])
 
-  // Uj geometria eseten ujramerjuk a hosszt, es beallitjuk az aktualis allast.
+  // Uj geometria eseten beallitjuk az aktualis allast.
   useEffect(() => {
-    const vonal = vonalRef.current
-    if (!vonal || !utvonal) return
     csokkentettRef.current = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    hosszRef.current = vonal.getTotalLength()
-    vonal.style.strokeDasharray = String(hosszRef.current)
     frissit()
   }, [utvonal, frissit])
 
@@ -129,34 +127,25 @@ export default function Road({ magassag, pontok }: Props) {
   return (
     <div
       ref={kereteRef}
-      className="pointer-events-none absolute inset-x-0 top-0"
+      className="pointer-events-none absolute inset-x-0 top-0 overflow-hidden"
       style={{ height: magassag }}
       aria-hidden="true"
     >
-      <svg className="h-full w-full" viewBox={`0 0 100 ${magassag}`} preserveAspectRatio="none">
-        <defs>
-          {/* Gorgetesre ez a maszk nyilik ki, igy minden reteg egyszerre rajzolodik */}
-          <mask id="ut-maszk">
-            <path
-              ref={vonalRef}
-              d={utvonal}
-              fill="none"
-              stroke="#fff"
-              strokeWidth="80"
-              strokeLinecap="round"
-              vectorEffect="non-scaling-stroke"
-            />
-          </mask>
-        </defs>
-
-        <g mask="url(#ut-maszk)">
-          <path d={utvonal} fill="none" stroke="#36B9F0" strokeWidth="62" strokeLinecap="round" opacity="0.1" vectorEffect="non-scaling-stroke" />
-          <path d={utvonal} fill="none" stroke="#36B9F0" strokeWidth="50" strokeLinecap="round" opacity="0.2" vectorEffect="non-scaling-stroke" />
-          <path d={utvonal} fill="none" stroke="#36B9F0" strokeWidth="44" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
-          <path d={utvonal} fill="none" stroke="#0A2E40" strokeWidth="36" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
-          <path d={utvonal} fill="none" stroke="#36B9F0" strokeWidth="30" strokeLinecap="round" strokeDasharray="1 9" opacity="0.14" vectorEffect="non-scaling-stroke" />
-          <path d={utvonal} fill="none" stroke="#FFFCF3" strokeWidth="4" strokeDasharray="16 22" opacity="0.75" vectorEffect="non-scaling-stroke" />
-        </g>
+      <svg
+        className="h-full w-full"
+        viewBox={`0 0 100 ${magassag}`}
+        preserveAspectRatio="none"
+      >
+        {/* Derengés az ut korul */}
+        <path d={utvonal} fill="none" stroke="#36B9F0" strokeWidth="56" strokeLinecap="round" opacity="0.14" vectorEffect="non-scaling-stroke" />
+        {/* Felfestett szegely */}
+        <path d={utvonal} fill="none" stroke="#36B9F0" strokeWidth="44" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+        {/* Aszfalt */}
+        <path d={utvonal} fill="none" stroke="#0A2E40" strokeWidth="36" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+        {/* Szorodas az aszfalton, mint a spray permete */}
+        <path d={utvonal} fill="none" stroke="#36B9F0" strokeWidth="30" strokeLinecap="round" strokeDasharray="1 9" opacity="0.14" vectorEffect="non-scaling-stroke" />
+        {/* Szaggatott kozepvonal */}
+        <path d={utvonal} fill="none" stroke="#FFFCF3" strokeWidth="4" strokeDasharray="16 22" opacity="0.75" vectorEffect="non-scaling-stroke" />
       </svg>
 
       {megallok.map((pont, index) => (
@@ -166,6 +155,13 @@ export default function Road({ magassag, pontok }: Props) {
           style={{ left: `${pont.x}%`, top: pont.y }}
         />
       ))}
+
+      {/* Takaro lap: ez fedi a meg fel nem festett szakaszt */}
+      <div
+        ref={takaroRef}
+        className="absolute inset-x-0 top-0 h-full bg-ink will-change-transform"
+        style={{ transform: 'translateY(0px)' }}
+      />
     </div>
   )
 }
