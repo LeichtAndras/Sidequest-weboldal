@@ -18,6 +18,14 @@ function RedeemIcon({ partner }: { partner: Partner }) {
   return <SpeechIcon className={className} />
 }
 
+/** Fel es masfel fok kozotti doles, a slugbol, hogy mindig ugyanaz legyen. */
+function dolesSzog(slug: string) {
+  let osszeg = 0
+  for (let i = 0; i < slug.length; i++) osszeg += slug.charCodeAt(i)
+  const merteke = 0.5 + ((osszeg % 11) / 10)
+  return osszeg % 2 === 0 ? merteke : -merteke
+}
+
 export function hasDetails(partner: Partner) {
   return Boolean(
     partner.description?.trim() ||
@@ -29,6 +37,7 @@ export function hasDetails(partner: Partner) {
 
 export default function PartnerCard({ partner, featured = false, open, onToggle }: Props) {
   const [imageFailed, setImageFailed] = useState(false)
+  const doles = dolesSzog(partner.slug)
   const value = partner.discount.replace(/[^\d.,]/g, '')
   const unit = partner.discount.replace(/[\d.,]/g, '')
   const expandable = hasDetails(partner)
@@ -55,13 +64,19 @@ export default function PartnerCard({ partner, featured = false, open, onToggle 
       <div className="p-4">
         <div className="flex items-start justify-between gap-2.5">
           <div className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1.5">
-            <h2 className="text-[1.08rem] leading-tight font-semibold text-cream">{partner.name}</h2>
-            <span className="rounded-full bg-accent/15 px-2 py-0.5 text-[0.7rem] font-medium text-accent">
+            <h2 className="font-display text-[0.95rem] leading-tight text-cream">{partner.name}</h2>
+            <span
+              className="rounded-[5px] bg-accent px-2 py-0.5 text-[0.68rem] font-semibold text-ink shadow-[0_2px_4px_rgba(5,32,46,0.5)]"
+              style={{ transform: 'rotate(-2.5deg)' }}
+            >
               {partner.category}
             </span>
           </div>
-          <p className="shrink-0 text-right leading-none font-extrabold tracking-tight text-accent tabular-nums">
-            <span className="text-[2.3rem]">{value}</span>
+          <p
+            className="shrink-0 text-right font-display leading-none text-accent"
+            style={{ textShadow: '0 0 16px rgba(54,185,240,0.45)' }}
+          >
+            <span className="text-[2.6rem]">{value}</span>
             <span className="text-[1.3rem]">{unit}</span>
           </p>
         </div>
@@ -86,8 +101,9 @@ export default function PartnerCard({ partner, featured = false, open, onToggle 
   return (
     <article
       id={`partner-${partner.slug}`}
-      className={`scroll-mt-4 overflow-hidden rounded-2xl bg-surface ${
-        featured ? 'border border-accent' : 'border border-line'
+      style={{ transform: `rotate(${doles}deg)` }}
+      className={`scroll-mt-4 overflow-hidden rounded-2xl border-2 border-dashed bg-surface shadow-[0_12px_28px_rgba(0,0,0,0.45)] ${
+        featured ? 'border-accent' : 'border-cream/25'
       }`}
     >
       {expandable ? (

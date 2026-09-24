@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 
-type Props = { children: ReactNode; delay?: number }
+type Props = { children: ReactNode; delay?: number; className?: string }
 
 /** A kepernyo aljahoz kepest ennyinel feljebb indul a megjelenes. */
 const KUSZOB = 0.92
@@ -63,7 +63,7 @@ function figyelj(element: Element, kesz: () => void) {
 }
 
 /** Alulrol beuszo megjelenes, amikor az elem a kepernyore er. */
-export default function Reveal({ children, delay = 0 }: Props) {
+export default function Reveal({ children, delay = 0, className = '' }: Props) {
   const ref = useRef<HTMLDivElement>(null)
   const [shown, setShown] = useState(false)
 
@@ -83,7 +83,7 @@ export default function Reveal({ children, delay = 0 }: Props) {
   return (
     <div
       ref={ref}
-      className={shown ? 'reveal reveal-in' : 'reveal'}
+      className={`${shown ? 'reveal reveal-in' : 'reveal'} ${className}`.trim()}
       style={{ transitionDelay: `${delay}ms` }}
     >
       {children}

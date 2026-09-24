@@ -77,8 +77,13 @@ export default function Subscribe() {
   }
 
   return (
-    <section className="mt-4 rounded-2xl border border-line bg-surface p-5">
-      <h2 className="text-[1.25rem] font-semibold text-cream">Ne maradj le az új helyekről</h2>
+    <section
+      className="mt-6 rounded-2xl border-2 border-dashed border-cream/25 bg-surface p-5 shadow-[0_12px_28px_rgba(0,0,0,0.45)]"
+      style={{ transform: 'rotate(0.8deg)' }}
+    >
+      <h2 className="font-display text-[1.05rem] leading-tight text-cream">
+        Ne maradj le az új helyekről
+      </h2>
       <p className="mt-2 text-[0.95rem] leading-relaxed text-cream/70">
         Szólunk, amikor új kedvezmény érkezik.
       </p>
@@ -114,7 +119,7 @@ export default function Subscribe() {
             <button
               type="submit"
               disabled={allapot === 'kuldes'}
-              className="shrink-0 rounded-xl bg-accent px-4 py-3 font-semibold text-ink transition active:scale-[0.97] disabled:opacity-60"
+              className="shrink-0 rounded-[8px] border-2 border-cream/70 bg-accent px-4 py-3 font-display text-[0.8rem] text-ink transition active:scale-[0.97] disabled:opacity-60"
             >
               {allapot === 'kuldes' ? 'Küldés...' : 'Feliratkozom'}
             </button>

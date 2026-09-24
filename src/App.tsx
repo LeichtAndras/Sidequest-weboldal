@@ -1,9 +1,12 @@
-import { useEffect, useMemo, useState } from 'react'
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import partnersData from './data/partners.json'
 import PartnerCard from './components/PartnerCard'
 import CategoryFilter, { ALL } from './components/CategoryFilter'
 import Reveal from './components/Reveal'
 import Subscribe from './components/Subscribe'
+import Header from './components/Header'
+import Road, { type UtPont } from './components/Road'
+import Milestone from './components/Milestone'
 import { InstagramIcon, TikTokIcon } from './components/Icons'
 import type { Partner } from './types'
 import { slugFromPath } from './site'
@@ -15,6 +18,9 @@ const toNumber = (discount: string) =>
 
 const topDiscount = Math.max(...partners.map((partner) => toNumber(partner.discount)))
 const categories = [...new Set(partners.map((partner) => partner.category))]
+
+/** Harom merfoldko, minden harmadik kartya utan. */
+const merfoldkovek = ['9 partner Budapesten', 'közel 10 000 követő', '4 hónap alatt']
 
 /** A cimsorbol indulunk: /magic-rooms/ eseten ez a kartya nyilik ki. */
 function partnerACimbol() {
@@ -86,6 +92,92 @@ export default function App() {
     [category],
   )
 
+  const utSavRef = useRef<HTMLDivElement>(null)
+  const [utMagassag, setUtMagassag] = useState(0)
+  const [utPontok, setUtPontok] = useState<UtPont[]>([])
+
+  // Az ut a valodi elrendezesbol epul fel: a szuro alatt indul, minden
+  // kartya mellett elhalad, es az oldal aljaig fut. Szures, lenyitas es
+  // atmeretezes utan ujraszamoljuk.
+  useEffect(() => {
+    const sav = utSavRef.current
+    if (!sav) return
+
+    const merj = () => {
+      const savDoboz = sav.getBoundingClientRect()
+      const szelesseg = savDoboz.width || 1
+      setUtMagassag(savDoboz.height)
+
+      const relativY = (doboz: DOMRect) => doboz.top - savDoboz.top
+      const kozepX = (doboz: DOMRect) =>
+        ((doboz.left - savDoboz.left + doboz.width / 2) / szelesseg) * 100
+
+      const pontok: UtPont[] = []
+
+      // Kezdopont a szuro gombok alatt, hogy ne vagjon at rajtuk
+      const nav = sav.querySelector('nav')
+      const navDoboz = nav?.getBoundingClientRect()
+      pontok.push({ x: 50, y: navDoboz ? relativY(navDoboz) + navDoboz.height + 22 : 0 })
+
+      // Minden kartya mellett elhalad, a kartya valodi helyzete szerint
+      const kartyak = [...sav.querySelectorAll('article[id^="partner-"]')]
+      kartyak.forEach((kartya, index) => {
+        const doboz = kartya.getBoundingClientRect()
+        const teljesSzeles = doboz.width / szelesseg > 0.75
+        const eltolas = teljesSzeles
+          ? index % 2 === 0
+            ? -19
+            : 19
+          : (kozepX(doboz) - 50) * 0.34
+        pontok.push({ x: 50 + eltolas, y: relativY(doboz) + doboz.height / 2, megallo: true })
+      })
+
+      // Az also dobozok mellett, a bal oldali savban halad el, nem alattuk
+      // tunik el, es nem vag at rajtuk.
+      const dobozok = [...sav.querySelectorAll('section')]
+      dobozok.forEach((doboz) => {
+        const d = doboz.getBoundingClientRect()
+        pontok.push({ x: 17, y: relativY(d) + d.height / 2 })
+      })
+
+      pontok.push({ x: 24, y: savDoboz.height - 6 })
+      setUtPontok(pontok)
+    }
+
+    merj()
+
+    // Lenyitas es bezaras kozben egyutt mozog az ut a kartyaval, nem utana ugrik be.
+    let kovetesVege = performance.now() + 400
+    const kovet = () => {
+      merj()
+      if (performance.now() < kovetesVege) window.requestAnimationFrame(kovet)
+    }
+    const kovetes = window.requestAnimationFrame(kovet)
+
+    // A savot es minden kartyat kulon figyeljuk, mert a kartyak magassaga
+    // kepbetoltestol es sortoresektol is valtozik.
+    const figyelo = new ResizeObserver(merj)
+    figyelo.observe(sav)
+    sav.querySelectorAll('article[id^="partner-"], section').forEach((elem) => figyelo.observe(elem))
+
+    const kepek = [...sav.querySelectorAll('img')]
+    kepek.forEach((kep) => kep.addEventListener('load', merj))
+
+    window.addEventListener('resize', merj)
+    window.addEventListener('load', merj)
+    const idozitok = [window.setTimeout(merj, 400), window.setTimeout(merj, 1200)]
+
+    return () => {
+      kovetesVege = 0
+      window.cancelAnimationFrame(kovetes)
+      figyelo.disconnect()
+      kepek.forEach((kep) => kep.removeEventListener('load', merj))
+      window.removeEventListener('resize', merj)
+      window.removeEventListener('load', merj)
+      idozitok.forEach(window.clearTimeout)
+    }
+  }, [category, openPartner])
+
   function selectCategory(next: string) {
     setCategory(next)
     setOpenPartner(null)
@@ -93,44 +185,50 @@ export default function App() {
 
   return (
     <div className="min-h-dvh bg-ink">
-      <div className="mx-auto w-full max-w-[480px] px-5 pt-10 pb-10">
-        <header className="text-center">
-          <img
-            src="/sidequest-logo.png"
-            alt="SideQuest"
-            width={180}
-            height={177}
-            fetchPriority="high"
-            className="mx-auto h-auto w-[180px] mix-blend-screen"
-          />
-          <p className="mt-2 text-[1.02rem] text-cream/70">Budapest legjobb helyei, olcsóbban.</p>
-          <p className="mt-1.5 text-[0.85rem] font-medium text-accent">
-            {partners.length} hely Budapesten, akár {topDiscount}% kedvezménnyel
-          </p>
-          <div className="mx-auto mt-6 h-px w-16 bg-accent/50" />
-        </header>
+      <Header />
 
-        <nav aria-label="Kategóriák" className="mt-6">
-          <CategoryFilter categories={categories} active={category} onSelect={selectCategory} />
-        </nav>
+      <div ref={utSavRef} className="relative">
+        <Road magassag={utMagassag} pontok={utPontok} />
 
-        <main key={category} className="mt-5 flex flex-col gap-3.5">
-          {visible.map((partner, index) => (
-            <Reveal key={partner.name} delay={Math.min(index, 4) * 60}>
-              <PartnerCard
-                partner={partner}
-                featured={toNumber(partner.discount) === topDiscount}
-                open={openPartner === partner.name}
-                onToggle={() =>
-                  setOpenPartner((current) => (current === partner.name ? null : partner.name))
-                }
-              />
-            </Reveal>
-          ))}
-        </main>
+        <div className="relative mx-auto w-full max-w-[480px] px-5 pt-8 pb-10 md:max-w-[900px]">
+          <nav aria-label="Kategóriák">
+            <CategoryFilter categories={categories} active={category} onSelect={selectCategory} />
+          </nav>
 
-        <section className="mt-12 rounded-2xl border border-line bg-surface p-5">
-          <h2 className="text-[1.25rem] font-semibold text-cream">Kik vagyunk?</h2>
+          <main key={category} className="mt-8 flex flex-col gap-11">
+            {visible.map((partner, index) => {
+              const merfoldko =
+                category === ALL && (index + 1) % 3 === 0 ? merfoldkovek[(index + 1) / 3 - 1] : null
+
+              return (
+                <Fragment key={partner.name}>
+                  <Reveal
+                    delay={Math.min(index, 4) * 60}
+                    className={index % 2 === 0 ? 'md:w-[46%] md:self-start' : 'md:w-[46%] md:self-end'}
+                  >
+                    <PartnerCard
+                      partner={partner}
+                      featured={toNumber(partner.discount) === topDiscount}
+                      open={openPartner === partner.name}
+                      onToggle={() =>
+                        setOpenPartner((current) => (current === partner.name ? null : partner.name))
+                      }
+                    />
+                  </Reveal>
+
+                  {merfoldko ? <Milestone szoveg={merfoldko} /> : null}
+                </Fragment>
+              )
+            })}
+          </main>
+        </div>
+
+        <div className="relative mx-auto w-full max-w-[480px] px-5 pb-10">
+        <section
+          className="mt-12 rounded-2xl border-2 border-dashed border-cream/25 bg-surface p-5 shadow-[0_12px_28px_rgba(0,0,0,0.45)]"
+          style={{ transform: 'rotate(-0.7deg)' }}
+        >
+          <h2 className="font-display text-[1.05rem] leading-tight text-cream">Kik vagyunk?</h2>
           <p className="mt-3 text-[0.95rem] leading-relaxed text-cream/70">
             Budapesti diákok vagyunk, akik unták, hogy mindig ugyanoda megyünk. Elkezdtük felkutatni
             a város legjobb helyeit, és megmutatni őket TikTokon és Instagramon. Most a
@@ -168,6 +266,7 @@ export default function App() {
 
           <p className="mt-9 text-[0.75rem] text-cream/70">Frissítve: 2026. szeptember</p>
         </footer>
+        </div>
       </div>
     </div>
   )

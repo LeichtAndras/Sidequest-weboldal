@@ -30,7 +30,10 @@ export default function CouponCode({ code }: Props) {
 
   return (
     <div className="mt-2.5 flex items-center gap-2">
-      <code className="flex-1 rounded-xl border border-dashed border-accent/45 bg-accent/10 px-3 py-2 text-[0.95rem] font-semibold tracking-[0.12em] text-accent">
+      <code
+        className="flex-1 rounded-[6px] border-[3px] border-double border-accent bg-accent/10 px-3 py-2 text-center font-display text-[0.9rem] tracking-[0.1em] text-accent"
+        style={{ transform: 'rotate(-2.5deg)', boxShadow: 'inset 0 0 0 1px rgba(54,185,240,0.35)' }}
+      >
         {code}
       </code>
       <button
