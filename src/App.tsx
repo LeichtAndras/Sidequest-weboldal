@@ -10,14 +10,25 @@ import Milestone from './components/Milestone'
 import { InstagramIcon, TikTokIcon } from './components/Icons'
 import type { Partner } from './types'
 import { slugFromPath } from './site'
+import { ujPartner } from './partner'
 
-const partners = partnersData as Partner[]
+const nyersPartnerek = partnersData as Partner[]
+
+/**
+ * Az ujonnan felvett helyek a lista elejere kerulnek, a tobbi sorrendje
+ * valtozatlan marad. A rendezes stabil, igy az azonos csoportba esok
+ * megtartjak az eredeti sorrendjuket.
+ */
+const partners = [...nyersPartnerek].sort(
+  (a, b) => Number(ujPartner(b)) - Number(ujPartner(a)),
+)
 
 const toNumber = (discount: string) =>
   Number.parseFloat(discount.replace(/[^\d.,]/g, '').replace(',', '.'))
 
 const topDiscount = Math.max(...partners.map((partner) => toNumber(partner.discount)))
-const categories = [...new Set(partners.map((partner) => partner.category))]
+// A szuro gombok sorrendje az eredeti listat koveti, nem az uj partnereket.
+const categories = [...new Set(nyersPartnerek.map((partner) => partner.category))]
 
 /** Harom merfoldko, minden harmadik kartya utan. */
 const merfoldkovek = ['9 partner Budapesten', 'közel 10 000 követő', '4 hónap alatt']

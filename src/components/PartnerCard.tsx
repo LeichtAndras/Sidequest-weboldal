@@ -1,5 +1,6 @@
 import { memo, useState } from 'react'
 import type { Partner } from '../types'
+import { ujPartner } from '../partner'
 import CouponCode from './CouponCode'
 import PartnerDetails from './PartnerDetails'
 import { ChevronIcon, QrIcon, SpeechIcon, TagIcon } from './Icons'
@@ -44,6 +45,16 @@ function PartnerCard({ partner, featured = false, open, onToggle }: Props) {
   const panelId = `reszletek-${partner.name.replace(/\s+/g, '-').toLowerCase()}`
 
   const vanKep = Boolean(partner.image) && !imageFailed
+  const uj = ujPartner(partner)
+
+  const ujMatrica = (
+    <span
+      className="rounded-[5px] bg-cream px-2 py-0.5 font-display text-[0.62rem] tracking-wide text-ink shadow-[0_2px_6px_rgba(5,32,46,0.6)]"
+      style={{ transform: 'rotate(3deg)' }}
+    >
+      ÚJ
+    </span>
+  )
 
   const matrica = (
     <span
@@ -70,6 +81,7 @@ function PartnerCard({ partner, featured = false, open, onToggle }: Props) {
           />
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-linear-to-b from-transparent to-surface" />
           <span className="absolute top-2.5 left-3 inline-block">{matrica}</span>
+          {uj ? <span className="absolute top-2.5 right-3 inline-block">{ujMatrica}</span> : null}
         </div>
       ) : null}
 
@@ -79,6 +91,7 @@ function PartnerCard({ partner, featured = false, open, onToggle }: Props) {
             <h2 className="font-display text-[0.95rem] leading-tight text-cream">{partner.name}</h2>
             {/* Kep nelkuli kartyan a nev mellett marad a helye */}
             {vanKep ? null : matrica}
+            {!vanKep && uj ? ujMatrica : null}
           </div>
           <p
             className="-mt-1 shrink-0 text-right font-display leading-none text-accent"
