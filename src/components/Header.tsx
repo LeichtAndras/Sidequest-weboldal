@@ -21,9 +21,9 @@ const fotok: Fotó[] = [
 export default function Header() {
   return (
     <header className="fal relative overflow-hidden pt-5 pb-16">
-      <div className="relative mx-auto w-full max-w-[480px] px-4">
+      <div className="hero-doboz relative mx-auto w-full max-w-[480px] px-4">
         {/* Fotokollazs */}
-        <div className="relative h-[300px]" aria-hidden="true">
+        <div className="hero-kollazs relative" aria-hidden="true">
           {fotok.map((foto) => (
             <div
               key={foto.src}
@@ -66,7 +66,8 @@ export default function Header() {
           />
         </div>
 
-        <p className="relative z-10 mt-5 text-center font-display text-[1.05rem] leading-tight text-ink">
+        <p className="relative z-10 mt-7 text-center text-[1.05rem] leading-tight text-ink"
+          style={{ fontFamily: 'var(--font-hero)' }}>
           Budapest legjobb helyei, olcsóbban.
         </p>
       </div>

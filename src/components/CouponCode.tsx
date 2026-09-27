@@ -29,10 +29,9 @@ export default function CouponCode({ code }: Props) {
   }
 
   return (
-    <div className="mt-2.5 flex items-center gap-2">
+    <div className="flex items-center gap-2">
       <code
-        className="flex-1 rounded-[6px] border-[3px] border-double border-accent bg-accent/10 px-3 py-2 text-center font-display text-[0.9rem] tracking-[0.1em] text-accent"
-        style={{ transform: 'rotate(-2.5deg)', boxShadow: 'inset 0 0 0 1px rgba(54,185,240,0.35)' }}
+        className="flex-1 rounded-xl border border-dashed border-accent/50 bg-accent/10 px-3 py-2.5 text-center font-display text-[0.9rem] tracking-[0.1em] text-accent"
       >
         {code}
       </code>
@@ -40,7 +39,7 @@ export default function CouponCode({ code }: Props) {
         type="button"
         onClick={copy}
         aria-live="polite"
-        className="flex shrink-0 items-center gap-1.5 rounded-xl bg-accent px-3.5 py-2 text-sm font-semibold text-ink transition active:scale-[0.97]"
+        className="flex shrink-0 items-center gap-1.5 rounded-xl bg-accent px-3.5 py-2.5 text-sm font-semibold text-ink transition active:scale-[0.97]"
       >
         {copied ? <CheckIcon className="h-4 w-4" /> : <CopyIcon className="h-4 w-4" />}
         {copied ? 'Kimásolva' : 'Másolás'}

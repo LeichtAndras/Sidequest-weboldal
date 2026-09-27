@@ -77,21 +77,18 @@ export default function Subscribe() {
   }
 
   return (
-    <section
-      className="mt-6 rounded-2xl border-2 border-dashed border-cream/25 bg-surface p-5 shadow-[0_12px_28px_rgba(0,0,0,0.45)]"
-      style={{ transform: 'rotate(0.8deg)' }}
-    >
-      <h2 className="font-display text-[1.05rem] leading-tight text-cream">
+    <section className="kartya mt-6 p-5">
+      <h2 className="font-display text-[1.5rem] leading-tight text-cream">
         Ne maradj le az új helyekről
       </h2>
-      <p className="mt-2 text-[0.95rem] leading-relaxed text-cream/70">
+      <p className="mt-2.5 text-[0.92rem] leading-relaxed text-cream/70">
         Szólunk, amikor új kedvezmény érkezik.
       </p>
 
       {allapot === 'kesz' ? (
         <p
           role="status"
-          className="mt-4 flex items-center gap-2 rounded-xl bg-accent/15 px-4 py-3 font-semibold text-accent"
+          className="mt-4 flex items-center gap-2 rounded-xl border border-accent/40 bg-accent/10 px-4 py-3 text-[0.9rem] font-semibold text-accent"
         >
           <CheckIcon className="h-4 w-4 shrink-0" />
           Kész, szólunk majd.
@@ -114,19 +111,19 @@ export default function Subscribe() {
                 if (hiba) setHiba(null)
               }}
               aria-invalid={hiba ? true : undefined}
-              className="min-w-0 flex-1 rounded-xl border border-line bg-ink px-3.5 py-3 text-[0.95rem] text-cream placeholder:text-cream/40"
+              className="min-w-0 flex-1 rounded-xl border border-white/15 bg-white/[0.06] px-3.5 py-3 text-[0.95rem] text-cream outline-none placeholder:text-cream/40"
             />
             <button
               type="submit"
               disabled={allapot === 'kuldes'}
-              className="shrink-0 rounded-[8px] border-2 border-cream/70 bg-accent px-4 py-3 font-display text-[0.8rem] text-ink transition active:scale-[0.97] disabled:opacity-60"
+              className="shrink-0 cursor-pointer rounded-xl bg-accent px-4 py-3 text-[0.88rem] font-semibold text-ink transition active:scale-[0.97] disabled:opacity-60"
             >
               {allapot === 'kuldes' ? 'Küldés...' : 'Feliratkozom'}
             </button>
           </div>
 
           {hiba ? (
-            <p role="alert" className="mt-2 text-[0.85rem] text-cream/70">
+            <p role="alert" className="mt-2.5 text-[0.85rem] font-semibold text-cream">
               {hiba}
             </p>
           ) : null}

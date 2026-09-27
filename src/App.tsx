@@ -1,12 +1,20 @@
-import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react'
 import partnersData from './data/partners.json'
-import PartnerCard from './components/PartnerCard'
+import ThumbCard from './components/ThumbCard'
 import CategoryFilter, { ALL } from './components/CategoryFilter'
 import Reveal from './components/Reveal'
 import Subscribe from './components/Subscribe'
 import Header from './components/Header'
-import Road, { type UtPont } from './components/Road'
 import Milestone from './components/Milestone'
+import FalHatter, { falak } from './components/FalHatter'
 import { InstagramIcon, TikTokIcon } from './components/Icons'
 import type { Partner } from './types'
 import { slugFromPath } from './site'
@@ -23,15 +31,15 @@ const partners = [...nyersPartnerek].sort(
   (a, b) => Number(ujPartner(b)) - Number(ujPartner(a)),
 )
 
-const toNumber = (discount: string) =>
-  Number.parseFloat(discount.replace(/[^\d.,]/g, '').replace(',', '.'))
-
-const topDiscount = Math.max(...partners.map((partner) => toNumber(partner.discount)))
 // A szuro gombok sorrendje az eredeti listat koveti, nem az uj partnereket.
 const categories = [...new Set(nyersPartnerek.map((partner) => partner.category))]
 
 /** Harom merfoldko, minden harmadik kartya utan. */
-const merfoldkovek = ['9 partner Budapesten', 'közel 10 000 követő', '4 hónap alatt']
+const merfoldkovek = [
+  { szam: '9', szoveg: 'partner Budapesten' },
+  { szam: '10 000', szoveg: 'követő, nagyjából' },
+  { szam: '4', szoveg: 'hónap alatt' },
+]
 
 /** A cimsorbol indulunk: /magic-rooms/ eseten ez a kartya nyilik ki. */
 function partnerACimbol() {
@@ -40,9 +48,47 @@ function partnerACimbol() {
   return partners.find((partner) => partner.slug === slug) ?? null
 }
 
+type FigyeloProps = {
+  sorszam: number
+  jelez: (sorszam: number) => void
+  children: ReactNode
+}
+
+/**
+ * Szol, amikor a kartya a kepernyo kozepere er. A megfigyelo hatara egy
+ * nulla magas sav a kepernyo kozepen, igy gorgeteskor nem szamolunk semmit.
+ */
+function KozepFigyelo({ sorszam, jelez, children }: FigyeloProps) {
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const elem = ref.current
+    if (!elem) return
+
+    const figyelo = new IntersectionObserver(
+      (bejegyzesek) => {
+        for (const bejegyzes of bejegyzesek) {
+          if (bejegyzes.isIntersecting) jelez(sorszam)
+        }
+      },
+      { rootMargin: '-50% 0px -50% 0px', threshold: 0 },
+    )
+
+    figyelo.observe(elem)
+    return () => figyelo.disconnect()
+  }, [sorszam, jelez])
+
+  return <div ref={ref}>{children}</div>
+}
+
 export default function App() {
   const [openPartner, setOpenPartner] = useState<string | null>(() => partnerACimbol()?.name ?? null)
   const [category, setCategory] = useState(ALL)
+  const [aktivFal, setAktivFal] = useState(0)
+
+  const falraLep = useCallback((sorszam: number) => {
+    setAktivFal((jelenlegi) => (jelenlegi === sorszam ? jelenlegi : sorszam))
+  }, [])
 
   // Megosztott linkrol erkezve odagorgetunk a kartyara.
   useEffect(() => {
@@ -103,109 +149,7 @@ export default function App() {
     [category],
   )
 
-  const utSavRef = useRef<HTMLDivElement>(null)
-  const [utMagassag, setUtMagassag] = useState(0)
-  const [utPontok, setUtPontok] = useState<UtPont[]>([])
-  const utolsoPontok = useRef('')
-
-  // Az ut a valodi elrendezesbol epul fel: a szuro alatt indul, minden
-  // kartya mellett elhalad, es az oldal aljaig fut. Szures, lenyitas es
-  // atmeretezes utan ujraszamoljuk.
-  useEffect(() => {
-    const sav = utSavRef.current
-    if (!sav) return
-
-    const merj = () => {
-      const savDoboz = sav.getBoundingClientRect()
-      const szelesseg = savDoboz.width || 1
-      setUtMagassag(savDoboz.height)
-
-      const relativY = (doboz: DOMRect) => doboz.top - savDoboz.top
-      const kozepX = (doboz: DOMRect) =>
-        ((doboz.left - savDoboz.left + doboz.width / 2) / szelesseg) * 100
-
-      const pontok: UtPont[] = []
-
-      // Kezdopont a szuro gombok alatt, hogy ne vagjon at rajtuk
-      const nav = sav.querySelector('nav')
-      const navDoboz = nav?.getBoundingClientRect()
-      pontok.push({ x: 50, y: navDoboz ? relativY(navDoboz) + navDoboz.height + 22 : 0 })
-
-      // Minden kartya mellett elhalad, a kartya valodi helyzete szerint
-      const kartyak = [...sav.querySelectorAll('article[id^="partner-"]')]
-      kartyak.forEach((kartya, index) => {
-        const doboz = kartya.getBoundingClientRect()
-        const teljesSzeles = doboz.width / szelesseg > 0.75
-        const eltolas = teljesSzeles
-          ? index % 2 === 0
-            ? -19
-            : 19
-          : (kozepX(doboz) - 50) * 0.34
-        const x = 50 + eltolas
-
-        // A szamozott megallo a kartya folotti hezagba kerul, hogy telefonon
-        // se takarja el a kartya. Az ut ugyanezen az x-en halad tovabb a
-        // kartya mellett, igy a vonal iranya nem valtozik.
-        pontok.push({ x, y: Math.max(relativY(doboz) - 28, 0), megallo: true })
-        pontok.push({ x, y: relativY(doboz) + doboz.height / 2 })
-      })
-
-      // Az also dobozok mellett, a bal oldali savban halad el, nem alattuk
-      // tunik el, es nem vag at rajtuk.
-      const dobozok = [...sav.querySelectorAll('section')]
-      dobozok.forEach((doboz) => {
-        const d = doboz.getBoundingClientRect()
-        pontok.push({ x: 17, y: relativY(d) + d.height / 2 })
-      })
-
-      pontok.push({ x: 24, y: savDoboz.height - 6 })
-
-      // Csak akkor frissitunk, ha tenyleg valtozott valami. Igy a felesleges
-      // ujrarajzolas es a geometria ujraszamolasa is elmarad.
-      const ujjlenyomat = pontok
-        .map((pont) => `${pont.x.toFixed(1)},${pont.y.toFixed(1)}`)
-        .join('|')
-      if (ujjlenyomat !== utolsoPontok.current) {
-        utolsoPontok.current = ujjlenyomat
-        setUtPontok(pontok)
-      }
-    }
-
-    merj()
-
-    // Lenyitas es bezaras kozben egyutt mozog az ut a kartyaval, nem utana ugrik be.
-    let kovetesVege = performance.now() + 400
-    const kovet = () => {
-      merj()
-      if (performance.now() < kovetesVege) window.requestAnimationFrame(kovet)
-    }
-    const kovetes = window.requestAnimationFrame(kovet)
-
-    // A savot es minden kartyat kulon figyeljuk, mert a kartyak magassaga
-    // kepbetoltestol es sortoresektol is valtozik.
-    const figyelo = new ResizeObserver(merj)
-    figyelo.observe(sav)
-    sav.querySelectorAll('article[id^="partner-"], section').forEach((elem) => figyelo.observe(elem))
-
-    const kepek = [...sav.querySelectorAll('img')]
-    kepek.forEach((kep) => kep.addEventListener('load', merj))
-
-    window.addEventListener('resize', merj)
-    window.addEventListener('load', merj)
-    const idozitok = [window.setTimeout(merj, 400), window.setTimeout(merj, 1200)]
-
-    return () => {
-      kovetesVege = 0
-      window.cancelAnimationFrame(kovetes)
-      figyelo.disconnect()
-      kepek.forEach((kep) => kep.removeEventListener('load', merj))
-      window.removeEventListener('resize', merj)
-      window.removeEventListener('load', merj)
-      idozitok.forEach(window.clearTimeout)
-    }
-  }, [category, openPartner])
-
-  // Kartyankent egy allando fuggveny, kulonben minden meres utan
+  // Kartyankent egy allando fuggveny, kulonben minden allapotvaltozas utan
   // ujrarajzolodna az osszes kartya.
   const valtok = useMemo(
     () =>
@@ -224,86 +168,88 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-dvh bg-ink">
+    <div className="min-h-dvh">
       <Header />
 
-      <div ref={utSavRef} className="relative">
-        <Road magassag={utMagassag} pontok={utPontok} />
+      {/* A grafiti fal a fejlec alatt indul, es a tartalom mogott all */}
+      <div className="relative">
+        <FalHatter aktiv={aktivFal} />
 
-        <div className="relative mx-auto w-full max-w-[480px] px-5 pt-8 pb-10 md:max-w-[900px]">
+        <div className="relative z-10 mx-auto w-full max-w-[480px] px-5 pt-6 pb-12 md:max-w-[1120px]">
           <nav aria-label="Kategóriák">
             <CategoryFilter categories={categories} active={category} onSelect={selectCategory} />
           </nav>
 
-          <main key={category} className="mt-8 flex flex-col gap-11">
+          {/* Asztalon harom oszlop: a harom kartyas blokkok igy egy-egy teljes sort adnak */}
+          <main key={category} className="mt-4 flex flex-col gap-6 md:grid md:grid-cols-3 md:gap-7">
             {visible.map((partner, index) => {
               const merfoldko =
                 category === ALL && (index + 1) % 3 === 0 ? merfoldkovek[(index + 1) / 3 - 1] : null
 
               return (
                 <Fragment key={partner.name}>
-                  <Reveal
-                    delay={Math.min(index, 4) * 60}
-                    className={index % 2 === 0 ? 'md:w-[46%] md:self-start' : 'md:w-[46%] md:self-end'}
+                  <KozepFigyelo
+                    sorszam={falak.length > 0 ? index % falak.length : 0}
+                    jelez={falraLep}
                   >
-                    <PartnerCard
-                      partner={partner}
-                      featured={toNumber(partner.discount) === topDiscount}
-                      open={openPartner === partner.name}
-                      onToggle={valtok.get(partner.name)!}
-                    />
-                  </Reveal>
+                    <Reveal>
+                      <ThumbCard
+                        partner={partner}
+                        open={openPartner === partner.name}
+                        onToggle={valtok.get(partner.name)!}
+                      />
+                    </Reveal>
+                  </KozepFigyelo>
 
-                  {merfoldko ? <Milestone szoveg={merfoldko} /> : null}
+                  {merfoldko ? (
+                    <div className="md:col-span-3">
+                      <Milestone szam={merfoldko.szam} szoveg={merfoldko.szoveg} />
+                    </div>
+                  ) : null}
                 </Fragment>
               )
             })}
           </main>
-        </div>
 
-        <div className="relative mx-auto w-full max-w-[480px] px-5 pb-10">
-        <section
-          className="mt-12 rounded-2xl border-2 border-dashed border-cream/25 bg-surface p-5 shadow-[0_12px_28px_rgba(0,0,0,0.45)]"
-          style={{ transform: 'rotate(-0.7deg)' }}
-        >
-          <h2 className="font-display text-[1.05rem] leading-tight text-cream">Kik vagyunk?</h2>
-          <p className="mt-3 text-[0.95rem] leading-relaxed text-cream/70">
-            Budapesti diákok vagyunk. Nekünk is az volt, hogy "menjünk valahova", aztán "jó, de
-            mennyibe kerül", aztán "akkor inkább nem". Most már nem így megy: végigjárjuk a várost,
-            és kedvezményt szerzünk oda, ahova amúgy is mennél.
-          </p>
-        </section>
+          <section className="kartya mt-12 p-5">
+            <h2 className="font-display text-[1.5rem] leading-tight text-cream">Kik vagyunk?</h2>
+            <p className="mt-2.5 text-[0.92rem] leading-relaxed text-cream/70">
+              Budapesti diákok vagyunk. Nekünk is az volt, hogy "menjünk valahova", aztán "jó, de
+              mennyibe kerül", aztán "akkor inkább nem". Most már nem így megy: végigjárjuk a várost,
+              és kedvezményt szerzünk oda, ahova amúgy is mennél.
+            </p>
+          </section>
 
-        <Subscribe />
+          <Subscribe />
 
-        <footer className="mt-12 text-center">
-          <p className="text-[0.98rem] leading-snug text-cream/70">
-            Új helyek folyamatosan. Kövess minket, hogy elsőként tudd.
-          </p>
+          <footer className="mt-12 text-center">
+            <p className="text-[0.95rem] leading-snug text-cream/70">
+              Új helyek folyamatosan. Kövess minket, hogy elsőként tudd.
+            </p>
 
-          <div className="mt-5 flex gap-3">
-            <a
-              href="https://instagram.com/side_quest.bp"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-accent px-4 py-3.5 font-semibold text-ink transition active:scale-[0.98]"
-            >
-              <InstagramIcon className="h-5 w-5" />
-              Instagram
-            </a>
-            <a
-              href="https://tiktok.com/@side_quest.bp"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-accent/60 px-4 py-3.5 font-semibold text-cream transition active:scale-[0.98]"
-            >
-              <TikTokIcon className="h-5 w-5" />
-              TikTok
-            </a>
-          </div>
+            <div className="mt-5 flex gap-3">
+              <a
+                href="https://instagram.com/side_quest.bp"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-1 items-center justify-center gap-2 rounded-full border border-white/15 bg-[#0A0A0A]/80 px-4 py-3 text-[0.85rem] font-semibold text-cream transition active:scale-[0.98]"
+              >
+                <InstagramIcon className="h-5 w-5" />
+                Instagram
+              </a>
+              <a
+                href="https://tiktok.com/@side_quest.bp"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-1 items-center justify-center gap-2 rounded-full border border-white/15 bg-[#0A0A0A]/80 px-4 py-3 text-[0.85rem] font-semibold text-cream transition active:scale-[0.98]"
+              >
+                <TikTokIcon className="h-5 w-5" />
+                TikTok
+              </a>
+            </div>
 
-          <p className="mt-9 text-[0.75rem] text-cream/70">Frissítve: 2026. szeptember</p>
-        </footer>
+            <p className="mt-9 text-[0.75rem] text-cream/60">Frissítve: 2026. szeptember</p>
+          </footer>
         </div>
       </div>
     </div>

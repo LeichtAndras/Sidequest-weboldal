@@ -3,18 +3,42 @@
 @theme {
   /* Oldal hattere */
   --color-ink: #05202E;
-  /* Kartya hattere: ugyanaz a kekeszold tonus, csak vilagosabb */
-  --color-surface: #083449;
+  /* Kartya hattere: tomor sotet */
+  --color-surface: #0A0A0A;
   /* Kartya kerete es elvalaszto vonalak */
-  --color-line: #0E4258;
-  /* Kiemelo szin */
+  --color-line: rgba(255, 255, 255, 0.1);
+  /* Kiemelo szin, a logo kekje */
   --color-accent: #36B9F0;
+  /* A kartyak kerete es a feliratok kulso korvonala */
+  --sotetkek: #0B1B3A;
+  /* Kedvezmeny robbanas */
+  --pink: #FF2D78;
   /* Szoveg */
   --color-cream: #FFFCF3;
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
-  /* Cimsorok es a nagy szamok: utcai tabla hangulat, a logohoz */
-  --font-display: "Bungee", "Arial Black", system-ui, sans-serif;
+  /* A fejlec betuje, ez nem valtozik */
+  --font-hero: "Bungee", "Arial Black", system-ui, sans-serif;
+  /*
+   * Hely nevek, szamok es a kedvezmeny. A logo kezzel irt feliratahoz all
+   * a legkozelebb, es tudja a magyar ekezeteket. Alternativak:
+   * "Luckiest Guy" (rajzoltabb, graffitisebb), "Baloo 2" 800 (lagyabb).
+   * Ha valtasz, a betu betolteset is at kell irni az index.html-ben.
+   */
+  --font-display: "Titan One", "Arial Black", system-ui, sans-serif;
+
+  /*
+   * Mennyire sotetitjuk a grafiti falakat a tartalom alatt. 0 = nincs, 1 = fekete.
+   * A kartyak igy emelkednek ki a falbol.
+   */
+  --wall-dim: 0.65;
+  /* Enyhe elmosas a falon, szinten a kartyak kedveert */
+  --wall-blur: 4px;
+  /*
+   * Kivagasos kartyan a sajat fotó hattere ennyire van elmosva, hogy ne
+   * latszodjon ketszer ugyanaz az ember. Kulon hatterkepnel nincs elmosas.
+   */
+  --cutout-bg-blur: 14px;
 }
 
 html {
@@ -52,7 +76,7 @@ body {
   display: none;
 }
 
-/* Kartyak finom beuszasa alulrol */
+/* Gorgeteskor beuszo elem. Csak opacity es transform valtozik. */
 .reveal {
   opacity: 0;
   transform: translateY(14px);
@@ -64,24 +88,6 @@ body {
 .reveal-in {
   opacity: 1;
   transform: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .reveal {
-    opacity: 1;
-    transform: none;
-    transition: none;
-    transition-delay: 0ms !important;
-  }
-
-  *,
-  ::before,
-  ::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
 }
 
 /* Csak kepolvasonak szant szoveg */
@@ -98,7 +104,7 @@ body {
 }
 
 /*
- * Plakatfal: vilagos, vakolt beton. Minden CSS-bol keszul,
+ * A fejlec fala: vilagos, vakolt beton. Minden CSS-bol keszul,
  * a szemcse egy beagyazott SVG zajszuro, nem kepfajl.
  */
 .fal {
@@ -120,14 +126,26 @@ body {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='z'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23z)' opacity='0.42'/%3E%3C/svg%3E");
 }
 
-/* Ragasztoszalag a fotok sarkan */
+/*
+ * A fejlec fotókollazsa: a fotok szelessege szazalekban van, tehat szeles
+ * kepernyon magasabbak is lesznek. Ha a doboz magassaga fix maradna,
+ * belelognanak a szlogenbe, ezert az is egyutt no a szelesseggel.
+ */
+.hero-doboz {
+  container-type: inline-size;
+}
+
+.hero-kollazs {
+  height: calc(160px + 41cqw);
+}
+
+/* Ragasztoszalag a fejlec fotoinak sarkan */
 .szalag {
   position: absolute;
   width: 62px;
   height: 20px;
   background: rgba(255, 252, 243, 0.55);
   box-shadow: 0 1px 2px rgba(5, 32, 46, 0.25);
-  mix-blend-mode: normal;
 }
 
 .szalag::after {
@@ -139,4 +157,491 @@ body {
     rgba(5, 32, 46, 0.06) 0 2px,
     transparent 2px 5px
   );
+}
+
+/*
+ * Grafiti fal a tartalom mogott. Sticky, igy nem kell
+ * background-attachment: fixed, ami iPhone-on nem mukodik.
+ * A negativ also margo miatt nem foglal helyet a folyamban.
+ */
+.fal-reteg {
+  position: sticky;
+  top: 0;
+  z-index: 0;
+  height: 100vh;
+  height: 100lvh;
+  margin-bottom: -100vh;
+  margin-bottom: -100lvh;
+  overflow: hidden;
+  background-color: var(--color-ink);
+}
+
+/* Egy fal. Csak az aktualis lathato, a tobbi atlatszo, igy uszik at. */
+.fal-kep {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 600ms ease;
+  filter: blur(var(--wall-blur));
+  /* Kicsit nagyobbra huzva, kulonben az elmosas atlatszo szelet hagyna */
+  transform: scale(1.06);
+}
+
+.fal-kep-aktiv {
+  opacity: 1;
+}
+
+/* Sotet reteg a falon, hogy a szoveg olvashato maradjon */
+.fal-sotetito {
+  position: absolute;
+  inset: 0;
+  background-color: rgb(0 0 0 / var(--wall-dim));
+}
+
+/* A fal helyszine es alkotoja, amig az a fal latszik */
+.fal-felirat {
+  position: absolute;
+  bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  left: 16px;
+  margin: 0;
+  max-width: 70%;
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  color: rgba(255, 252, 243, 0.5);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+  pointer-events: none;
+}
+
+/* Tomor sotet felulet: kartyak es szovegblokkok */
+.kartya {
+  background-color: var(--color-surface);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 18px 40px -16px rgba(0, 0, 0, 0.85);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+    transition-delay: 0ms !important;
+  }
+
+  /* Nincs attunes a falak kozott, csak csere */
+  .fal-kep {
+    transition: none;
+  }
+
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+
+/*
+ * Thumbnail kartya: 4:3 lap, a fotó kitolti, rajta kivagott szemely,
+ * buborekos feliratok es kedvezmeny robbanas. A lenyitott resz a kartya
+ * folytatasa, a keret es a kulso szel korulotte is vegigfut.
+ */
+.tn-kartya {
+  position: relative;
+  container-type: inline-size;
+  border-radius: 24px;
+  overflow: hidden;
+  background-color: var(--sotetkek);
+  box-shadow:
+    0 0 0 3px rgba(255, 252, 243, 0.92),
+    0 22px 42px -18px rgba(0, 0, 0, 0.9);
+}
+
+.tn-lap {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background-color: var(--sotetkek);
+}
+
+/*
+ * A vastag sotetkek keret a tartalom felett: takarja a kivagas aljat, es
+ * lenyitaskor egyben nyulik a kartyaval, mert a kulso burokhoz igazodik.
+ */
+.tn-keret {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  border: 2.6cqw solid var(--sotetkek);
+  border-radius: 24px;
+  pointer-events: none;
+}
+
+.tn-foto {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/*
+ * Elmosott hatter: ha a kivagas nem a sajat helyen all, a fotóbol csak
+ * szines hangulat marad. Az elmosas mertekere kartyankent van beallitas.
+ */
+.tn-foto-elmosott {
+  filter: blur(var(--cutout-bg-blur));
+  transform: scale(1.06);
+}
+
+/*
+ * Sotetites csak ott, ahol szoveg van: felul a cim, alul a gombok.
+ * Kozepen a fotó erintetlen marad, igy nem lesz szurke es mosott.
+ */
+.tn-fatyol,
+.tn-fatyol-eros {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(11, 27, 58, 0.5) 0%,
+    rgba(11, 27, 58, 0.22) 18%,
+    rgba(11, 27, 58, 0) 34%,
+    rgba(11, 27, 58, 0) 60%,
+    rgba(11, 27, 58, 0.3) 82%,
+    rgba(11, 27, 58, 0.55) 100%
+  );
+}
+
+/* A kivagott szemely: bal alul, az alja a keret moge bujik */
+.tn-kivagas {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  z-index: 3;
+  height: auto;
+  filter: drop-shadow(0 0.8cqw 1.2cqw rgba(0, 0, 0, 0.45));
+}
+
+/*
+ * Feliratok a referencia stilusaban: feher kitoltes, vastag vilagoskek
+ * korvonal, azon kivul sotetkek. Ket egymasra tett szoveg adja a ket
+ * korvonalat, a paint-order miatt a kitoltes nem harapja el oket.
+ */
+.tn-felirat {
+  position: relative;
+  display: block;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  line-height: 1.04;
+  filter: drop-shadow(0 0.5cqw 0 rgba(11, 27, 58, 0.85));
+}
+
+.tn-felirat-hatso,
+.tn-felirat-elso {
+  display: block;
+  margin: 0;
+  paint-order: stroke fill;
+}
+
+.tn-felirat-hatso {
+  position: absolute;
+  inset: 0;
+  color: transparent;
+  -webkit-text-stroke: 2.1cqw var(--sotetkek);
+}
+
+.tn-felirat-elso {
+  position: relative;
+  color: #ffffff;
+  -webkit-text-stroke: 0.95cqw var(--color-accent);
+}
+
+/* Gombok felirata: sima Titan One, korvonal nelkul */
+.tn-gomb-felirat {
+  font-family: var(--font-display);
+  color: #ffffff;
+  text-transform: uppercase;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+/* A TOBB gomb felirata sotetkek, igy olvashatobb a vilagos kek kapszulan */
+.tn-gomb-felirat-sotet {
+  color: var(--sotetkek);
+}
+
+/* Kisebb feliratok vekonyabb korvonallal */
+.tn-felirat-kicsi .tn-felirat-hatso {
+  -webkit-text-stroke-width: 1.5cqw;
+}
+
+.tn-felirat-kicsi .tn-felirat-elso {
+  -webkit-text-stroke-width: 0.7cqw;
+}
+
+/* Vilagos hatteren: sima sotetkek betu, korvonal nelkul */
+.tn-felirat-sotet {
+  filter: none;
+}
+
+.tn-felirat-sotet .tn-felirat-elso {
+  color: var(--sotetkek);
+  -webkit-text-stroke-width: 0;
+}
+
+.tn-nev {
+  position: absolute;
+  z-index: 5;
+  top: 4.5cqw;
+  margin: 0;
+  text-align: right;
+}
+
+/* Kategoria matrica bal felul, vagy szuk helyen a nev folott jobbra */
+.tn-kategoria {
+  position: absolute;
+  z-index: 5;
+  top: 5.5cqw;
+  left: 5cqw;
+  padding: 0.7cqw 2cqw;
+  border: 0.55cqw solid var(--sotetkek);
+  border-radius: 99px;
+  background-color: rgba(255, 252, 243, 0.95);
+  color: var(--sotetkek);
+  font-family: var(--font-display);
+  font-size: 3.2cqw;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Szuk helyen a cimke a nev fole kerul, jobbra igazitva */
+.tn-kategoria-fent {
+  left: auto;
+  right: 5cqw;
+  top: 4.5cqw;
+}
+
+/*
+ * Bevaltas modja: kis matrica bal alul, a kategoria cimke stilusaban.
+ * A gombbal egy vonalban all, es sosem er at ala.
+ */
+.tn-bevaltas {
+  position: absolute;
+  z-index: 5;
+  left: 5cqw;
+  bottom: 4.5cqw;
+  display: inline-flex;
+  align-items: center;
+  gap: 1.4cqw;
+  padding: 0.7cqw 2cqw;
+  border: 0.55cqw solid var(--sotetkek);
+  border-radius: 99px;
+  background-color: rgba(255, 252, 243, 0.95);
+  color: var(--sotetkek);
+  font-family: var(--font-display);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.tn-bevaltas-ikon {
+  width: 4cqw;
+  height: 4cqw;
+  flex: none;
+}
+
+/* Kedvezmeny robbanas */
+.tn-robbanas {
+  position: absolute;
+  z-index: 5;
+  right: 3cqw;
+  top: 28.5cqw;
+  width: 42cqw;
+  height: 30cqw;
+  display: grid;
+  place-items: center;
+}
+
+.tn-robbanas svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.tn-robbanas-szoveg {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  transform: rotate(-4deg);
+}
+
+/* Kapszula gomb: a TOBB gomb es a panel gombjai is ezt hasznaljak */
+.tn-kapszula {
+  display: inline-flex;
+  align-items: center;
+  gap: 1.2cqw;
+  padding: 1.4cqw 3.4cqw;
+  border: 0.7cqw solid var(--sotetkek);
+  border-radius: 99px;
+  background-color: var(--color-accent);
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 0.8cqw 0 var(--sotetkek);
+  transition: transform 140ms ease;
+}
+
+.tn-kapszula:active {
+  transform: translateY(0.4cqw);
+}
+
+.tn-kapszula-ikon {
+  width: 4.2cqw;
+  height: 4.2cqw;
+  flex: none;
+}
+
+/* Tobb gomb jobb alul, a fotón */
+.tn-tobb {
+  position: absolute;
+  z-index: 7;
+  right: 4.5cqw;
+  bottom: 4.5cqw;
+}
+
+/*
+ * Lenyitott resz: a kartya folytatasa. Nincs kozte res, nincs sajat
+ * lekerekites, a kulso burok kerekiti le az aljat.
+ */
+.tn-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 260ms ease-out;
+}
+
+.tn-panel-nyitva {
+  grid-template-rows: 1fr;
+}
+
+.tn-panel > div {
+  overflow: hidden;
+}
+
+.tn-panel-belso {
+  background-color: var(--color-cream);
+  color: var(--sotetkek);
+  padding: 4.5cqw 5.5cqw 6.5cqw;
+}
+
+.tn-panel-szoveg {
+  margin: 0;
+  font-size: 4.3cqw;
+  line-height: 1.55;
+}
+
+.tn-panel-blokk {
+  margin-top: 4.5cqw;
+}
+
+.tn-panel-sor {
+  display: flex;
+  align-items: flex-start;
+  gap: 2.2cqw;
+  margin: 0;
+  font-size: 4.2cqw;
+  line-height: 1.45;
+}
+
+.tn-panel-ikon {
+  width: 4.4cqw;
+  height: 4.4cqw;
+  flex: none;
+  color: var(--sotetkek);
+  transform: translateY(0.4cqw);
+}
+
+.tn-kapszula-panel {
+  margin-top: 3cqw;
+  padding: 0.7cqw 4cqw;
+}
+
+.tn-kapszula-megosztas {
+  margin-top: 5.5cqw;
+  width: 100%;
+  justify-content: center;
+}
+
+.tn-lepesek {
+  margin: 3cqw 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2.4cqw;
+}
+
+.tn-lepes {
+  display: flex;
+  align-items: flex-start;
+  gap: 2.6cqw;
+  font-size: 4.2cqw;
+  line-height: 1.45;
+}
+
+/* Lepes szama: kis pink kor matrica */
+.tn-lepes-szam {
+  display: grid;
+  place-items: center;
+  width: 7.4cqw;
+  height: 7.4cqw;
+  flex: none;
+  border: 0.65cqw solid var(--sotetkek);
+  border-radius: 999px;
+  background-color: var(--pink);
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-size: 3.8cqw;
+  line-height: 1;
+}
+
+.tn-feltetel {
+  display: flex;
+  align-items: flex-start;
+  gap: 2cqw;
+  margin: 4.5cqw 0 0;
+  padding: 2.6cqw 3cqw;
+  border: 0.55cqw solid var(--sotetkek);
+  border-radius: 14px;
+  background-color: rgba(11, 27, 58, 0.06);
+  font-size: 3.9cqw;
+  line-height: 1.45;
+}
+
+/* Kuponkod a kartyan belul, a fotó alatt */
+.tn-kupon {
+  background-color: var(--color-cream);
+  padding: 4cqw 5.5cqw;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tn-panel,
+  .tn-kapszula {
+    transition: none;
+  }
+}
+
+.tn-diszek {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }

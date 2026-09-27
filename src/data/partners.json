@@ -14,14 +14,15 @@
       "Olvasd be a SideQuest QR kódot a telefonoddal",
       "Mutasd a kedvezményt fizetés előtt"
     ],
-    "conditions": ""
+    "conditions": "",
+    "cutout": "/images/cutouts/sugar-bowling.webp"
   },
   {
     "name": "Magic Rooms",
     "slug": "magic-rooms",
     "addedDate": "",
     "discount": "25%",
-    "category": "Szabadulószoba",
+    "category": "Szoba",
     "redeem": "Add meg foglaláskor a kódot",
     "image": "/images/magicrooms.jpg",
     "brightenImage": true,
@@ -32,7 +33,8 @@
       "Az utalás közleményébe írd be: 1KVD25",
       "A kedvezményt a helyszínen kapod meg"
     ],
-    "conditions": "Csak hétköznap érvényes. A kedvezmény a helyszínen érvényesül, nem online kuponkód."
+    "conditions": "Csak hétköznap érvényes. A kedvezmény a helyszínen érvényesül, nem online kuponkód.",
+    "cutout": "/images/cutouts/magic-rooms.webp"
   },
   {
     "name": "SugárMozi",
@@ -49,14 +51,15 @@
       "Olvasd be a SideQuest QR kódot a telefonoddal",
       "Mutasd a kedvezményt a jegyvásárlásnál"
     ],
-    "conditions": ""
+    "conditions": "",
+    "cutout": "/images/cutouts/sugarmozi.webp"
   },
   {
     "name": "TimeHeist",
     "slug": "timeheist",
     "addedDate": "",
     "discount": "20%",
-    "category": "Szabadulószoba",
+    "category": "Szoba",
     "redeem": "QR kód a helyszínen",
     "image": "/images/timeheist.jpg",
     "imagePosition": "center 20%",
@@ -67,7 +70,8 @@
       "Olvasd be a SideQuest QR kódot a telefonoddal",
       "Mutasd a kedvezményt fizetés előtt"
     ],
-    "conditions": ""
+    "conditions": "",
+    "cutout": "/images/cutouts/timeheist.webp"
   },
   {
     "name": "Szelfimúzeum",
@@ -84,7 +88,8 @@
       "Mondd a pénztárnál, hogy SideQuest",
       "A kedvezményt a jegy árából vonják le"
     ],
-    "conditions": ""
+    "conditions": "",
+    "cutout": "/images/cutouts/szelfimuzeum.webp"
   },
   {
     "name": "Baltadobálás",
@@ -102,7 +107,8 @@
       "Olvasd be a SideQuest QR kódot a telefonoddal",
       "Mutasd a kedvezményt fizetés előtt"
     ],
-    "conditions": ""
+    "conditions": "",
+    "cutout": "/images/cutouts/baltadobalas.webp"
   },
   {
     "name": "Leonoria Kvízbox",
@@ -119,7 +125,8 @@
       "Mondd a pénztárnál, hogy SideQuest",
       "A kedvezményt a fizetésnél kapod meg"
     ],
-    "conditions": ""
+    "conditions": "",
+    "cutout": "/images/cutouts/leonoria-kvizbox.webp"
   },
   {
     "name": "Base Bar",
@@ -136,7 +143,8 @@
       "Mondd a pultnál, hogy SideQuest",
       "A kedvezményt a fizetésnél kapod meg"
     ],
-    "conditions": ""
+    "conditions": "",
+    "cutout": "/images/cutouts/base-bar.webp"
   },
   {
     "name": "Pixity",
@@ -155,6 +163,7 @@
       "A fizetésnél írd be a kuponkódot: SIDEQUEST10",
       "A kedvezmény automatikusan levonásra kerül"
     ],
-    "conditions": ""
+    "conditions": "",
+    "cutout": "/images/cutouts/pixity.webp"
   }
 ]

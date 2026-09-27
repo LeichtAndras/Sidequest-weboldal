@@ -1,11 +1,21 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import type { Partner } from '../types'
 import { partnerUrl } from '../site'
 import { CheckIcon, ShareIcon } from './Icons'
 
-type Props = { partner: Partner }
+type Props = {
+  partner: Partner
+  className?: string
+  /** Az ikon osztalya, ha a gomb sajat meretet hasznal. */
+  ikonOsztaly?: string
+  /** A felirat becsomagolasa, pl. a kartya stilusu Felirat elembe. */
+  felirat?: (szoveg: string) => ReactNode
+}
 
-export default function ShareButton({ partner }: Props) {
+const ALAP_STILUS =
+  'mt-1 flex w-full items-center justify-center gap-2 rounded-xl border border-accent/60 px-4 py-3 font-semibold text-accent transition active:scale-[0.98]'
+
+export default function ShareButton({ partner, className, ikonOsztaly, felirat }: Props) {
   const [copied, setCopied] = useState(false)
   const timer = useRef<number | undefined>(undefined)
 
@@ -59,10 +69,14 @@ export default function ShareButton({ partner }: Props) {
       type="button"
       onClick={megoszt}
       aria-live="polite"
-      className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl border border-accent/60 px-4 py-3 font-semibold text-accent transition active:scale-[0.98]"
+      className={className ?? ALAP_STILUS}
     >
-      {copied ? <CheckIcon className="h-4 w-4" /> : <ShareIcon className="h-4 w-4" />}
-      {copied ? 'Link másolva' : 'Megosztás'}
+      {copied ? (
+        <CheckIcon className={ikonOsztaly ?? 'h-4 w-4'} />
+      ) : (
+        <ShareIcon className={ikonOsztaly ?? 'h-4 w-4'} />
+      )}
+      {felirat ? felirat(copied ? 'Link másolva' : 'Megosztás') : copied ? 'Link másolva' : 'Megosztás'}
     </button>
   )
 }

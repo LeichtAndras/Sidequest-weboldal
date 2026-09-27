@@ -15,9 +15,32 @@ export type Partner = {
   imagePosition?: string
   /** Sotet fotohoz: fenyero es kontraszt megemelese, csak ezen a kartyan. */
   brightenImage?: boolean
+  /** Atlatszo hatteru kivagas utvonala, pl. "/images/cutouts/base-bar.webp". */
+  cutout?: string
+  /** A kivagas szelessege a kartya szelessegehez kepest. Alapertelmezes 45. */
+  cutoutWidth?: number
+  /**
+   * Kulon hatterkep a kivagas moge, ember nelkul, pl. "/images/basebar-ter.jpg".
+   * Ha ki van toltve, ez lesz a kartya hattere, es nem mossuk el. Ha ures,
+   * a sajat fotó kerul oda eros elmosassal, hogy ne latszodjon ketszer
+   * ugyanaz az ember.
+   */
+  cutoutBg?: string
   /** Lenyilo resz. Ami ures, az nem jelenik meg. */
   description?: string
   address?: string
   steps?: string[]
   conditions?: string
+}
+
+export type Fal = {
+  /**
+   * A kep neve meret nelkul, pl. "wall-3". A public/images/walls mappaban
+   * ehhez tartozik egy wall-3-900.webp es egy wall-3-1600.webp.
+   */
+  fajl: string
+  /** Opcionalis. Ha ki van toltve, megjelenik a kep bal also sarkaban. */
+  helyszin?: string
+  /** Opcionalis. Az alkoto neve, a helyszin mellett jelenik meg. */
+  alkoto?: string
 }
