@@ -48,7 +48,6 @@ html {
 
 body {
   margin: 0;
-  background-color: var(--color-ink);
   color: var(--color-cream);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
@@ -104,29 +103,6 @@ body {
 }
 
 /*
- * A fejlec fala: vilagos, vakolt beton. Minden CSS-bol keszul,
- * a szemcse egy beagyazott SVG zajszuro, nem kepfajl.
- */
-.fal {
-  background-color: var(--color-cream);
-  background-image:
-    radial-gradient(circle at 18% 12%, rgba(5, 32, 46, 0.09), transparent 42%),
-    radial-gradient(circle at 82% 8%, rgba(5, 32, 46, 0.07), transparent 38%),
-    radial-gradient(circle at 60% 70%, rgba(5, 32, 46, 0.08), transparent 45%),
-    radial-gradient(circle at 25% 88%, rgba(5, 32, 46, 0.06), transparent 40%);
-}
-
-.fal::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.55;
-  mix-blend-mode: multiply;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='z'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23z)' opacity='0.42'/%3E%3C/svg%3E");
-}
-
-/*
  * A fejlec fotókollazsa: a fotok szelessege szazalekban van, tehat szeles
  * kepernyon magasabbak is lesznek. Ha a doboz magassaga fix maradna,
  * belelognanak a szlogenbe, ezert az is egyutt no a szelesseggel.
@@ -137,6 +113,17 @@ body {
 
 .hero-kollazs {
   height: calc(160px + 41cqw);
+}
+
+/*
+ * A szlogen a grafitis falon all, ezert vilagos fenykontúr emeli ki,
+ * kulonben belefolyna a fotón levo tablakba es firkakba.
+ */
+.hero-szlogen {
+  text-shadow:
+    0 0 10px rgba(255, 252, 243, 0.95),
+    0 0 22px rgba(255, 252, 243, 0.85),
+    0 2px 4px rgba(255, 252, 243, 0.9);
 }
 
 /* Ragasztoszalag a fejlec fotoinak sarkan */
@@ -160,59 +147,84 @@ body {
 }
 
 /*
- * Grafiti fal a tartalom mogott. Sticky, igy nem kell
- * background-attachment: fixed, ami iPhone-on nem mukodik.
- * A negativ also margo miatt nem foglal helyet a folyamban.
+ * A grafiti fal az egesz oldal hattere, a hero-tol a labjegyzetig. Rogzitett
+ * reteg, nem background-attachment: fixed, mert azt az iOS nem kezeli.
  */
-.fal-reteg {
-  position: sticky;
-  top: 0;
-  z-index: 0;
-  height: 100vh;
-  height: 100lvh;
-  margin-bottom: -100vh;
-  margin-bottom: -100lvh;
-  overflow: hidden;
+.oldal-hatter {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
   background-color: var(--color-ink);
+  background-image: url("/images/hatter/sidequest-fal-900.webp");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
-/* Egy fal. Csak az aktualis lathato, a tobbi atlatszo, igy uszik at. */
-.fal-kep {
+@media (min-width: 820px) {
+  .oldal-hatter {
+    background-image: url("/images/hatter/sidequest-fal-1500.webp");
+  }
+}
+
+/* A fejlec mogott vilagosabb a fal, hogy a sotet szoveg olvashato legyen */
+.hero {
+  position: relative;
+  padding-bottom: 3.5rem;
+}
+
+@media (min-width: 768px) {
+  .hero {
+    padding-bottom: 6rem;
+  }
+}
+
+/* Vilagosito fatyol a hero sotet szovege alatt */
+.hero-fatyol {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0;
-  transition: opacity 600ms ease;
-  filter: blur(var(--wall-blur));
-  /* Kicsit nagyobbra huzva, kulonben az elmosas atlatszo szelet hagyna */
-  transform: scale(1.06);
-}
-
-.fal-kep-aktiv {
-  opacity: 1;
-}
-
-/* Sotet reteg a falon, hogy a szoveg olvashato maradjon */
-.fal-sotetito {
-  position: absolute;
-  inset: 0;
-  background-color: rgb(0 0 0 / var(--wall-dim));
-}
-
-/* A fal helyszine es alkotoja, amig az a fal latszik */
-.fal-felirat {
-  position: absolute;
-  bottom: calc(14px + env(safe-area-inset-bottom, 0px));
-  left: 16px;
-  margin: 0;
-  max-width: 70%;
-  font-size: 0.68rem;
-  letter-spacing: 0.04em;
-  color: rgba(255, 252, 243, 0.5);
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
   pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 252, 243, 0.5) 0%,
+    rgba(255, 252, 243, 0.42) 45%,
+    rgba(255, 252, 243, 0.34) 78%,
+    rgba(255, 252, 243, 0) 100%
+  );
+}
+
+.tartalom-szakasz {
+  position: relative;
+}
+
+/*
+ * Enyhe sotetites a kartyak es a szurogombok kedveert. Nullarol indul a hero
+ * also szelen es 200px alatt eri el a vegso erteket, igy nincs lathato vagas.
+ */
+.tartalom-arnyek {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0,
+    rgba(0, 0, 0, 0.35) 200px,
+    rgba(0, 0, 0, 0.35) 100%
+  );
+}
+
+/*
+ * Kartyan kivul, kozvetlenul a falon allo szoveg. A 0.35-os sotetites onmagaban
+ * keves a vilagos grafiti folott, ezert ezek kapnak sajat arnyekot.
+ */
+.falon-szoveg {
+  text-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.85),
+    0 2px 12px rgba(0, 0, 0, 0.6);
+}
+
+.tartalom-belso {
+  padding-top: 3.5rem;
 }
 
 /* Tomor sotet felulet: kartyak es szovegblokkok */
@@ -229,11 +241,6 @@ body {
     transform: none;
     transition: none;
     transition-delay: 0ms !important;
-  }
-
-  /* Nincs attunes a falak kozott, csak csere */
-  .fal-kep {
-    transition: none;
   }
 
   *,

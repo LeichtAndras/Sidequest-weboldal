@@ -1,12 +1,4 @@
-import {
-  Fragment,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from 'react'
+import { Fragment, useEffect, useMemo, useState } from 'react'
 import partnersData from './data/partners.json'
 import ThumbCard from './components/ThumbCard'
 import CategoryFilter, { ALL } from './components/CategoryFilter'
@@ -14,7 +6,6 @@ import Reveal from './components/Reveal'
 import Subscribe from './components/Subscribe'
 import Header from './components/Header'
 import Milestone from './components/Milestone'
-import FalHatter, { falak } from './components/FalHatter'
 import { InstagramIcon, TikTokIcon } from './components/Icons'
 import type { Partner } from './types'
 import { slugFromPath } from './site'
@@ -37,7 +28,11 @@ const categories = [...new Set(nyersPartnerek.map((partner) => partner.category)
 /** Harom merfoldko, minden harmadik kartya utan. */
 const merfoldkovek = [
   { szam: '9', szoveg: 'partner Budapesten' },
-  { szam: '10 000', szoveg: 'követő, nagyjából' },
+  {
+    szam: 'közel 10 ezer',
+    szoveg: 'követő',
+    link: 'https://instagram.com/side_quest.bp',
+  },
   { szam: '4', szoveg: 'hónap alatt' },
 ]
 
@@ -48,48 +43,9 @@ function partnerACimbol() {
   return partners.find((partner) => partner.slug === slug) ?? null
 }
 
-type FigyeloProps = {
-  sorszam: number
-  jelez: (sorszam: number) => void
-  children: ReactNode
-}
-
-/**
- * Szol, amikor a kartya a kepernyo kozepere er. A megfigyelo hatara egy
- * nulla magas sav a kepernyo kozepen, igy gorgeteskor nem szamolunk semmit.
- */
-function KozepFigyelo({ sorszam, jelez, children }: FigyeloProps) {
-  const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const elem = ref.current
-    if (!elem) return
-
-    const figyelo = new IntersectionObserver(
-      (bejegyzesek) => {
-        for (const bejegyzes of bejegyzesek) {
-          if (bejegyzes.isIntersecting) jelez(sorszam)
-        }
-      },
-      { rootMargin: '-50% 0px -50% 0px', threshold: 0 },
-    )
-
-    figyelo.observe(elem)
-    return () => figyelo.disconnect()
-  }, [sorszam, jelez])
-
-  return <div ref={ref}>{children}</div>
-}
-
 export default function App() {
   const [openPartner, setOpenPartner] = useState<string | null>(() => partnerACimbol()?.name ?? null)
   const [category, setCategory] = useState(ALL)
-  const [aktivFal, setAktivFal] = useState(0)
-
-  const falraLep = useCallback((sorszam: number) => {
-    setAktivFal((jelenlegi) => (jelenlegi === sorszam ? jelenlegi : sorszam))
-  }, [])
-
   // Megosztott linkrol erkezve odagorgetunk a kartyara.
   useEffect(() => {
     const partner = partnerACimbol()
@@ -168,15 +124,15 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-dvh">
+    <div className="relative min-h-dvh">
+      <div className="oldal-hatter" />
       <Header />
 
-      {/* A grafiti fal a fejlec alatt indul, es a tartalom mogott all */}
-      <div className="relative">
-        <FalHatter aktiv={aktivFal} />
-
-        <div className="relative z-10 mx-auto w-full max-w-[480px] px-5 pt-6 pb-12 md:max-w-[1120px]">
-          <nav aria-label="Kategóriák">
+      {/* A kartyas resz. Nincs sajat z-index, hogy a hero csoppjei rala loghassanak. */}
+      <div className="tartalom-szakasz">
+        <div className="tartalom-arnyek" />
+        <div className="tartalom-belso relative z-10 mx-auto w-full max-w-[480px] px-5 pb-12 md:max-w-[1120px]">
+          <nav aria-label="Kategóriák" className="relative z-20">
             <CategoryFilter categories={categories} active={category} onSelect={selectCategory} />
           </nav>
 
@@ -188,22 +144,17 @@ export default function App() {
 
               return (
                 <Fragment key={partner.name}>
-                  <KozepFigyelo
-                    sorszam={falak.length > 0 ? index % falak.length : 0}
-                    jelez={falraLep}
-                  >
-                    <Reveal>
+                  <Reveal>
                       <ThumbCard
                         partner={partner}
                         open={openPartner === partner.name}
                         onToggle={valtok.get(partner.name)!}
                       />
                     </Reveal>
-                  </KozepFigyelo>
 
                   {merfoldko ? (
                     <div className="md:col-span-3">
-                      <Milestone szam={merfoldko.szam} szoveg={merfoldko.szoveg} />
+                      <Milestone szam={merfoldko.szam} szoveg={merfoldko.szoveg} link={merfoldko.link} />
                     </div>
                   ) : null}
                 </Fragment>
@@ -223,7 +174,7 @@ export default function App() {
           <Subscribe />
 
           <footer className="mt-12 text-center">
-            <p className="text-[0.95rem] leading-snug text-cream/70">
+            <p className="falon-szoveg text-[0.95rem] leading-snug text-cream/80">
               Új helyek folyamatosan. Kövess minket, hogy elsőként tudd.
             </p>
 
@@ -248,7 +199,7 @@ export default function App() {
               </a>
             </div>
 
-            <p className="mt-9 text-[0.75rem] text-cream/60">Frissítve: 2026. szeptember</p>
+            <p className="falon-szoveg mt-9 text-[0.75rem] text-cream/70">Frissítve: 2026. szeptember</p>
           </footer>
         </div>
       </div>

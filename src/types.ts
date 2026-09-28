@@ -32,15 +32,3 @@ export type Partner = {
   steps?: string[]
   conditions?: string
 }
-
-export type Fal = {
-  /**
-   * A kep neve meret nelkul, pl. "wall-3". A public/images/walls mappaban
-   * ehhez tartozik egy wall-3-900.webp es egy wall-3-1600.webp.
-   */
-  fajl: string
-  /** Opcionalis. Ha ki van toltve, megjelenik a kep bal also sarkaban. */
-  helyszin?: string
-  /** Opcionalis. Az alkoto neve, a helyszin mellett jelenik meg. */
-  alkoto?: string
-}

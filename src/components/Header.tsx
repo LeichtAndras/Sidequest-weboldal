@@ -20,7 +20,8 @@ const fotok: Fotó[] = [
 
 export default function Header() {
   return (
-    <header className="fal relative overflow-hidden pt-5 pb-16">
+    <header className="hero pt-5">
+      <div className="hero-fatyol" />
       <div className="hero-doboz relative mx-auto w-full max-w-[480px] px-4">
         {/* Fotokollazs */}
         <div className="hero-kollazs relative" aria-hidden="true">
@@ -66,22 +67,11 @@ export default function Header() {
           />
         </div>
 
-        <p className="relative z-10 mt-7 text-center text-[1.05rem] leading-tight text-ink"
+        <p className="hero-szlogen relative z-10 mt-7 text-center text-[1.05rem] leading-tight text-ink"
           style={{ fontFamily: 'var(--font-hero)' }}>
           Budapest legjobb helyei, olcsóbban.
         </p>
       </div>
-
-      {/* Szakadt papir el, innen indul a sotet resz */}
-      <svg
-        className="absolute inset-x-0 bottom-0 h-[46px] w-full"
-        viewBox="0 0 1200 60"
-        preserveAspectRatio="none"
-        aria-hidden="true"
-      >
-        <path fill="#05202E" opacity="0.4" d="M0 60V48L38 36L88 47L123 49L170 46L219 42L266 39L304 38L346 42L378 43L432 39L461 36L492 39L525 41L558 48L601 36L646 55L673 48L703 38L743 39L795 43L824 45L863 35L921 40L951 37L1008 49L1037 56L1073 42L1101 43L1134 41L1185 49L1200 56V60Z" />
-        <path fill="#05202E" d="M0 60V28L20 35L44 21L68 35L83 33L98 27L128 37L157 24L189 30L211 24L227 38L257 35L272 26L290 29L313 22L339 26L366 24L381 31L400 36L424 31L439 33L454 33L476 38L501 35L530 38L550 29L565 37L594 38L615 22L631 33L652 23L681 35L695 46L728 31L755 29L780 29L799 51L824 30L844 33L874 22L903 33L921 29L943 44L957 36L978 21L996 23L1016 23L1040 26L1072 46L1100 39L1123 38L1154 31L1171 24L1200 39V60Z" />
-      </svg>
 
     </header>
   )
