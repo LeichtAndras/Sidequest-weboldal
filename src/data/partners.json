@@ -15,7 +15,7 @@
       "Mutasd a kedvezményt fizetés előtt"
     ],
     "conditions": "",
-    "cutout": "/images/cutouts/sugar-bowling.webp"
+    "venue": "sugar-bowling.webp"
   },
   {
     "name": "Magic Rooms",
@@ -25,7 +25,6 @@
     "category": "Szoba",
     "redeem": "Add meg foglaláskor a kódot",
     "image": "/images/magicrooms.jpg",
-    "brightenImage": true,
     "description": "Szabadulószobák egész sorozata, a Harry Potter hangulatútól a Jumanjiig. Az egyik legjobbra értékelt hely a városban, kezdőknek is működik.",
     "address": "",
     "steps": [
@@ -34,7 +33,7 @@
       "A kedvezményt a helyszínen kapod meg"
     ],
     "conditions": "Csak hétköznap érvényes. A kedvezmény a helyszínen érvényesül, nem online kuponkód.",
-    "cutout": "/images/cutouts/magic-rooms.webp"
+    "venue": "magic-rooms.webp"
   },
   {
     "name": "SugárMozi",
@@ -52,7 +51,7 @@
       "Mutasd a kedvezményt a jegyvásárlásnál"
     ],
     "conditions": "",
-    "cutout": "/images/cutouts/sugarmozi.webp"
+    "venue": "sugarmozi.webp"
   },
   {
     "name": "TimeHeist",
@@ -71,7 +70,7 @@
       "Mutasd a kedvezményt fizetés előtt"
     ],
     "conditions": "",
-    "cutout": "/images/cutouts/timeheist.webp"
+    "venue": "timeheist.webp"
   },
   {
     "name": "Szelfimúzeum",
@@ -89,7 +88,7 @@
       "A kedvezményt a jegy árából vonják le"
     ],
     "conditions": "",
-    "cutout": "/images/cutouts/szelfimuzeum.webp"
+    "venue": "szelfimuzeum.webp"
   },
   {
     "name": "Baltadobálás",
@@ -99,7 +98,6 @@
     "category": "Élmény",
     "redeem": "QR kód a helyszínen",
     "image": "/images/baltadobalas.jpg",
-    "brightenImage": true,
     "description": "Pont az, amit a neve mond, oktatással és biztonsági felügyelettel. Meglepően addiktív, és tökéletes, ha valami szokatlanra vágytok.",
     "address": "Budapest, Dohány u. 30/A, 1074",
     "steps": [
@@ -108,7 +106,7 @@
       "Mutasd a kedvezményt fizetés előtt"
     ],
     "conditions": "",
-    "cutout": "/images/cutouts/baltadobalas.webp"
+    "venue": "baltadobalas.webp"
   },
   {
     "name": "Leonoria Kvízbox",
@@ -126,7 +124,7 @@
       "A kedvezményt a fizetésnél kapod meg"
     ],
     "conditions": "",
-    "cutout": "/images/cutouts/leonoria-kvizbox.webp"
+    "venue": "leonoria-kvizbox.webp"
   },
   {
     "name": "Base Bar",
@@ -144,7 +142,7 @@
       "A kedvezményt a fizetésnél kapod meg"
     ],
     "conditions": "",
-    "cutout": "/images/cutouts/base-bar.webp"
+    "venue": "base-bar.webp"
   },
   {
     "name": "Pixity",
@@ -155,7 +153,6 @@
     "redeem": "Online kuponkód",
     "code": "SIDEQUEST10",
     "image": "/images/pixity.jpg",
-    "brightenImage": true,
     "description": "Interaktív mozgásos játékok, ahol futni és ugrani kell a pontokért. Izzadós, de ez a lényege. Sportcuccban gyere, és hozz vizet.",
     "address": "Budapest, Lomb u. 27, 1139",
     "steps": [
@@ -164,6 +161,6 @@
       "A kedvezmény automatikusan levonásra kerül"
     ],
     "conditions": "",
-    "cutout": "/images/cutouts/pixity.webp"
+    "venue": "pixity.webp"
   }
 ]

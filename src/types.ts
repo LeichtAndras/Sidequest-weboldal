@@ -5,27 +5,19 @@ export type Partner = {
   /** A felvetel datuma, pl. "2026-10-15". Ures: nem uj partner. */
   addedDate?: string
   discount: string
+  /**
+   * A helyszinkep fajlneve a /public/venues mappabol, pl. "base-bar.webp".
+   * Az npm run helyszinek irja be. Uj hely eseten eleg ezt megadni.
+   */
+  venue?: string
   category: string
   redeem: string
   /** Online kuponkod, ha van. Ilyenkor megjelenik a Masolas gomb. */
   code?: string
-  /** Kep utvonala a public mappabol, pl. "/images/base-bar.jpg". Ha ures, nincs kep. */
+  /** Kep utvonala a public mappabol, pl. "/images/base-bar.jpg". A nyers foto. */
   image?: string
   /** CSS object-position a kephez, pl. "center 20%". Ures: kozep. */
   imagePosition?: string
-  /** Sotet fotohoz: fenyero es kontraszt megemelese, csak ezen a kartyan. */
-  brightenImage?: boolean
-  /** Atlatszo hatteru kivagas utvonala, pl. "/images/cutouts/base-bar.webp". */
-  cutout?: string
-  /** A kivagas szelessege a kartya szelessegehez kepest. Alapertelmezes 45. */
-  cutoutWidth?: number
-  /**
-   * Kulon hatterkep a kivagas moge, ember nelkul, pl. "/images/basebar-ter.jpg".
-   * Ha ki van toltve, ez lesz a kartya hattere, es nem mossuk el. Ha ures,
-   * a sajat fotó kerul oda eros elmosassal, hogy ne latszodjon ketszer
-   * ugyanaz az ember.
-   */
-  cutoutBg?: string
   /** Lenyilo resz. Ami ures, az nem jelenik meg. */
   description?: string
   address?: string

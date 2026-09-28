@@ -255,85 +255,196 @@ body {
 
 
 /*
- * Thumbnail kartya: 4:3 lap, a fotó kitolti, rajta kivagott szemely,
- * buborekos feliratok es kedvezmeny robbanas. A lenyitott resz a kartya
- * folytatasa, a keret es a kulso szel korulotte is vegigfut.
+ * Helyszinkartya. Egy felepites minden helyre: eles foto a teljes kartyan,
+ * alul sotetedo gradient, es azon a nev meg a ket gomb.
  */
-.tn-kartya {
+.hk-kartya {
   position: relative;
   container-type: inline-size;
-  border-radius: 24px;
+  border-radius: 20px;
   overflow: hidden;
   background-color: var(--sotetkek);
-  box-shadow:
-    0 0 0 3px rgba(255, 252, 243, 0.92),
-    0 22px 42px -18px rgba(0, 0, 0, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 18px 38px -18px rgba(0, 0, 0, 0.85);
+  transition:
+    transform 240ms ease,
+    box-shadow 240ms ease;
 }
 
-.tn-lap {
+@media (hover: hover) {
+  .hk-kartya:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 28px 50px -18px rgba(0, 0, 0, 0.9);
+  }
+
+  .hk-kartya:hover .hk-foto {
+    transform: scale(1.05);
+  }
+}
+
+.hk-lap {
   position: relative;
   aspect-ratio: 4 / 3;
   overflow: hidden;
   background-color: var(--sotetkek);
 }
 
-/*
- * A vastag sotetkek keret a tartalom felett: takarja a kivagas aljat, es
- * lenyitaskor egyben nyulik a kartyaval, mert a kulso burokhoz igazodik.
- */
-.tn-keret {
-  position: absolute;
-  inset: 0;
-  z-index: 6;
-  border: 2.6cqw solid var(--sotetkek);
-  border-radius: 24px;
-  pointer-events: none;
-}
-
-.tn-foto {
+.hk-foto {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 320ms ease;
 }
 
-/*
- * Elmosott hatter: ha a kivagas nem a sajat helyen all, a fotóbol csak
- * szines hangulat marad. Az elmosas mertekere kartyankent van beallitas.
- */
-.tn-foto-elmosott {
-  filter: blur(var(--cutout-bg-blur));
-  transform: scale(1.06);
-}
-
-/*
- * Sotetites csak ott, ahol szoveg van: felul a cim, alul a gombok.
- * Kozepen a fotó erintetlen marad, igy nem lesz szurke es mosott.
- */
-.tn-fatyol,
-.tn-fatyol-eros {
+/* Sotetedes a kartya also feleben, hogy a nev es a gombok olvashatok legyenek */
+.hk-arnyek {
   position: absolute;
   inset: 0;
+  pointer-events: none;
   background: linear-gradient(
     to bottom,
-    rgba(11, 27, 58, 0.5) 0%,
-    rgba(11, 27, 58, 0.22) 18%,
-    rgba(11, 27, 58, 0) 34%,
-    rgba(11, 27, 58, 0) 60%,
-    rgba(11, 27, 58, 0.3) 82%,
-    rgba(11, 27, 58, 0.55) 100%
+    rgba(0, 0, 0, 0) 50%,
+    rgba(0, 0, 0, 0.35) 68%,
+    rgba(0, 0, 0, 0.64) 84%,
+    rgba(0, 0, 0, 0.8) 100%
   );
 }
 
-/* A kivagott szemely: bal alul, az alja a keret moge bujik */
-.tn-kivagas {
+/* Kategoria cimke bal felul */
+.hk-kategoria {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  z-index: 3;
-  height: auto;
-  filter: drop-shadow(0 0.8cqw 1.2cqw rgba(0, 0, 0, 0.45));
+  z-index: 5;
+  top: 4.5cqw;
+  left: 4.5cqw;
+  padding: 0.7cqw 2cqw;
+  border: 0.55cqw solid var(--sotetkek);
+  border-radius: 99px;
+  background-color: rgba(255, 252, 243, 0.95);
+  color: var(--sotetkek);
+  font-family: var(--font-display);
+  font-size: 3.2cqw;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Kedvezmeny badge jobb felul */
+.hk-kedvezmeny {
+  position: absolute;
+  z-index: 5;
+  top: 3cqw;
+  right: 2.5cqw;
+  width: 25cqw;
+  height: 18cqw;
+  display: grid;
+  place-items: center;
+  transform: rotate(-5deg);
+}
+
+.hk-kedvezmeny svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.hk-kedvezmeny-szoveg {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  font-family: var(--font-display);
+  color: #ffffff;
+  line-height: 1;
+}
+
+.hk-kedvezmeny-szam {
+  display: block;
+  font-size: 6.6cqw;
+}
+
+.hk-kedvezmeny-felirat {
+  display: block;
+  margin-top: 0.4cqw;
+  font-size: 2.1cqw;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* A nev es a ket gomb egy blokkban, a kartya aljan */
+.hk-also {
+  position: absolute;
+  z-index: 5;
+  left: 5cqw;
+  right: 5cqw;
+  bottom: 4.5cqw;
+}
+
+.hk-nev {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 8.2cqw;
+  line-height: 1.06;
+  text-align: left;
+  text-transform: uppercase;
+  color: #ffffff;
+  text-shadow: 0 0.3cqw 1.4cqw rgba(0, 0, 0, 0.6);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.hk-sor {
+  margin-top: 3cqw;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2cqw;
+}
+
+/* Bevaltas chip: minden kartyan ugyanitt, a sor bal oldalan */
+.hk-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 1.4cqw;
+  padding: 0.9cqw 2.2cqw;
+  border-radius: 99px;
+  background-color: rgba(255, 252, 243, 0.95);
+  color: var(--sotetkek);
+  font-family: var(--font-display);
+  font-size: 3.2cqw;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.hk-chip-ikon {
+  width: 4cqw;
+  height: 4cqw;
+  flex: none;
+}
+
+.hk-tobb {
+  flex: none;
+  padding: 1.2cqw 3cqw;
+  border-width: 0.6cqw;
+  box-shadow: 0 0.6cqw 0 var(--sotetkek);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hk-kartya,
+  .hk-foto {
+    transition: none;
+  }
+
+  .hk-kartya:hover {
+    transform: none;
+  }
+
+  .hk-kartya:hover .hk-foto {
+    transform: none;
+  }
 }
 
 /*
@@ -403,93 +514,6 @@ body {
   -webkit-text-stroke-width: 0;
 }
 
-.tn-nev {
-  position: absolute;
-  z-index: 5;
-  top: 4.5cqw;
-  margin: 0;
-  text-align: right;
-}
-
-/* Kategoria matrica bal felul, vagy szuk helyen a nev folott jobbra */
-.tn-kategoria {
-  position: absolute;
-  z-index: 5;
-  top: 5.5cqw;
-  left: 5cqw;
-  padding: 0.7cqw 2cqw;
-  border: 0.55cqw solid var(--sotetkek);
-  border-radius: 99px;
-  background-color: rgba(255, 252, 243, 0.95);
-  color: var(--sotetkek);
-  font-family: var(--font-display);
-  font-size: 3.2cqw;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-/* Szuk helyen a cimke a nev fole kerul, jobbra igazitva */
-.tn-kategoria-fent {
-  left: auto;
-  right: 5cqw;
-  top: 4.5cqw;
-}
-
-/*
- * Bevaltas modja: kis matrica bal alul, a kategoria cimke stilusaban.
- * A gombbal egy vonalban all, es sosem er at ala.
- */
-.tn-bevaltas {
-  position: absolute;
-  z-index: 5;
-  left: 5cqw;
-  bottom: 4.5cqw;
-  display: inline-flex;
-  align-items: center;
-  gap: 1.4cqw;
-  padding: 0.7cqw 2cqw;
-  border: 0.55cqw solid var(--sotetkek);
-  border-radius: 99px;
-  background-color: rgba(255, 252, 243, 0.95);
-  color: var(--sotetkek);
-  font-family: var(--font-display);
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-}
-
-.tn-bevaltas-ikon {
-  width: 4cqw;
-  height: 4cqw;
-  flex: none;
-}
-
-/* Kedvezmeny robbanas */
-.tn-robbanas {
-  position: absolute;
-  z-index: 5;
-  right: 3cqw;
-  top: 28.5cqw;
-  width: 42cqw;
-  height: 30cqw;
-  display: grid;
-  place-items: center;
-}
-
-.tn-robbanas svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.tn-robbanas-szoveg {
-  position: relative;
-  z-index: 1;
-  text-align: center;
-  transform: rotate(-4deg);
-}
-
 /* Kapszula gomb: a TOBB gomb es a panel gombjai is ezt hasznaljak */
 .tn-kapszula {
   display: inline-flex;
@@ -513,14 +537,6 @@ body {
   width: 4.2cqw;
   height: 4.2cqw;
   flex: none;
-}
-
-/* Tobb gomb jobb alul, a fotón */
-.tn-tobb {
-  position: absolute;
-  z-index: 7;
-  right: 4.5cqw;
-  bottom: 4.5cqw;
 }
 
 /*
@@ -644,11 +660,3 @@ body {
   }
 }
 
-.tn-diszek {
-  position: absolute;
-  inset: 0;
-  z-index: 4;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-}
