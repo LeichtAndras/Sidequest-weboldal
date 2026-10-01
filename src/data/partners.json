@@ -3,7 +3,7 @@
     "name": "Sugár Bowling",
     "slug": "sugar-bowling",
     "addedDate": "",
-    "discount": "25%",
+    "discount": "10%",
     "category": "Bowling",
     "redeem": "QR kód a helyszínen",
     "image": "/images/sugar-bowling.jpg",
@@ -50,7 +50,7 @@
       "Olvasd be a SideQuest QR kódot a telefonoddal",
       "Mutasd a kedvezményt a jegyvásárlásnál"
     ],
-    "conditions": "",
+    "conditions": "Más kedvezményes árakkal nem vonható össze.",
     "venue": "sugarmozi.webp"
   },
   {
