@@ -1,6 +1,7 @@
 import { memo, useState } from 'react'
 import type { Partner } from '../types'
 import { ujPartner } from '../partner'
+import kategoriaSzo from '../data/kategoriak.json'
 import ThumbDetails from './ThumbDetails'
 import { QrIcon, SpeechIcon, TagIcon } from './Icons'
 
@@ -42,6 +43,15 @@ function vanReszlet(partner: Partner) {
   )
 }
 
+/**
+ * Pl. "Sugár Bowling, bowlingpálya Budapesten". Ugyanezt a szoveget hasznalja
+ * az og:image:alt is, lasd scripts/generate-partner-pages.mjs.
+ */
+function kepLeiras(partner: Partner) {
+  const szo = (kategoriaSzo as Record<string, string>)[partner.category] ?? partner.category.toLowerCase()
+  return `${partner.name}, ${szo} Budapesten`
+}
+
 /** A kisebb valtozat fajlneve: "base-bar.webp" -> "base-bar-640.webp". */
 function kisebbKep(fajl: string) {
   return fajl.replace(/\.webp$/, '-640.webp')
@@ -70,7 +80,7 @@ function ThumbCard({ partner, open, onToggle }: Props) {
             src={kep}
             srcSet={`/venues/${kisebbKep(partner.venue!)} 640w, ${kep} 960w`}
             sizes="(min-width: 768px) 440px, 92vw"
-            alt={partner.name}
+            alt={kepLeiras(partner)}
             loading="lazy"
             decoding="async"
             onError={() => setKepHiba(true)}

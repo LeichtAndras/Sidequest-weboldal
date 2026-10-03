@@ -1,5 +1,7 @@
 type Fotó = {
   src: string
+  /** Mit abrazol a kep. Kepolvasonak es kereso motornak is ez szol. */
+  alt: string
   bal: string
   teto: string
   szeles: string
@@ -10,12 +12,12 @@ type Fotó = {
 
 /** Kiragasztott fotok a falon. Szandekosan szabalytalan elrendezes. */
 const fotok: Fotó[] = [
-  { src: '/images/fal/szelfimuzeum.jpg', bal: '1%', teto: '6px', szeles: '33%', dolt: -7, reteg: 1, szalagDolt: -12 },
-  { src: '/images/fal/sugar-bowling.jpg', bal: '30%', teto: '0px', szeles: '34%', dolt: 4, reteg: 2, szalagDolt: 8 },
-  { src: '/images/fal/timeheist.jpg', bal: '63%', teto: '14px', szeles: '32%', dolt: -5, reteg: 1, szalagDolt: 14 },
-  { src: '/images/fal/baltadobalas.jpg', bal: '4%', teto: '128px', szeles: '31%', dolt: 6, reteg: 2, szalagDolt: -8 },
-  { src: '/images/fal/leonoria.jpg', bal: '36%', teto: '150px', szeles: '30%', dolt: -4, reteg: 1, szalagDolt: 10 },
-  { src: '/images/fal/basebar.jpg', bal: '66%', teto: '136px', szeles: '30%', dolt: 8, reteg: 2, szalagDolt: -14 },
+  { src: '/images/fal/szelfimuzeum.jpg', alt: 'Szelfimúzeum, színes fotóháttér Budapesten', bal: '1%', teto: '6px', szeles: '33%', dolt: -7, reteg: 1, szalagDolt: -12 },
+  { src: '/images/fal/sugar-bowling.jpg', alt: 'Sugár Bowling, bowlingpálya Budapesten', bal: '30%', teto: '0px', szeles: '34%', dolt: 4, reteg: 2, szalagDolt: 8 },
+  { src: '/images/fal/timeheist.jpg', alt: 'TimeHeist, szabadulószoba Budapesten', bal: '63%', teto: '14px', szeles: '32%', dolt: -5, reteg: 1, szalagDolt: 14 },
+  { src: '/images/fal/baltadobalas.jpg', alt: 'Baltadobálás, élményhely Budapesten', bal: '4%', teto: '128px', szeles: '31%', dolt: 6, reteg: 2, szalagDolt: -8 },
+  { src: '/images/fal/leonoria.jpg', alt: 'Leonoria Kvízbox, kvízjáték Budapesten', bal: '36%', teto: '150px', szeles: '30%', dolt: -4, reteg: 1, szalagDolt: 10 },
+  { src: '/images/fal/basebar.jpg', alt: 'Base Bar, bár Budapesten', bal: '66%', teto: '136px', szeles: '30%', dolt: 8, reteg: 2, szalagDolt: -14 },
 ]
 
 export default function Header() {
@@ -24,7 +26,7 @@ export default function Header() {
       <div className="hero-fatyol" />
       <div className="hero-doboz relative mx-auto w-full max-w-[480px] px-4">
         {/* Fotokollazs */}
-        <div className="hero-kollazs relative" aria-hidden="true">
+        <div className="hero-kollazs relative">
           {fotok.map((foto) => (
             <div
               key={foto.src}
@@ -40,7 +42,7 @@ export default function Header() {
               <div className="relative bg-cream p-1.5 shadow-[0_6px_14px_rgba(5,32,46,0.35)]">
                 <img
                   src={foto.src}
-                  alt=""
+                  alt={foto.alt}
                   loading="eager"
                   className="aspect-[3/4] w-full object-cover"
                 />
@@ -59,7 +61,7 @@ export default function Header() {
           {/* A logo a kollazs elott */}
           <img
             src="/sidequest-logo-atlatszo.png"
-            alt="SideQuest"
+            alt="SideQuest logó"
             width={230}
             height={199}
             fetchPriority="high"

@@ -1,6 +1,12 @@
+/**
+ * Build utani lepes. Harom dolgot csinal:
+ *  1. elorendereli az oldalt, hogy a tartalom a statikus HTML-ben is benne legyen
+ *  2. legyartja a partnerenkenti megoszthato oldalakat sajat meta adatokkal
+ *  3. kiirja a sitemap.xml-t a partners.json alapjan
+ */
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const gyoker = join(dirname(fileURLToPath(import.meta.url)), '..')
 const dist = join(gyoker, 'dist')
@@ -8,8 +14,10 @@ const SITE_URL = 'https://sidequestbp.hu'
 
 const KEZDET = '<!-- MEGOSZTAS ELEJE'
 const VEG = '<!-- MEGOSZTAS VEGE -->'
+const GYOKER = '<div id="root"></div>'
 
 const partners = JSON.parse(readFileSync(join(gyoker, 'src/data/partners.json'), 'utf8'))
+const kategoriaSzo = JSON.parse(readFileSync(join(gyoker, 'src/data/kategoriak.json'), 'utf8'))
 const alap = readFileSync(join(dist, 'index.html'), 'utf8')
 
 const eleje = alap.indexOf(KEZDET)
@@ -17,6 +25,11 @@ const vege = alap.indexOf(VEG)
 if (eleje === -1 || vege === -1) {
   throw new Error('Nincs meg a megosztas jelolo az index.html-ben, a partner oldalak nem keszultek el.')
 }
+if (!alap.includes(GYOKER)) {
+  throw new Error('Nincs meg az ures gyoker elem az index.html-ben, az elorendereles nem megy.')
+}
+
+const { render } = await import(pathToFileURL(join(gyoker, 'dist-ssr/entry-server.js')).href)
 
 /** HTML attributumba irhato szoveg. */
 const esc = (szoveg) =>
@@ -26,6 +39,39 @@ const esc = (szoveg) =>
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
 
+/**
+ * A kep alt szovege, ugyanaz, mint a kartyan: "Sugár Bowling, bowlingpálya
+ * Budapesten". A kartya oldalan a ThumbCard kepLeiras fuggvenye adja.
+ */
+function kepLeiras(partner) {
+  const szo = kategoriaSzo[partner.category] ?? partner.category.toLowerCase()
+  return `${partner.name}, ${szo} Budapesten`
+}
+
+/**
+ * A keresoben megjeleno leiras legfeljebb 155 karakter. Ha a partner szovege
+ * hosszabb, az utolso olyan mondat vegen vagjuk el, ami meg belefer. Ha meg az
+ * elso mondat sem fer bele, szohataron vagunk, es harom pont zarja.
+ */
+const LEIRAS_MAX = 155
+
+function rovidLeiras(szoveg, max = LEIRAS_MAX) {
+  const tiszta = szoveg.trim().replace(/\s+/g, ' ')
+  if (tiszta.length <= max) return tiszta
+
+  const mondatok = tiszta.match(/[^.!?]+[.!?]+(?:\s+|$)/g) ?? []
+  let kesz = ''
+  for (const mondat of mondatok) {
+    if ((kesz + mondat).trim().length > max) break
+    kesz += mondat
+  }
+  if (kesz.trim()) return kesz.trim()
+
+  const vagott = tiszta.slice(0, max - 1)
+  const szokoz = vagott.lastIndexOf(' ')
+  return (szokoz > 0 ? vagott.slice(0, szokoz) : vagott).trim() + '…'
+}
+
 function metaBlokk(partner) {
   const url = `${SITE_URL}/${partner.slug}/`
   const kep = partner.image ? `${SITE_URL}${partner.image}` : `${SITE_URL}/sidequest-logo.png`
@@ -33,10 +79,12 @@ function metaBlokk(partner) {
   const leiras =
     partner.description?.trim() ||
     `${partner.name} ${partner.discount} kedvezménnyel, SideQuest-tel. ${partner.redeem}.`
+  // A kereso leiras rovid, a megosztasi elonezete maradhat teljes
+  const rovid = rovidLeiras(leiras)
 
   return [
     `<title>${esc(cim)}</title>`,
-    `<meta name="description" content="${esc(leiras)}" />`,
+    `<meta name="description" content="${esc(rovid)}" />`,
     `<link rel="canonical" href="${url}" />`,
     `<meta property="og:type" content="website" />`,
     `<meta property="og:site_name" content="SideQuest" />`,
@@ -45,7 +93,7 @@ function metaBlokk(partner) {
     `<meta property="og:title" content="${esc(`${partner.name} ${partner.discount} kedvezmény`)}" />`,
     `<meta property="og:description" content="${esc(leiras)}" />`,
     `<meta property="og:image" content="${kep}" />`,
-    `<meta property="og:image:alt" content="${esc(partner.name)}" />`,
+    `<meta property="og:image:alt" content="${esc(kepLeiras(partner))}" />`,
     `<meta name="twitter:card" content="summary_large_image" />`,
     `<meta name="twitter:title" content="${esc(`${partner.name} ${partner.discount} kedvezmény`)}" />`,
     `<meta name="twitter:description" content="${esc(leiras)}" />`,
@@ -55,17 +103,39 @@ function metaBlokk(partner) {
     .join('\n')
 }
 
+/** A kesz oldal: sajat meta blokk, es a gyoker elemben a kirajzolt tartalom. */
+function oldal(utvonal, meta) {
+  const fejjel = meta
+    ? alap.slice(0, eleje) + meta.trimStart() + '\n    ' + alap.slice(vege + VEG.length)
+    : alap
+  return fejjel.replace(GYOKER, `<div id="root">${render(utvonal)}</div>`)
+}
+
+writeFileSync(join(dist, 'index.html'), oldal('/', null))
+
 let db = 0
 for (const partner of partners) {
   if (!partner.slug) throw new Error(`Hianyzo slug: ${partner.name}`)
-  const oldal = alap.slice(0, eleje) + metaBlokk(partner).trimStart() + '\n    ' + alap.slice(vege + VEG.length)
   const mappa = join(dist, partner.slug)
   mkdirSync(mappa, { recursive: true })
-  writeFileSync(join(mappa, 'index.html'), oldal)
+  writeFileSync(join(mappa, 'index.html'), oldal(`/${partner.slug}/`, metaBlokk(partner)))
   db++
 }
 
-// Ismeretlen cimre is a weboldal joj jon be, ne a GitHub hibaoldala.
-writeFileSync(join(dist, '404.html'), alap)
+// Ismeretlen cimre is a weboldal jojjon be, ne a GitHub hibaoldala.
+writeFileSync(join(dist, '404.html'), oldal('/', null))
 
-console.log(`Partner oldalak: ${db} db, plusz a 404.html`)
+// Sitemap: a fooldal es minden partner megoszthato cime.
+const ma = new Date().toISOString().slice(0, 10)
+const cimek = [`${SITE_URL}/`, ...partners.map((partner) => `${SITE_URL}/${partner.slug}/`)]
+const sitemap =
+  `<?xml version="1.0" encoding="UTF-8"?>\n` +
+  `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
+  cimek.map((url) => `  <url>\n    <loc>${url}</loc>\n    <lastmod>${ma}</lastmod>\n  </url>`).join('\n') +
+  `\n</urlset>\n`
+
+// A public mappaba is bekerul, igy a repoban is latszik, nem csak a buildben.
+writeFileSync(join(dist, 'sitemap.xml'), sitemap)
+writeFileSync(join(gyoker, 'public/sitemap.xml'), sitemap)
+
+console.log(`Elorenderelve: fooldal + ${db} partner oldal + 404.html, sitemap: ${cimek.length} cim`)

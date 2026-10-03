@@ -36,15 +36,27 @@ const merfoldkovek = [
   { szam: '4', szoveg: 'hónap alatt' },
 ]
 
-/** A cimsorbol indulunk: /magic-rooms/ eseten ez a kartya nyilik ki. */
-function partnerACimbol() {
-  if (typeof window === 'undefined') return null
-  const slug = slugFromPath(window.location.pathname)
+/**
+ * A cimsorbol indulunk: /magic-rooms/ eseten ez a kartya nyilik ki.
+ * Elorenderelesnel nincs bongeszo, ott az utvonalat kivulrol kapjuk, igy a
+ * statikus HTML ugyanazt mutatja, amit a bongeszo is kirajzolna.
+ */
+function partnerACimbol(utvonal?: string) {
+  const ut = utvonal ?? (typeof window === 'undefined' ? null : window.location.pathname)
+  if (ut === null) return null
+  const slug = slugFromPath(ut)
   return partners.find((partner) => partner.slug === slug) ?? null
 }
 
-export default function App() {
-  const [openPartner, setOpenPartner] = useState<string | null>(() => partnerACimbol()?.name ?? null)
+type Props = {
+  /** Csak elorenderelesnel adjuk at. A bongeszoben a cimsorbol jon. */
+  utvonal?: string
+}
+
+export default function App({ utvonal }: Props = {}) {
+  const [openPartner, setOpenPartner] = useState<string | null>(
+    () => partnerACimbol(utvonal)?.name ?? null,
+  )
   const [category, setCategory] = useState(ALL)
   // Megosztott linkrol erkezve odagorgetunk a kartyara.
   useEffect(() => {
