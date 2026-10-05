@@ -554,12 +554,13 @@ body {
 }
 
 /*
- * Vagas, nem rejtes: az overflow: hidden gorgetheto dobozt csinal, es a
- * scrollIntoView azt gorgette el a lap helyett, amitol a panel teteje
- * levagodott. A clip nem gorgetheto, a lenyilas ugyanugy mukodik.
+ * Hidden, nem clip: a lenyilas a grid-template-rows 1fr -> 0fr valtasan
+ * alapul, es a gyerek csak akkor tud nullara zsugorodni, ha hidden. A clip
+ * mellett a panel nyitva ragadt. A korabbi gorgetesi gond megszunt, mert a
+ * mozi szavazas mar nem panelben van.
  */
 .tn-panel > div {
-  overflow: clip;
+  overflow: hidden;
 }
 
 .tn-panel-belso {
