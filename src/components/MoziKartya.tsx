@@ -43,29 +43,47 @@ export default function MoziKartya() {
   const lap = useRef<HTMLDivElement>(null)
 
   /**
-   * Odagorget a szavazas szakaszhoz. Tobbszor is probalkozik, mert a lusta
-   * kepek betoltodve meg arrebb tolhatjak, es a lenyilas is animalt.
+   * Odagorget a szavazas szakaszhoz. Tobbszor is probalkozik, mert a lenyilas
+   * animalt, a lusta kepek pedig betoltve meg arrebb tolhatjak a celpontot.
+   *
+   * A megszakito figyelok csak keses utan kapcsolodnak be: telefonon maga a
+   * koppintas is touchstartot vált ki, az kulonben rogton leallitana a
+   * korrekciokat, es a lap felutan maradna.
    */
   const ugrasSzavazashoz = useCallback(() => {
     setNyitva(true)
+
     let megszakit = false
     const megall = () => {
       megszakit = true
     }
-    // Azonnali gorgetes, nem sima: a tobbszori probalkozas kulonben
-    // egymast szakitana meg, es felemas helyen allna meg az oldal.
     const oda = () => {
       if (megszakit) return
       document.getElementById('szavazas')?.scrollIntoView({ block: 'start' })
     }
-    window.addEventListener('wheel', megall, { passive: true, once: true })
-    window.addEventListener('touchstart', megall, { passive: true, once: true })
-    const idozitok = [80, 320, 600, 1100, 1800].map((ms) => window.setTimeout(oda, ms))
+
+    const figyeloIdozito = window.setTimeout(() => {
+      window.addEventListener('wheel', megall, { passive: true, once: true })
+      window.addEventListener('touchmove', megall, { passive: true, once: true })
+    }, 400)
+
+    const idozitok = [80, 320, 600, 1100, 1800, 2800].map((ms) => window.setTimeout(oda, ms))
+
     window.setTimeout(() => {
+      window.clearTimeout(figyeloIdozito)
       window.removeEventListener('wheel', megall)
-      window.removeEventListener('touchstart', megall)
+      window.removeEventListener('touchmove', megall)
       idozitok.forEach(window.clearTimeout)
-    }, 2200)
+    }, 3200)
+  }, [])
+
+  /** Bezaraskor visszavisz a kartyahoz, kulonben a latogato lent ragadna. */
+  const vissza = useCallback(() => {
+    setNyitva(false)
+    const oda = () => doboz.current?.scrollIntoView({ block: 'start' })
+    oda()
+    const idozitok = [120, 400].map((ms) => window.setTimeout(oda, ms))
+    window.setTimeout(() => idozitok.forEach(window.clearTimeout), 800)
   }, [])
 
   /*
@@ -95,7 +113,7 @@ export default function MoziKartya() {
       }
 
       window.addEventListener('wheel', megall, { passive: true, once: true })
-      window.addEventListener('touchstart', megall, { passive: true, once: true })
+      window.addEventListener('touchmove', megall, { passive: true, once: true })
       window.addEventListener('keydown', megall, { once: true })
       window.addEventListener('load', oda)
 
@@ -109,7 +127,7 @@ export default function MoziKartya() {
 
       takarit = () => {
         window.removeEventListener('wheel', megall)
-        window.removeEventListener('touchstart', megall)
+        window.removeEventListener('touchmove', megall)
         window.removeEventListener('keydown', megall)
         window.removeEventListener('load', oda)
         kep?.removeEventListener('load', oda)
@@ -222,7 +240,7 @@ export default function MoziKartya() {
             <button
               type="button"
               className="tn-kapszula hk-tobb mozi-fo-gomb"
-              onClick={() => (nyitva ? setNyitva(false) : ugrasSzavazashoz())}
+              onClick={() => (nyitva ? vissza() : ugrasSzavazashoz())}
               aria-expanded={nyitva}
               aria-controls={panelId}
             >
