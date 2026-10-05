@@ -6,7 +6,7 @@ import { beallitas, kezdet, vege } from '../mozi/beallitas'
 import { useSzavazas } from '../mozi/useSzavazas'
 import { ROBBANAS } from '../robbanas'
 
-const KEP = '/images/mozi/sugarmozi-terem'
+const KEP = '/images/mozi/sugarmozi-popcorn'
 /** Ennyi szavazattol mutatjuk a szamot. Kevesebb gyengen nez ki. */
 const SZAVAZAT_HATAR = 20
 const UTOLSO_NAP = 24 * 60 * 60 * 1000
@@ -148,15 +148,15 @@ export default function MoziKartya() {
         <picture>
           <source
             type="image/webp"
-            srcSet={`${KEP}_640.webp 640w, ${KEP}_1043.webp 1043w`}
+            srcSet={`${KEP}_640.webp 640w, ${KEP}_1199.webp 1199w`}
             sizes="(min-width: 768px) 1080px, 92vw"
           />
           <img
             className="hk-foto"
             src={`${KEP}.jpg`}
-            alt="A SugárMozi vetítőterme, a vásznon a SugárMozi és a SideQuest közös felirata"
-            width={1920}
-            height={1080}
+            alt="A SugárMozi vetítőterme, a vásznon kérdőjel, előtérben két vödör popcorn"
+            width={1199}
+            height={1600}
             loading="lazy"
             decoding="async"
           />

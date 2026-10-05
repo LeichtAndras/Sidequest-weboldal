@@ -51,33 +51,59 @@ await writeFile(`${CEL}/og-mozi.png`, og)
 console.log(`og-mozi.png     ${Math.round(og.length / 1024)} kB  (${OG.szeles}x${OG.magas}, sotet hatteren)`)
 
 // ---------------------------------------------------------------------
-// A fooldali mozi kartya hattere: a SugarMozi terme a kozos felirattal.
+// A fooldali mozi kartya hattere: a SugarMozi terme, elotérben popcornnal.
 //
-// A nyers fotón korbe sotet a terem, kulonosen a jobb szelen. Ha azt is
-// kiszolgalnank, a kartya szelen fekete csik maradna, ezert mar itt a
-// vaszonra vagunk, kis rahagyassal. Igy barmelyik aranynal keptartalom
-// er a kartya szelere.
+// A vaszonra belegetunk egy kerdojelet, nem CSS retegkent tesszuk ra. Igy
+// barmilyen vagasnal pontosan a vaszon kozepen marad.
 // ---------------------------------------------------------------------
-const KARTYA_FORRAS = 'kepek-eredeti/sugarmozi-terem.webp'
-/** A vaszon hatarai a nyers fotón, a kep szazalekaban. */
-const VASZON = { bal: 0.095, jobb: 0.815, fent: 0.15, lent: 0.78 }
+const KARTYA_FORRAS = 'kepek-eredeti/sugarmozi-popcorn.jpg'
+/** A vaszon helye a fotón, meressel, a kep szazalekaban. */
+const VASZON = { kozepX: 0.46, kozepY: 0.463, magassag: 0.245 }
+/** A kerdojel a vaszon magassaganak ennyi reszet toltse ki. */
+const JEL_ARANY = 0.6
+/** Par fok doles, hogy illjen a matricas stilushoz. */
+const JEL_DOLES = -5
 
 const kartyaMeret = await sharp(KARTYA_FORRAS).metadata()
-const vagas = {
-  left: Math.round(kartyaMeret.width * VASZON.bal),
-  top: Math.round(kartyaMeret.height * VASZON.fent),
-  width: Math.round(kartyaMeret.width * (VASZON.jobb - VASZON.bal)),
-  height: Math.round(kartyaMeret.height * (VASZON.lent - VASZON.fent)),
-}
-console.log(`\nkartya forras: ${kartyaMeret.width}x${kartyaMeret.height} -> vagva ${vagas.width}x${vagas.height}`)
+const KW = kartyaMeret.width
+const KH = kartyaMeret.height
+// A Titan One nagybetu magassaga nagyjabol a betumeret 0,72-szerese
+const jelBetu = Math.round((KH * VASZON.magassag * JEL_ARANY) / 0.72)
+const jelX = Math.round(KW * VASZON.kozepX)
+const jelY = Math.round(KH * VASZON.kozepY)
 
-const vagott = () => sharp(KARTYA_FORRAS).extract(vagas)
+const jelSzoveg = (szin, vastag) =>
+  `<text x="${jelX}" y="${jelY}" font-family="Titan One" font-size="${jelBetu}" text-anchor="middle" dominant-baseline="central" fill="${szin}"` +
+  (vastag ? ` stroke="${szin}" stroke-width="${vastag}" stroke-linejoin="round"` : '') +
+  `>?</text>`
 
-await writeFile(`${CEL}/sugarmozi-terem.jpg`, await vagott().jpeg({ quality: 86 }).toBuffer())
+const jelSvg = (tartalom) =>
+  Buffer.from(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${KW}" height="${KH}"><g transform="rotate(${JEL_DOLES} ${jelX} ${jelY})">${tartalom}</g></svg>`,
+  )
 
-// Nem nagyitunk: a vagas sajat szelessege a felso hatar
-for (const szeles of [Math.min(1600, vagas.width), 640]) {
-  const puffer = await vagott().resize({ width: szeles }).webp({ quality: 84 }).toBuffer()
-  await writeFile(`${CEL}/sugarmozi-terem_${szeles}.webp`, puffer)
-  console.log(`sugarmozi-terem_${szeles}.webp  ${Math.round(puffer.length / 1024)} kB`)
+// A kek dereng egy vastag, elmosott kerdojel. Ketszer tesszuk ra, hogy erosebb legyen.
+const dereng = await sharp(jelSvg(jelSzoveg('#36B9F0', Math.round(jelBetu * 0.14))))
+  .blur(Math.round(jelBetu * 0.09))
+  .toBuffer()
+
+const jeles = await sharp(KARTYA_FORRAS)
+  .composite([
+    { input: dereng },
+    { input: dereng },
+    { input: jelSvg(jelSzoveg('#1E9BE0', Math.round(jelBetu * 0.085))) },
+    { input: jelSvg(jelSzoveg('#FFFCF3', 0)) },
+  ])
+  .png()
+  .toBuffer()
+
+console.log(`\nkartya forras: ${KW}x${KH}, kerdojel betumeret ${jelBetu}, kozep (${jelX}, ${jelY})`)
+
+await writeFile(`${CEL}/sugarmozi-popcorn.jpg`, await sharp(jeles).jpeg({ quality: 88 }).toBuffer())
+
+// Nem nagyitunk: a forras szelessege a felso hatar
+for (const szeles of [Math.min(1199, KW), 640]) {
+  const puffer = await sharp(jeles).resize({ width: szeles }).webp({ quality: 84 }).toBuffer()
+  await writeFile(`${CEL}/sugarmozi-popcorn_${szeles}.webp`, puffer)
+  console.log(`sugarmozi-popcorn_${szeles}.webp  ${Math.round(puffer.length / 1024)} kB`)
 }

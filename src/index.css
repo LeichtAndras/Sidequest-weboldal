@@ -706,24 +706,26 @@ body {
 }
 
 @media (min-width: 768px) {
+  /* A sotetites csak a kerdojel alatt indul, hogy az vegig fenyes maradjon */
   .mozi-kartya .hk-arnyek {
     background: linear-gradient(
       to bottom,
-      rgba(0, 0, 0, 0) 36%,
-      rgba(0, 0, 0, 0.42) 62%,
-      rgba(0, 0, 0, 0.76) 84%,
-      rgba(0, 0, 0, 0.85) 100%
+      rgba(0, 0, 0, 0) 58%,
+      rgba(0, 0, 0, 0.5) 72%,
+      rgba(0, 0, 0, 0.82) 88%,
+      rgba(0, 0, 0, 0.88) 100%
     );
   }
 }
 
 .mozi-kartya .hk-foto {
   /*
-   * A kep a vaszonra van vagva. A felirat a kep 35 es 59 szazaleka kozott
-   * all fuggolegesen, ezert 43 szazaleknal pont a 3:1-es kartya kozepere
-   * kerul. Mobilon a 4:3 a teljes magassagot mutatja, ott is kozepen van.
+   * Allo fotó: asztalon a 3:1-es kartya a magassag negyedet mutatja. 51
+   * szazaleknal a kerdojel a kartya felso ket harmadaba esik, igy a also
+   * szovegblokk nem takarja. Popcorn ide mar nem fer, az a mobil nezetben
+   * latszik.
    */
-  object-position: center 43%;
+  object-position: center 51%;
 }
 
 .mozi-kartya .mozi-gomb-felirat {
@@ -926,9 +928,13 @@ body {
     display: block;
   }
 
+  /*
+   * Telefonon magasabb a kep: a 4:5 a fotó magassaganak 94 szazalekat
+   * mutatja, igy a vaszon a kerdojellel es a popcorn is belefer.
+   */
   .mozi-kartya .hk-foto {
     position: static;
-    aspect-ratio: 16 / 9;
+    aspect-ratio: 4 / 5;
     height: auto;
     object-position: center;
   }
