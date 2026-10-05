@@ -553,8 +553,13 @@ body {
   grid-template-rows: 1fr;
 }
 
+/*
+ * Vagas, nem rejtes: az overflow: hidden gorgetheto dobozt csinal, es a
+ * scrollIntoView azt gorgette el a lap helyett, amitol a panel teteje
+ * levagodott. A clip nem gorgetheto, a lenyilas ugyanugy mukodik.
+ */
 .tn-panel > div {
-  overflow: hidden;
+  overflow: clip;
 }
 
 .tn-panel-belso {
@@ -691,43 +696,6 @@ body {
   margin: 0 0 0.5rem;
 }
 
-/*
- * A fotón sajat felirat van, ezert itt eroszakosabb a sotetites, mint a
- * partner kartyakon: mire a cim kezdodik, a vaszon szovege mar elhalkult.
- */
-.mozi-kartya .hk-arnyek {
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0) 30%,
-    rgba(0, 0, 0, 0.45) 56%,
-    rgba(0, 0, 0, 0.78) 78%,
-    rgba(0, 0, 0, 0.85) 100%
-  );
-}
-
-@media (min-width: 768px) {
-  /* A sotetites csak a kerdojel alatt indul, hogy az vegig fenyes maradjon */
-  .mozi-kartya .hk-arnyek {
-    background: linear-gradient(
-      to bottom,
-      rgba(0, 0, 0, 0) 58%,
-      rgba(0, 0, 0, 0.5) 72%,
-      rgba(0, 0, 0, 0.82) 88%,
-      rgba(0, 0, 0, 0.88) 100%
-    );
-  }
-}
-
-.mozi-kartya .hk-foto {
-  /*
-   * Allo fotó: asztalon a 3:1-es kartya a magassag negyedet mutatja. 51
-   * szazaleknal a kerdojel a kartya felso ket harmadaba esik, igy a also
-   * szovegblokk nem takarja. Popcorn ide mar nem fer, az a mobil nezetben
-   * latszik.
-   */
-  object-position: center 51%;
-}
-
 .mozi-kartya .mozi-gomb-felirat {
   font-size: 4cqw;
 }
@@ -738,11 +706,6 @@ body {
 }
 
 @media (min-width: 768px) {
-  /* Asztalon laposabb, hogy ne legyen magasabb a kelletenel */
-  .mozi-kartya .hk-lap {
-    aspect-ratio: 3 / 1;
-  }
-
   /*
    * A kartya itt 900px szeles, a partner kartyak 355 koruliek. A cqw ertekek
    * ezert ketszer akkorak lennenek, igy asztalon fix meretekre valtunk, pont
@@ -771,12 +734,6 @@ body {
   .mozi-kartya .hk-kedvezmeny-felirat {
     margin-top: 0.09rem;
     font-size: 0.47rem;
-  }
-
-  .mozi-kartya .hk-also {
-    left: 1.11rem;
-    right: 1.11rem;
-    bottom: 1rem;
   }
 
   .mozi-kartya .hk-nev {
@@ -851,15 +808,10 @@ body {
     width: 100%;
     min-height: 48px;
     justify-content: center;
-    margin-left: 0;
   }
 }
 
-@media (min-width: 768px) {
-  .mozi-pirulak {
-    flex: 0 1 auto;
-  }
-}
+
 
 /* Ketyego visszaszamlalo: pink alap, krem szam, vastag keret, kemeny arnyek */
 .mozi-ora-pirula {
@@ -913,58 +865,103 @@ body {
 
 
 /*
- * Telefonon a banner ket reszre valik egy kartyan belul: felul a kep a
- * teljes felirattal, alatta sotet savon a szoveg. Igy semmi nem takarja a
- * vasznat, es a cim is nyugodtan megfer.
+ * A banner mindket nezetben ket reszbol all: a kep es a sotetkek
+ * szovegblokk. A szoveg sosem a kepen van, igy a vaszon es a kerdojel
+ * mindig szabadon latszik.
  */
+.mozi-kartya .hk-lap {
+  aspect-ratio: auto;
+  height: auto;
+  display: block;
+}
+
+.mozi-kartya picture {
+  display: block;
+}
+
+/*
+ * A kep 4:5, igy a vaszon a kerdojellel es a popcorn is belefer. Soha nem
+ * nagyitunk rajta: a forras 1199 pixel szeles, a megjelenitett meret ennel
+ * mindig kisebb.
+ */
+.mozi-kartya .hk-foto {
+  position: static;
+  aspect-ratio: 4 / 5;
+  width: 100%;
+  height: auto;
+  object-position: center;
+}
+
+/* A szoveg nem a kepen van, ezert sotetites sem kell */
+.mozi-kartya .hk-arnyek {
+  display: none;
+}
+
+.mozi-kartya .hk-also {
+  position: static;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  padding: 0.85rem 1rem 1rem;
+  background-color: var(--sotetkek);
+}
+
+.mozi-kartya .hk-nev,
+.mozi-kartya .mozi-alcim {
+  text-shadow: none;
+}
+
+/* A csillag a kep bal felso sarkaban, a kerdojel folott */
+.mozi-kartya .hk-kedvezmeny {
+  top: 0.25rem;
+  left: 0.3rem;
+  right: auto;
+}
+
 @media (max-width: 639px) {
+  .mozi-kartya .hk-kedvezmeny {
+    width: 21cqw;
+    height: 15cqw;
+  }
+}
+
+/* A gomb a pirulak alatt all, nem a sor jobb szelen */
+.mozi-kartya .mozi-fo-gomb {
+  margin-left: 0;
+}
+
+@media (min-width: 640px) {
+  /*
+   * Asztalon osztott kartya: balra az allo kep, jobbra a szovegblokk
+   * fuggolegesen kozepre igazitva. Igy nem kell a magas fotóbol szeles
+   * csikot kinagyitani, a kep eles marad.
+   */
   .mozi-kartya .hk-lap {
-    aspect-ratio: auto;
-    height: auto;
-    display: block;
+    display: flex;
+    align-items: stretch;
   }
 
   .mozi-kartya picture {
-    display: block;
-  }
-
-  /*
-   * Telefonon magasabb a kep: a 4:5 a fotó magassaganak 94 szazalekat
-   * mutatja, igy a vaszon a kerdojellel es a popcorn is belefer.
-   */
-  .mozi-kartya .hk-foto {
-    position: static;
+    flex: 0 0 40%;
     aspect-ratio: 4 / 5;
-    height: auto;
-    object-position: center;
   }
 
-  /* A szoveg nem a kepen van, ezert sotetites sem kell */
-  .mozi-kartya .hk-arnyek {
-    display: none;
+  .mozi-kartya .hk-foto {
+    aspect-ratio: auto;
+    height: 100%;
   }
 
   .mozi-kartya .hk-also {
-    position: static;
-    left: auto;
-    right: auto;
-    bottom: auto;
-    padding: 0.85rem 1rem 1rem;
-    background-color: var(--sotetkek);
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 1.6rem 1.9rem;
   }
 
-  .mozi-kartya .hk-nev,
-  .mozi-kartya .mozi-alcim {
-    text-shadow: none;
-  }
-
-  /* A csillag a kep bal felso sarkaban, a felirat folott */
-  .mozi-kartya .hk-kedvezmeny {
-    top: 0.25rem;
-    left: 0.3rem;
-    right: auto;
-    width: 21cqw;
-    height: 15cqw;
+  .mozi-kartya .mozi-fo-gomb {
+    align-self: flex-start;
   }
 }
 
@@ -1545,17 +1542,17 @@ body {
   z-index: 40;
   left: 0;
   right: 0;
-  bottom: 0;
+  top: 0;
   display: none;
   align-items: center;
   justify-content: space-between;
   gap: 0.6rem;
-  max-height: 64px;
-  padding: 0.6rem 0.9rem calc(0.6rem + env(safe-area-inset-bottom));
+  max-height: calc(64px + env(safe-area-inset-top));
+  padding: calc(0.6rem + env(safe-area-inset-top)) 0.9rem 0.6rem;
   background-color: var(--sotetkek);
-  border-top: 2px solid rgba(255, 255, 255, 0.16);
-  box-shadow: 0 -8px 24px -10px rgba(0, 0, 0, 0.9);
-  transform: translateY(110%);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 8px 24px -10px rgba(0, 0, 0, 0.9);
+  transform: translateY(-110%);
   transition: transform 260ms ease-out;
 }
 
@@ -1593,11 +1590,6 @@ body {
   font-size: 0.88rem;
 }
 
-/* Amig a sav latszik, ne takarja el az oldal aljat */
-.mozi-sav-helye {
-  padding-bottom: calc(64px + env(safe-area-inset-bottom));
-}
-
 /* A szavazas szakasz teteje ne bujjon a sav vagy a kartya szele moge */
 .mozi-szavazas-blokk {
   scroll-margin-top: 1.25rem;
@@ -1608,14 +1600,9 @@ body {
     display: flex;
   }
 
+  /* A fenti sav magassaga plusz egy kis levegő */
   .mozi-szavazas-blokk {
-    scroll-margin-top: 0.75rem;
-  }
-}
-
-@media (min-width: 640px) {
-  .mozi-sav-helye {
-    padding-bottom: 0;
+    scroll-margin-top: calc(76px + env(safe-area-inset-top));
   }
 }
 

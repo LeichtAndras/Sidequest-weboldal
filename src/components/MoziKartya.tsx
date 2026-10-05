@@ -70,40 +70,58 @@ export default function MoziKartya() {
 
   /*
    * A /#mozi es a /#szavazas cimre erkezve magatol kinyilik es odagorgetunk.
-   * Tobbszor is probalkozunk, mert a fejlec fotoi es a lenyilo resz is
-   * mozgatjak a kartyat, amig minden a helyere kerul. Ha a latogato kozben
-   * maga gorget, abbahagyjuk.
+   * Tobbszor is probalkozunk, mert a fejlec fotoi, a kartya kepe es a lenyilo
+   * resz is mozgatjak a celpontot, amig minden a helyere kerul. Ha a latogato
+   * kozben maga gorget, abbahagyjuk. A hashchange-re is figyelunk, hogy az
+   * oldalon beluli linkek is mukodjenek.
    */
   useEffect(() => {
-    const hash = window.location.hash
-    if (hash !== '#mozi' && hash !== '#szavazas') return
-    setNyitva(true)
+    let takarit: (() => void) | null = null
 
-    let megszakit = false
-    const megall = () => {
-      megszakit = true
+    const inditas = () => {
+      const hash = window.location.hash
+      if (hash !== '#mozi' && hash !== '#szavazas') return
+      setNyitva(true)
+
+      takarit?.()
+      let megszakit = false
+      const megall = () => {
+        megszakit = true
+      }
+      const oda = () => {
+        if (megszakit) return
+        const cel = hash === '#szavazas' ? document.getElementById('szavazas') : doboz.current
+        cel?.scrollIntoView({ block: 'start' })
+      }
+
+      window.addEventListener('wheel', megall, { passive: true, once: true })
+      window.addEventListener('touchstart', megall, { passive: true, once: true })
+      window.addEventListener('keydown', megall, { once: true })
+      window.addEventListener('load', oda)
+
+      // A kartya kepe lustan toltodik, betoltes utan ujra pozicionalunk
+      const kep = doboz.current?.querySelector('img')
+      kep?.addEventListener('load', oda)
+
+      const idozitok = [150, 500, 1000, 1800, 2800, 4200].map((kesleltetes) =>
+        window.setTimeout(oda, kesleltetes),
+      )
+
+      takarit = () => {
+        window.removeEventListener('wheel', megall)
+        window.removeEventListener('touchstart', megall)
+        window.removeEventListener('keydown', megall)
+        window.removeEventListener('load', oda)
+        kep?.removeEventListener('load', oda)
+        idozitok.forEach(window.clearTimeout)
+      }
     }
-    const oda = () => {
-      if (megszakit) return
-      const cel = hash === '#szavazas' ? document.getElementById('szavazas') : doboz.current
-      cel?.scrollIntoView({ block: 'start' })
-    }
 
-    window.addEventListener('wheel', megall, { passive: true, once: true })
-    window.addEventListener('touchstart', megall, { passive: true, once: true })
-    window.addEventListener('keydown', megall, { once: true })
-    window.addEventListener('load', oda)
-
-    const idozitok = [150, 500, 1000, 1800, 2600].map((kesleltetes) =>
-      window.setTimeout(oda, kesleltetes),
-    )
-
+    inditas()
+    window.addEventListener('hashchange', inditas)
     return () => {
-      window.removeEventListener('wheel', megall)
-      window.removeEventListener('touchstart', megall)
-      window.removeEventListener('keydown', megall)
-      window.removeEventListener('load', oda)
-      idozitok.forEach(window.clearTimeout)
+      window.removeEventListener('hashchange', inditas)
+      takarit?.()
     }
   }, [])
 
@@ -111,9 +129,9 @@ export default function MoziKartya() {
   useEffect(() => {
     const elem = lap.current
     if (!elem) return
-    const figyelo = new IntersectionObserver(
-      ([bejegyzes]) => setBannerLatszik(bejegyzes.isIntersecting),
-      { rootMargin: '0px 0px -40px 0px' },
+    // Nincs rootMargin: amig a banner barmelyik keppontja latszik, nincs sav
+    const figyelo = new IntersectionObserver(([bejegyzes]) =>
+      setBannerLatszik(bejegyzes.isIntersecting),
     )
     figyelo.observe(elem)
     return () => figyelo.disconnect()
@@ -133,11 +151,12 @@ export default function MoziKartya() {
 
   const savLatszik = !bannerLatszik && !szavazasLatszik && szavazas.faz !== null && !szavazas.lezart
 
-  // Amig a sav latszik, az oldal aljara annyi hely kell, amennyit eltakar
-  useEffect(() => {
-    document.body.classList.toggle('mozi-sav-helye', savLatszik)
-    return () => document.body.classList.remove('mozi-sav-helye')
-  }, [savLatszik])
+  /*
+   * A sav a kepernyo tetejen lebeg, nem tolja el a tartalmat. Ha felso
+   * belso margot adnank az oldalnak, az lejjebb tolna a bannert, az megint
+   * lathatova valna, a sav eltunne, es a ketto oda-vissza kapcsolgatna.
+   * A szavazas szakasz gorgetesi margoja viszont szamol a sav magassagaval.
+   */
 
   const lezart = szavazas.lezart
   const mutatSzavazatot = szavazas.osszes >= SZAVAZAT_HATAR
