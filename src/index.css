@@ -696,6 +696,20 @@ body {
   margin: 0 0 0.5rem;
 }
 
+/*
+ * Ez nem kattinthato kartya, van sajat gombja, ezert nem emelkedik hoverre.
+ * Mellekesen a transform a fix pozicioju savot is elmozditana.
+ */
+@media (hover: hover) {
+  .mozi-kartya:hover {
+    transform: none;
+  }
+
+  .mozi-kartya:hover .hk-foto {
+    transform: none;
+  }
+}
+
 .mozi-kartya .mozi-gomb-felirat {
   font-size: 4cqw;
 }

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Visszaszamlalo from './mozi/Visszaszamlalo'
 import MoziReszletek from './mozi/MoziReszletek'
 import RagadosSav from './mozi/RagadosSav'
@@ -20,15 +20,15 @@ function hataridoSzoveg() {
 }
 
 /**
- * A fooldal kiemelt blokkja: a filmszavazas, a partner kartyak felepitesevel.
- * Ugyanazok a hk- osztalyok, csak szelesebb es laposabb, plusz a hataridore
- * figyelmezteto jelek: matrica szalag, pink cimke es ketyego visszaszamlalo.
+ * A fooldal kiemelt blokkja: a filmszavazas. Felul a banner, alatta mindig
+ * lathatoan a szavazas. Nincs lenyitas, a gombok csak odagorgetnek.
  */
 export default function MoziKartya() {
-  const [nyitva, setNyitva] = useState(false)
   const [utolsoNap, setUtolsoNap] = useState(false)
-  const szavazas = useSzavazas({ frissitsen: nyitva })
-  const panelId = useId()
+  const [kartyaLatszik, setKartyaLatszik] = useState(true)
+  const [szavazasLatszik, setSzavazasLatszik] = useState(false)
+  // A toplistat csak akkor frissitjuk, amikor tenyleg latszik is
+  const szavazas = useSzavazas({ frissitsen: szavazasLatszik })
   const doboz = useRef<HTMLElement>(null)
 
   // Betolteskor mar tudjuk, hogy az utolso napban vagyunk-e
@@ -38,21 +38,15 @@ export default function MoziKartya() {
 
   const utolsoNapLett = useCallback(() => setUtolsoNap(true), [])
 
-  const [bannerLatszik, setBannerLatszik] = useState(true)
-  const [szavazasLatszik, setSzavazasLatszik] = useState(false)
-  const lap = useRef<HTMLDivElement>(null)
-
   /**
-   * Odagorget a szavazas szakaszhoz. Tobbszor is probalkozik, mert a lenyilas
-   * animalt, a lusta kepek pedig betoltve meg arrebb tolhatjak a celpontot.
+   * Odagorget a szavazas szakaszhoz. Tobbszor is probalkozik, mert a lusta
+   * kepek betoltodve meg arrebb tolhatjak a celpontot.
    *
    * A megszakito figyelok csak keses utan kapcsolodnak be: telefonon maga a
-   * koppintas is touchstartot vált ki, az kulonben rogton leallitana a
+   * koppintas is erintest valt ki, az kulonben rogton leallitana a
    * korrekciokat, es a lap felutan maradna.
    */
   const ugrasSzavazashoz = useCallback(() => {
-    setNyitva(true)
-
     let megszakit = false
     const megall = () => {
       megszakit = true
@@ -62,36 +56,28 @@ export default function MoziKartya() {
       document.getElementById('szavazas')?.scrollIntoView({ block: 'start' })
     }
 
+    oda()
+
     const figyeloIdozito = window.setTimeout(() => {
       window.addEventListener('wheel', megall, { passive: true, once: true })
       window.addEventListener('touchmove', megall, { passive: true, once: true })
     }, 400)
 
-    const idozitok = [80, 320, 600, 1100, 1800, 2800].map((ms) => window.setTimeout(oda, ms))
+    const idozitok = [120, 420, 900, 1600].map((ms) => window.setTimeout(oda, ms))
 
     window.setTimeout(() => {
       window.clearTimeout(figyeloIdozito)
       window.removeEventListener('wheel', megall)
       window.removeEventListener('touchmove', megall)
       idozitok.forEach(window.clearTimeout)
-    }, 3200)
-  }, [])
-
-  /** Bezaraskor visszavisz a kartyahoz, kulonben a latogato lent ragadna. */
-  const vissza = useCallback(() => {
-    setNyitva(false)
-    const oda = () => doboz.current?.scrollIntoView({ block: 'start' })
-    oda()
-    const idozitok = [120, 400].map((ms) => window.setTimeout(oda, ms))
-    window.setTimeout(() => idozitok.forEach(window.clearTimeout), 800)
+    }, 2200)
   }, [])
 
   /*
-   * A /#mozi es a /#szavazas cimre erkezve magatol kinyilik es odagorgetunk.
-   * Tobbszor is probalkozunk, mert a fejlec fotoi, a kartya kepe es a lenyilo
-   * resz is mozgatjak a celpontot, amig minden a helyere kerul. Ha a latogato
-   * kozben maga gorget, abbahagyjuk. A hashchange-re is figyelunk, hogy az
-   * oldalon beluli linkek is mukodjenek.
+   * A /#mozi es a /#szavazas cimre erkezve odagorgetunk. Tobbszor is
+   * probalkozunk, mert a fejlec fotoi es a kartya kepe is mozgatjak a
+   * celpontot, amig minden a helyere kerul. A hashchange-re is figyelunk,
+   * hogy az oldalon beluli linkek is mukodjenek.
    */
   useEffect(() => {
     let takarit: (() => void) | null = null
@@ -99,7 +85,6 @@ export default function MoziKartya() {
     const inditas = () => {
       const hash = window.location.hash
       if (hash !== '#mozi' && hash !== '#szavazas') return
-      setNyitva(true)
 
       takarit?.()
       let megszakit = false
@@ -117,11 +102,10 @@ export default function MoziKartya() {
       window.addEventListener('keydown', megall, { once: true })
       window.addEventListener('load', oda)
 
-      // A kartya kepe lustan toltodik, betoltes utan ujra pozicionalunk
       const kep = doboz.current?.querySelector('img')
       kep?.addEventListener('load', oda)
 
-      const idozitok = [150, 500, 1000, 1800, 2800, 4200].map((kesleltetes) =>
+      const idozitok = [150, 500, 1000, 1800, 2800].map((kesleltetes) =>
         window.setTimeout(oda, kesleltetes),
       )
 
@@ -143,45 +127,40 @@ export default function MoziKartya() {
     }
   }, [])
 
-  // A ragados sav akkor jon, ha a banner mar kigorgott es a szavazas sem latszik
+  /*
+   * A ragados sav csak akkor jon elo, ha a teljes blokk kigorgott. A
+   * szavazas szakasz a blokkon belul van, tehat amig az latszik, nincs sav.
+   */
   useEffect(() => {
-    const elem = lap.current
+    const elem = doboz.current
     if (!elem) return
-    // Nincs rootMargin: amig a banner barmelyik keppontja latszik, nincs sav
-    const figyelo = new IntersectionObserver(([bejegyzes]) =>
-      setBannerLatszik(bejegyzes.isIntersecting),
+    const figyelo = new IntersectionObserver(
+      ([bejegyzes]) => setKartyaLatszik(bejegyzes.isIntersecting),
+      { threshold: 0 },
     )
     figyelo.observe(elem)
     return () => figyelo.disconnect()
   }, [])
 
+  // A toplista frissitesehez tudnunk kell, latszik-e a szavazas szakasz
   useEffect(() => {
-    if (!nyitva) {
-      setSzavazasLatszik(false)
-      return
-    }
     const elem = document.getElementById('szavazas')
     if (!elem) return
-    const figyelo = new IntersectionObserver(([bejegyzes]) => setSzavazasLatszik(bejegyzes.isIntersecting))
+    const figyelo = new IntersectionObserver(([bejegyzes]) =>
+      setSzavazasLatszik(bejegyzes.isIntersecting),
+    )
     figyelo.observe(elem)
     return () => figyelo.disconnect()
-  }, [nyitva])
-
-  const savLatszik = !bannerLatszik && !szavazasLatszik && szavazas.faz !== null && !szavazas.lezart
-
-  /*
-   * A sav a kepernyo tetejen lebeg, nem tolja el a tartalmat. Ha felso
-   * belso margot adnank az oldalnak, az lejjebb tolna a bannert, az megint
-   * lathatova valna, a sav eltunne, es a ketto oda-vissza kapcsolgatna.
-   * A szavazas szakasz gorgetesi margoja viszont szamol a sav magassagaval.
-   */
+  }, [])
 
   const lezart = szavazas.lezart
   const mutatSzavazatot = szavazas.osszes >= SZAVAZAT_HATAR
+  const savLatszik = !kartyaLatszik && szavazas.faz !== null && !lezart
 
   return (
+    <>
     <section id="mozi" ref={doboz} className="hk-kartya mozi-kartya scroll-mt-4">
-      <div className="hk-lap" ref={lap}>
+      <div className="hk-lap">
         <picture>
           <source
             type="image/webp"
@@ -200,6 +179,7 @@ export default function MoziKartya() {
         </picture>
 
         <div className="hk-arnyek" />
+
         <div className="hk-kedvezmeny">
           <svg viewBox="0 0 140 100" aria-hidden="true">
             <path d={ROBBANAS} fill="#FF2D78" stroke="#0B1B3A" strokeWidth="3.4" strokeLinejoin="round" />
@@ -240,21 +220,12 @@ export default function MoziKartya() {
             <button
               type="button"
               className="tn-kapszula hk-tobb mozi-fo-gomb"
-              onClick={() => (nyitva ? vissza() : ugrasSzavazashoz())}
-              aria-expanded={nyitva}
-              aria-controls={panelId}
+              onClick={ugrasSzavazashoz}
             >
               <span className="tn-gomb-felirat tn-gomb-felirat-sotet mozi-gomb-felirat">
-                {nyitva ? 'Vissza' : 'Szavazok'}
+                Szavazok
               </span>
-              <svg
-                viewBox="0 0 24 24"
-                width="1em"
-                height="1em"
-                aria-hidden="true"
-                className="mozi-gomb-nyil"
-                style={{ transform: nyitva ? 'rotate(180deg)' : 'none' }}
-              >
+              <svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" className="mozi-gomb-nyil">
                 <path
                   d="M12 4v13m0 0 6-6m-6 6-6-6"
                   fill="none"
@@ -269,15 +240,13 @@ export default function MoziKartya() {
         </div>
       </div>
 
-      <RagadosSav latszik={savLatszik} faz={szavazas.faz} onSzavazok={ugrasSzavazashoz} />
-
-      <div id={panelId} inert={!nyitva} className={`tn-panel ${nyitva ? 'tn-panel-nyitva' : ''}`}>
-        <div>
-          <div className="tn-panel-belso mozi-panel">
-            <MoziReszletek szavazas={szavazas} teljesOra />
-          </div>
-        </div>
+      {/* A szavazas mindig latszik, a banner folytatasakent */}
+      <div className="tn-panel-belso mozi-panel">
+        <MoziReszletek szavazas={szavazas} teljesOra />
       </div>
     </section>
+
+    <RagadosSav latszik={savLatszik} faz={szavazas.faz} onSzavazok={ugrasSzavazashoz} />
+    </>
   )
 }
