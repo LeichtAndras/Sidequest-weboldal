@@ -74,7 +74,10 @@ export default function MoziKartya() {
     }
     const oda = () => {
       if (megszakit) return
-      document.getElementById('szavazas')?.scrollIntoView({ block: 'start' })
+      // Nem a keresomezore, hanem a lepesekre: igy latszik, hogyan mukodik
+      const cel =
+        document.getElementById('mozi-instrukciok') ?? document.getElementById('szavazas')
+      cel?.scrollIntoView({ block: 'start' })
     }
 
     if (voltNyitva) oda()
@@ -118,7 +121,11 @@ export default function MoziKartya() {
       }
       const oda = () => {
         if (megszakit) return
-        const cel = hash === '#szavazas' ? document.getElementById('szavazas') : doboz.current
+        // A #szavazas link is a lepesekre erkezik, ugyanoda, ahova a gomb
+        const cel =
+          hash === '#szavazas'
+            ? (document.getElementById('mozi-instrukciok') ?? document.getElementById('szavazas'))
+            : doboz.current
         cel?.scrollIntoView({ block: 'start' })
       }
 

@@ -1605,8 +1605,9 @@ body {
   font-size: 0.88rem;
 }
 
-/* A szavazas szakasz teteje ne bujjon a sav vagy a kartya szele moge */
-.mozi-szavazas-blokk {
+/* Az ugras celjainak teteje ne bujjon a sav vagy a kartya szele moge */
+.mozi-szavazas-blokk,
+.mozi-instrukciok {
   scroll-margin-top: 1.25rem;
 }
 
@@ -1616,7 +1617,8 @@ body {
   }
 
   /* A fenti sav magassaga plusz egy kis levegő */
-  .mozi-szavazas-blokk {
+  .mozi-szavazas-blokk,
+  .mozi-instrukciok {
     scroll-margin-top: calc(76px + env(safe-area-inset-top));
   }
 }

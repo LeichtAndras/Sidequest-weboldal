@@ -62,7 +62,8 @@ export default function MoziReszletek({ szavazas, teljesOra = false }: Props) {
 
       <p className="tn-panel-szoveg mozi-bevezeto">{beallitas.intro}</p>
 
-      <div className="tn-panel-blokk">
+      {/* Ide ugrunk a Szavazok gombrol: a lepesek es a kereso igy egyszerre latszik */}
+      <div id="mozi-instrukciok" className="tn-panel-blokk mozi-instrukciok">
         <Felirat szoveg="Így működik" kicsi valtozat="sotet" className="mozi-fejlec" />
         <ol className="tn-lepesek">
           {beallitas.steps.map((lepes, index) => (
