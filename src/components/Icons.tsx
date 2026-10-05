@@ -189,3 +189,18 @@ export function FingerprintIcon({ className, style }: IconProps) {
     </svg>
   )
 }
+
+export function FilmIcon({ className, style }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className={className} style={style}>
+      <rect x="3" y="4" width="18" height="16" rx="2.5" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M8 4v16M16 4v16" stroke="currentColor" strokeWidth="1.8" />
+      <path
+        d="M3 9h5M3 15h5M16 9h5M16 15h5"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}

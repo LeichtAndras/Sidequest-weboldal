@@ -1,0 +1,15 @@
+{
+  "voteStart": "2026-10-04T00:00:00+02:00",
+  "voteEnd": "2026-10-11T23:59:59+02:00",
+  "eventDate": null,
+  "venue": "SugárMozi",
+  "heroImage": "/images/mozi/hero-1600.webp",
+  "intro": "Egy egész terem a miénk lesz a SugárMoziban, és SideQuest filmestet tartunk. A filmet viszont nem mi választjuk, hanem ti.",
+  "steps": [
+    "Keress rá a filmre, amit a legszívesebben néznél moziban.",
+    "Szavazz rá, vagy nyomj +1-et valamelyikre a toplistáról.",
+    "Egy szavazatod van, úgyhogy gondold át!",
+    "A visszaszámlálás végén a legtöbb szavazatot kapott film nyer."
+  ],
+  "disclaimer": "A győztes filmet a SugárMozival közösen véglegesítjük."
+}

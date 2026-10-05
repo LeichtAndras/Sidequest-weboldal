@@ -1,6 +1,7 @@
 import { memo, useState } from 'react'
 import type { Partner } from '../types'
 import { ujPartner } from '../partner'
+import { ROBBANAS } from '../robbanas'
 import kategoriaSzo from '../data/kategoriak.json'
 import ThumbDetails from './ThumbDetails'
 import { QrIcon, SpeechIcon, TagIcon } from './Icons'
@@ -10,22 +11,6 @@ type Props = {
   open: boolean
   onToggle: () => void
 }
-
-/** A kedvezmeny badge csillag alakja. Minden kartyan ugyanaz. */
-function robbanasUt(agak = 13, kulsoX = 63, kulsoY = 45, aranyBelso = 0.755) {
-  const pontok: string[] = []
-  for (let i = 0; i < agak * 2; i++) {
-    const kulso = i % 2 === 0 ? 1 : aranyBelso
-    const tenyezo = kulso * (1 + 0.07 * Math.sin(i * 2.3))
-    const szog = (Math.PI * i) / agak - Math.PI / 2
-    pontok.push(
-      `${(70 + kulsoX * tenyezo * Math.cos(szog)).toFixed(2)},${(50 + kulsoY * tenyezo * Math.sin(szog)).toFixed(2)}`,
-    )
-  }
-  return `M${pontok.join('L')}Z`
-}
-
-const ROBBANAS = robbanasUt()
 
 /** A bevaltas modja: harom lehetoseg, mindig ugyanazokkal a szavakkal. */
 function bevaltasMod(partner: Partner) {

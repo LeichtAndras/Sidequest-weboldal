@@ -1,6 +1,6 @@
 import { StrictMode } from 'react'
 import { renderToString } from 'react-dom/server'
-import App from './App'
+import Oldal from './Oldal'
 
 /**
  * Eloreneneles: a build utan ez adja a statikus HTML-t minden cimhez.
@@ -9,7 +9,7 @@ import App from './App'
 export function render(utvonal: string) {
   return renderToString(
     <StrictMode>
-      <App utvonal={utvonal} />
+      <Oldal utvonal={utvonal} />
     </StrictMode>,
   )
 }

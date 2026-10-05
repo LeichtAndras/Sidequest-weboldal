@@ -660,3 +660,961 @@ body {
   }
 }
 
+
+/* ===== Mozi szavazas blokk ===== */
+
+.mozi-hero-ures {
+  aspect-ratio: 16 / 9;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background:
+    repeating-linear-gradient(
+      -45deg,
+      rgba(255, 255, 255, 0.035) 0 14px,
+      transparent 14px 28px
+    ),
+    var(--sotetkek);
+}
+
+.mozi-ora-rovid {
+  font-variant-numeric: tabular-nums;
+}
+
+
+/* ===== A fooldal mozi kartyaja ===== */
+
+/*
+ * Ugyanaz a felepites, mint a partner kartyakon: hk- osztalyok, azonos keret,
+ * arnyek, cimke, csillag es gomb. Csak szelesebb, es laposabb az aranya.
+ */
+.mozi-kartya {
+  margin: 0 0 0.5rem;
+}
+
+/*
+ * A fotón sajat felirat van, ezert itt eroszakosabb a sotetites, mint a
+ * partner kartyakon: mire a cim kezdodik, a vaszon szovege mar elhalkult.
+ */
+.mozi-kartya .hk-arnyek {
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 30%,
+    rgba(0, 0, 0, 0.45) 56%,
+    rgba(0, 0, 0, 0.78) 78%,
+    rgba(0, 0, 0, 0.85) 100%
+  );
+}
+
+@media (min-width: 768px) {
+  .mozi-kartya .hk-arnyek {
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0) 36%,
+      rgba(0, 0, 0, 0.42) 62%,
+      rgba(0, 0, 0, 0.76) 84%,
+      rgba(0, 0, 0, 0.85) 100%
+    );
+  }
+}
+
+.mozi-kartya .hk-foto {
+  /*
+   * A kep a vaszonra van vagva. A felirat a kep 35 es 59 szazaleka kozott
+   * all fuggolegesen, ezert 43 szazaleknal pont a 3:1-es kartya kozepere
+   * kerul. Mobilon a 4:3 a teljes magassagot mutatja, ott is kozepen van.
+   */
+  object-position: center 43%;
+}
+
+.mozi-kartya .mozi-gomb-felirat {
+  font-size: 4cqw;
+}
+
+.mozi-kartya .mozi-gomb-nyil {
+  font-size: 4.4cqw;
+  transition: transform 200ms ease;
+}
+
+@media (min-width: 768px) {
+  /* Asztalon laposabb, hogy ne legyen magasabb a kelletenel */
+  .mozi-kartya .hk-lap {
+    aspect-ratio: 3 / 1;
+  }
+
+  /*
+   * A kartya itt 900px szeles, a partner kartyak 355 koruliek. A cqw ertekek
+   * ezert ketszer akkorak lennenek, igy asztalon fix meretekre valtunk, pont
+   * akkorakra, amekkorara egy partner kartyan jonnek ki.
+   */
+  .mozi-kartya .hk-kategoria {
+    top: 1rem;
+    left: 1rem;
+    padding: 0.16rem 0.45rem;
+    border-width: 2px;
+    font-size: 0.71rem;
+  }
+
+  .mozi-kartya .hk-kedvezmeny {
+    top: 0.67rem;
+    left: 0.56rem;
+    right: auto;
+    width: 5.55rem;
+    height: 4rem;
+  }
+
+  .mozi-kartya .hk-kedvezmeny-szam {
+    font-size: 1.46rem;
+  }
+
+  .mozi-kartya .hk-kedvezmeny-felirat {
+    margin-top: 0.09rem;
+    font-size: 0.47rem;
+  }
+
+  .mozi-kartya .hk-also {
+    left: 1.11rem;
+    right: 1.11rem;
+    bottom: 1rem;
+  }
+
+  .mozi-kartya .hk-nev {
+    font-size: 1.82rem;
+  }
+
+  .mozi-kartya .hk-sor {
+    margin-top: 0.67rem;
+    gap: 0.45rem;
+  }
+
+  .mozi-kartya .hk-chip {
+    padding: 0.2rem 0.49rem;
+    gap: 0.31rem;
+    font-size: 0.71rem;
+  }
+
+  .mozi-kartya .hk-tobb {
+    padding: 0.27rem 0.67rem;
+    border-width: 2px;
+    box-shadow: 0 2px 0 var(--sotetkek);
+  }
+
+  .mozi-kartya .mozi-gomb-felirat {
+    font-size: 0.89rem;
+  }
+
+  .mozi-kartya .mozi-gomb-nyil {
+    font-size: 0.98rem;
+  }
+}
+
+
+/* ----- Hatarido jelzesek a mozi kartyan ----- */
+
+/* Rovid magyarazo sor a cim alatt */
+.mozi-alcim {
+  margin: 0.3rem 0 0;
+  font-size: 0.86rem;
+  line-height: 1.35;
+  font-weight: 600;
+  color: rgba(255, 252, 243, 0.92);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
+}
+
+/*
+ * Telefonon a pirulak sajat sorban allnak, a gomb alattuk jobbra. Igy nem
+ * tordelodik szet a visszaszamlalo es a hatarido. Asztalon mind egy sorba fer.
+ */
+.mozi-also-sor {
+  align-items: flex-end;
+  flex-wrap: wrap;
+  row-gap: 0.45rem;
+}
+
+.mozi-pirulak {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+  flex: 1 1 100%;
+}
+
+/* Telefonon a gomb teljes szelessegu es kenyelmesen magas */
+.mozi-fo-gomb {
+  margin-left: auto;
+}
+
+@media (max-width: 639px) {
+  .mozi-fo-gomb {
+    width: 100%;
+    min-height: 48px;
+    justify-content: center;
+    margin-left: 0;
+  }
+}
+
+@media (min-width: 768px) {
+  .mozi-pirulak {
+    flex: 0 1 auto;
+  }
+}
+
+/* Ketyego visszaszamlalo: pink alap, krem szam, vastag keret, kemeny arnyek */
+.mozi-ora-pirula {
+  display: inline-flex;
+  font-family: var(--font-display);
+  align-items: center;
+  padding: 0.25rem 0.6rem;
+  border: 2.5px solid var(--sotetkek);
+  border-radius: 99px;
+  background-color: var(--pink);
+  color: var(--color-cream);
+  box-shadow: 0 3px 0 var(--sotetkek);
+}
+
+.mozi-ora-digit {
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes mozi-lukteto {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.mozi-ora-pirula-surgos {
+  animation: mozi-lukteto 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mozi-ora-pirula-surgos {
+    animation: none;
+  }
+}
+
+@media (min-width: 768px) {
+  .mozi-alcim {
+    font-size: 0.95rem;
+  }
+
+  .mozi-ora-digit {
+    font-size: 0.9rem;
+  }
+}
+
+
+/*
+ * Telefonon a banner ket reszre valik egy kartyan belul: felul a kep a
+ * teljes felirattal, alatta sotet savon a szoveg. Igy semmi nem takarja a
+ * vasznat, es a cim is nyugodtan megfer.
+ */
+@media (max-width: 639px) {
+  .mozi-kartya .hk-lap {
+    aspect-ratio: auto;
+    height: auto;
+    display: block;
+  }
+
+  .mozi-kartya picture {
+    display: block;
+  }
+
+  .mozi-kartya .hk-foto {
+    position: static;
+    aspect-ratio: 16 / 9;
+    height: auto;
+    object-position: center;
+  }
+
+  /* A szoveg nem a kepen van, ezert sotetites sem kell */
+  .mozi-kartya .hk-arnyek {
+    display: none;
+  }
+
+  .mozi-kartya .hk-also {
+    position: static;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    padding: 0.85rem 1rem 1rem;
+    background-color: var(--sotetkek);
+  }
+
+  .mozi-kartya .hk-nev,
+  .mozi-kartya .mozi-alcim {
+    text-shadow: none;
+  }
+
+  /* A csillag a kep bal felso sarkaban, a felirat folott */
+  .mozi-kartya .hk-kedvezmeny {
+    top: 0.25rem;
+    left: 0.3rem;
+    right: auto;
+    width: 21cqw;
+    height: 15cqw;
+  }
+}
+
+/*
+ * A lenyilo resz a partner kartyak krem panelje. A tn- osztalyok cqw-ben
+ * merik magukat, ez a blokk viszont 900px szeles is lehet, ezert itt fix
+ * meretekre valtunk, hogy ugyanakkora legyen, mint egy partner kartyan.
+ */
+.mozi-panel {
+  padding: 1.1rem 1.1rem 1.4rem;
+}
+
+.mozi-panel .tn-panel-szoveg,
+.mozi-panel .tn-lepes {
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.mozi-panel .tn-panel-blokk {
+  margin-top: 1.3rem;
+}
+
+.mozi-panel .tn-lepesek {
+  margin-top: 0.8rem;
+  gap: 0.65rem;
+}
+
+.mozi-panel .tn-lepes {
+  gap: 0.7rem;
+}
+
+.mozi-panel .tn-lepes-szam {
+  width: 1.65rem;
+  height: 1.65rem;
+  border-width: 2px;
+  font-size: 0.85rem;
+}
+
+.mozi-panel .tn-feltetel {
+  margin-top: 1.3rem;
+  padding: 0.7rem 0.8rem;
+  border-width: 2px;
+  font-size: 0.82rem;
+}
+
+.mozi-panel .tn-panel-ikon {
+  width: 1.1rem;
+  height: 1.1rem;
+  transform: translateY(0.1rem);
+}
+
+.mozi-panel .tn-kapszula {
+  padding: 0.5rem 1rem;
+  border-width: 2px;
+  box-shadow: 0 3px 0 var(--sotetkek);
+  gap: 0.4rem;
+}
+
+.mozi-panel .tn-gomb-felirat {
+  font-size: 0.95rem;
+}
+
+/* Blokk fejlecek: vastag sotetkek felirat, mint a bevaltas lepeseinel */
+.mozi-fejlec {
+  font-size: 1.1rem;
+  margin-bottom: 0.2rem;
+}
+
+.mozi-panel .tn-felirat {
+  filter: none;
+}
+
+.mozi-panel .tn-felirat-hatso {
+  -webkit-text-stroke-width: 0;
+}
+
+.mozi-panel .tn-felirat-sotet .tn-felirat-elso {
+  -webkit-text-stroke-width: 0;
+}
+
+/* Visszaszamlalo: negy krem matrica vastag kerettel es kemeny arnyekkal */
+.mozi-ora-blokk {
+  margin-bottom: 1.3rem;
+}
+
+.mozi-ora-felirat {
+  margin: 0 0 0.55rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(11, 27, 58, 0.7);
+}
+
+.mozi-ora {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+}
+
+.mozi-ora-elem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  padding: 0.5rem 0.2rem 0.4rem;
+  border: 2.5px solid var(--sotetkek);
+  border-radius: 14px;
+  background-color: var(--color-cream);
+  box-shadow: 0 3px 0 var(--sotetkek);
+}
+
+.mozi-ora-szam {
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 6vw, 1.7rem);
+  line-height: 1;
+  color: var(--sotetkek);
+  font-variant-numeric: tabular-nums;
+}
+
+.mozi-ora-cimke {
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(11, 27, 58, 0.6);
+}
+
+.mozi-idopont {
+  margin: 1.1rem 0 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--sotetkek);
+}
+
+/* ----- Kereso ----- */
+
+.mozi-cimke {
+  display: block;
+  margin: 0.7rem 0 0.35rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: rgba(11, 27, 58, 0.7);
+}
+
+.mozi-mezo-sor {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.mozi-mezo {
+  flex: 1;
+  min-width: 0;
+  padding: 0.6rem 0.8rem;
+  border: 2.5px solid var(--sotetkek);
+  border-radius: 14px;
+  background-color: var(--color-cream);
+  color: var(--sotetkek);
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  font-weight: 600;
+  box-shadow: 0 3px 0 var(--sotetkek);
+}
+
+.mozi-mezo::placeholder {
+  font-family: var(--font-display);
+  font-weight: 400;
+  color: rgba(11, 27, 58, 0.4);
+}
+
+.mozi-mezo:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.mozi-mezo:disabled {
+  opacity: 0.55;
+  box-shadow: none;
+}
+
+.mozi-torlo {
+  flex: none;
+  padding: 0 0.75rem;
+  border: 2.5px solid var(--sotetkek);
+  border-radius: 14px;
+  background-color: rgba(11, 27, 58, 0.06);
+  color: var(--sotetkek);
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.mozi-talalatok {
+  margin: 0.55rem 0 0;
+  padding: 0;
+  list-style: none;
+  border: 2.5px solid var(--sotetkek);
+  border-radius: 14px;
+  overflow: hidden;
+  background-color: var(--color-cream);
+}
+
+.mozi-talalat {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  border: 0;
+  border-bottom: 1.5px solid rgba(11, 27, 58, 0.14);
+  background: none;
+  color: var(--sotetkek);
+  text-align: left;
+  cursor: pointer;
+}
+
+.mozi-talalatok li:last-child .mozi-talalat {
+  border-bottom: 0;
+}
+
+.mozi-talalat:hover,
+.mozi-talalat:focus-visible {
+  background-color: rgba(54, 185, 240, 0.18);
+}
+
+.mozi-talalat-szoveg {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.mozi-talalat-cim {
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.mozi-talalat-ev {
+  font-size: 0.78rem;
+  color: rgba(11, 27, 58, 0.62);
+}
+
+/* Poszter helyett ikonos helyorzo, a Wikidatan nincs kep */
+.mozi-jelkep {
+  flex: none;
+  width: 2.1rem;
+  height: 2.1rem;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  border: 2px solid var(--sotetkek);
+  background-color: rgba(11, 27, 58, 0.08);
+  color: var(--sotetkek);
+}
+
+.mozi-jelkep-ikon {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.mozi-gomb {
+  margin-top: 0.85rem;
+  width: 100%;
+  justify-content: center;
+}
+
+/* Tiltva ugyanaz a gomb, csak halvanyabb, nem szurke sav */
+.mozi-gomb:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ----- Toplista ----- */
+
+.mozi-toplista {
+  margin: 0.8rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.mozi-sor {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0.6rem;
+  border: 2.5px solid var(--sotetkek);
+  border-radius: 16px;
+  background-color: var(--sotetkek);
+  box-shadow: 0 3px 0 rgba(11, 27, 58, 0.35);
+}
+
+.mozi-sor .mozi-jelkep {
+  border-color: rgba(255, 255, 255, 0.25);
+  background-color: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 252, 243, 0.65);
+}
+
+.mozi-sor-sajat {
+  background-color: #11306b;
+  border-color: var(--color-accent);
+}
+
+.mozi-helyezes {
+  flex: none;
+  width: 1.6rem;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  color: rgba(255, 252, 243, 0.55);
+  text-align: center;
+}
+
+/* Az elso helyezett pink csillagot kap, mint a kedvezmeny badge */
+.mozi-helyezes-csillag {
+  position: relative;
+  flex: none;
+  width: 2.2rem;
+  height: 2.2rem;
+  display: grid;
+  place-items: center;
+  transform: rotate(-6deg);
+}
+
+.mozi-helyezes-csillag svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.mozi-helyezes-csillag span {
+  position: relative;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  color: #ffffff;
+}
+
+.mozi-sor-szoveg {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.mozi-sor-cim {
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--color-cream);
+}
+
+.mozi-sor-ev {
+  font-size: 0.76rem;
+  color: rgba(255, 252, 243, 0.6);
+}
+
+.mozi-jelolo {
+  display: inline-block;
+  margin-left: 0.4rem;
+  padding: 0.08rem 0.42rem;
+  border-radius: 99px;
+  background-color: var(--color-accent);
+  color: var(--sotetkek);
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+
+.mozi-sor-elso .mozi-jelolo {
+  background-color: var(--pink);
+  color: #ffffff;
+}
+
+.mozi-arany {
+  display: block;
+  height: 5px;
+  border-radius: 99px;
+  background-color: rgba(255, 255, 255, 0.14);
+  overflow: hidden;
+}
+
+.mozi-arany-kitolt {
+  display: block;
+  height: 100%;
+  border-radius: 99px;
+  background-color: var(--color-accent);
+  transition: width 300ms ease;
+}
+
+.mozi-sor-elso .mozi-arany-kitolt {
+  background-color: var(--pink);
+}
+
+.mozi-sor-adat {
+  font-size: 0.74rem;
+  color: rgba(255, 252, 243, 0.6);
+}
+
+.mozi-plusz {
+  flex: none;
+  width: 2.3rem;
+  height: 2.3rem;
+  border: 2.5px solid var(--sotetkek);
+  border-radius: 99px;
+  background-color: var(--color-accent);
+  color: var(--sotetkek);
+  font-family: var(--font-display);
+  font-size: 0.88rem;
+  cursor: pointer;
+  box-shadow: 0 2px 0 var(--sotetkek);
+}
+
+.mozi-plusz:active {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+
+/* ----- Visszajelzesek a krem panelen ----- */
+
+.mozi-jelzes {
+  margin: 0.7rem 0 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: rgba(11, 27, 58, 0.72);
+}
+
+.mozi-hiba {
+  margin: 0.7rem 0 0;
+  padding: 0.6rem 0.75rem;
+  border: 2px solid var(--pink);
+  border-radius: 14px;
+  background-color: rgba(255, 45, 120, 0.1);
+  font-size: 0.86rem;
+  line-height: 1.45;
+  font-weight: 600;
+  color: #9d1142;
+}
+
+.mozi-siker {
+  margin: 0.2rem 0 0.7rem;
+  padding: 0.6rem 0.75rem;
+  border: 2px solid var(--color-accent);
+  border-radius: 14px;
+  background-color: rgba(54, 185, 240, 0.14);
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--sotetkek);
+}
+
+.mozi-osszes,
+.mozi-sajat-kiemelt,
+.mozi-zaro {
+  margin: 0.8rem 0 0;
+  font-size: 0.84rem;
+  color: rgba(11, 27, 58, 0.72);
+}
+
+.mozi-zaro {
+  font-weight: 700;
+  color: var(--sotetkek);
+}
+
+/* ----- A kulon /mozi oldal ----- */
+
+.mozi-vissza {
+  display: inline-block;
+  margin-bottom: 1rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 99px;
+  background-color: rgba(5, 32, 46, 0.7);
+  color: var(--color-accent);
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.mozi-hero {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.55));
+}
+
+.mozi-oldal-jelzes {
+  margin: 0.7rem 0 0;
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-cream);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.85);
+}
+
+.mozi-cim {
+  margin: 1rem 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 8vw, 2.3rem);
+  line-height: 1.05;
+  color: #ffffff;
+  text-align: center;
+  text-transform: uppercase;
+  text-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.85),
+    0 2px 14px rgba(0, 0, 0, 0.6);
+}
+
+.mozi-oldal-panel {
+  margin-top: 1rem;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 18px 38px -18px rgba(0, 0, 0, 0.9);
+  container-type: inline-size;
+}
+
+.mozi-cta {
+  margin-top: 1rem;
+  width: 100%;
+  justify-content: center;
+  padding: 0.75rem 1rem;
+  border-width: 2px;
+  box-shadow: 0 3px 0 var(--sotetkek);
+  text-decoration: none;
+}
+
+.mozi-cta .tn-gomb-felirat {
+  font-size: 0.92rem;
+}
+
+@media (min-width: 768px) {
+  .mozi-panel {
+    padding: 1.4rem 1.6rem 1.7rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mozi-arany-kitolt {
+    transition: none;
+  }
+}
+
+/*
+ * A fejlec logoja. A kepnek fekete hattere van, a screen keveres tunteti el:
+ * a fekete atlatszova valik, a feher felirat es a kek dereng megmarad.
+ */
+.hero-logo {
+  mix-blend-mode: screen;
+}
+
+/* Lagy sotet folt a logo mogott, ezen latszik a kek derengés */
+.hero-logo-halo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 9;
+  width: 300px;
+  height: 300px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  background: radial-gradient(
+    closest-side,
+    rgba(5, 20, 32, 0.92) 0%,
+    rgba(5, 20, 32, 0.78) 42%,
+    rgba(5, 20, 32, 0.32) 68%,
+    rgba(5, 20, 32, 0) 100%
+  );
+}
+
+/*
+ * Ragados also sav telefonon. Akkor jon elo, amikor a banner mar kigorgott,
+ * es a szavazas szakasz sem latszik. Asztalon sosem jelenik meg.
+ */
+.mozi-ragados {
+  position: fixed;
+  z-index: 40;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  max-height: 64px;
+  padding: 0.6rem 0.9rem calc(0.6rem + env(safe-area-inset-bottom));
+  background-color: var(--sotetkek);
+  border-top: 2px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 -8px 24px -10px rgba(0, 0, 0, 0.9);
+  transform: translateY(110%);
+  transition: transform 260ms ease-out;
+}
+
+.mozi-ragados-latszik {
+  transform: translateY(0);
+}
+
+.mozi-ragados-szoveg {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  line-height: 1.2;
+  color: var(--color-cream);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mozi-ragados-pont {
+  color: var(--color-accent);
+}
+
+.mozi-ragados-gomb {
+  flex: none;
+  min-height: 40px;
+  padding: 0.4rem 0.9rem;
+  border-width: 2px;
+  box-shadow: 0 3px 0 var(--sotetkek);
+}
+
+.mozi-ragados-gomb .tn-gomb-felirat {
+  font-size: 0.88rem;
+}
+
+/* Amig a sav latszik, ne takarja el az oldal aljat */
+.mozi-sav-helye {
+  padding-bottom: calc(64px + env(safe-area-inset-bottom));
+}
+
+/* A szavazas szakasz teteje ne bujjon a sav vagy a kartya szele moge */
+.mozi-szavazas-blokk {
+  scroll-margin-top: 1.25rem;
+}
+
+@media (max-width: 639px) {
+  .mozi-ragados {
+    display: flex;
+  }
+
+  .mozi-szavazas-blokk {
+    scroll-margin-top: 0.75rem;
+  }
+}
+
+@media (min-width: 640px) {
+  .mozi-sav-helye {
+    padding-bottom: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mozi-ragados {
+    transition: none;
+  }
+}

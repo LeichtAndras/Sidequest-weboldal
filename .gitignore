@@ -6,3 +6,5 @@ dist
 # Teljes felbontasu eredeti fotok, csak helyben
 kepek-eredeti
 dist-ssr
+.env
+.env.local

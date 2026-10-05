@@ -103,6 +103,39 @@ function metaBlokk(partner) {
     .join('\n')
 }
 
+/**
+ * A filmszavazas oldal meta adatai. Kozossegi megosztasra a kozos
+ * megosztasi kep megy, amig nincs sajat hero kep.
+ */
+function moziBlokk() {
+  const url = `${SITE_URL}/mozi/`
+  const cim = 'Te választod a filmet! | SideQuest Budapest'
+  const leiras =
+    'Szavazz, melyik filmet vetítsük a SideQuest filmesten. A legtöbb szavazatot kapott film nyer.'
+
+  return [
+    `<title>${esc(cim)}</title>`,
+    `<meta name="description" content="${esc(leiras)}" />`,
+    `<link rel="canonical" href="${url}" />`,
+    `<meta property="og:type" content="website" />`,
+    `<meta property="og:site_name" content="SideQuest" />`,
+    `<meta property="og:locale" content="hu_HU" />`,
+    `<meta property="og:url" content="${url}" />`,
+    `<meta property="og:title" content="${esc(cim)}" />`,
+    `<meta property="og:description" content="${esc(leiras)}" />`,
+    `<meta property="og:image" content="${SITE_URL}/images/mozi/og-mozi.png" />`,
+    `<meta property="og:image:width" content="1200" />`,
+    `<meta property="og:image:height" content="630" />`,
+    `<meta property="og:image:alt" content="SideQuest filmest a SugárMoziban, te választod a filmet" />`,
+    `<meta name="twitter:card" content="summary_large_image" />`,
+    `<meta name="twitter:title" content="${esc(cim)}" />`,
+    `<meta name="twitter:description" content="${esc(leiras)}" />`,
+    `<meta name="twitter:image" content="${SITE_URL}/images/mozi/og-mozi.png" />`,
+  ]
+    .map((sor) => `    ${sor}`)
+    .join('\n')
+}
+
 /** A kesz oldal: sajat meta blokk, es a gyoker elemben a kirajzolt tartalom. */
 function oldal(utvonal, meta) {
   const fejjel = meta
@@ -122,12 +155,20 @@ for (const partner of partners) {
   db++
 }
 
+// Filmszavazas oldal
+mkdirSync(join(dist, 'mozi'), { recursive: true })
+writeFileSync(join(dist, 'mozi/index.html'), oldal('/mozi/', moziBlokk()))
+
 // Ismeretlen cimre is a weboldal jojjon be, ne a GitHub hibaoldala.
 writeFileSync(join(dist, '404.html'), oldal('/', null))
 
 // Sitemap: a fooldal es minden partner megoszthato cime.
 const ma = new Date().toISOString().slice(0, 10)
-const cimek = [`${SITE_URL}/`, ...partners.map((partner) => `${SITE_URL}/${partner.slug}/`)]
+const cimek = [
+  `${SITE_URL}/`,
+  `${SITE_URL}/mozi/`,
+  ...partners.map((partner) => `${SITE_URL}/${partner.slug}/`),
+]
 const sitemap =
   `<?xml version="1.0" encoding="UTF-8"?>\n` +
   `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
@@ -138,4 +179,4 @@ const sitemap =
 writeFileSync(join(dist, 'sitemap.xml'), sitemap)
 writeFileSync(join(gyoker, 'public/sitemap.xml'), sitemap)
 
-console.log(`Elorenderelve: fooldal + ${db} partner oldal + 404.html, sitemap: ${cimek.length} cim`)
+console.log(`Elorenderelve: fooldal + mozi + ${db} partner oldal + 404.html, sitemap: ${cimek.length} cim`)

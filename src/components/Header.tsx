@@ -58,14 +58,19 @@ export default function Header() {
             </div>
           ))}
 
-          {/* A logo a kollazs elott */}
+          {/*
+            A logo a kollazs kozepen. Fekete hattere van, azt a screen
+            keverés tunteti el. A keveres vilagos alapon kimosna a kepet,
+            ezert alatta egy lagy sotet glória all, azon ervenyesul a neon.
+          */}
+          <span className="hero-logo-halo" aria-hidden="true" />
           <img
-            src="/sidequest-logo-atlatszo.png"
+            src="/sidequest-logo-glow.webp"
             alt="SideQuest logó"
-            width={230}
-            height={199}
+            width={260}
+            height={260}
             fetchPriority="high"
-            className="absolute top-1/2 left-1/2 z-10 h-auto w-[230px] -translate-x-1/2 -translate-y-1/2 drop-shadow-[0_10px_18px_rgba(5,32,46,0.45)]"
+            className="hero-logo absolute top-1/2 left-1/2 z-10 h-auto w-[260px] -translate-x-1/2 -translate-y-1/2"
           />
         </div>
 

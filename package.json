@@ -8,11 +8,13 @@
     "build": "tsc -b && vite build && vite build --ssr src/entry-server.tsx --outDir dist-ssr && node scripts/generate-partner-pages.mjs",
     "preview": "vite preview",
     "kepek": "node scripts/kepek.mjs",
-    "helyszinek": "node scripts/helyszinek.mjs"
+    "helyszinek": "node scripts/helyszinek.mjs",
+    "mozikep": "node scripts/mozikep.mjs"
   },
   "dependencies": {
     "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "react-dom": "^19.1.1",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.13",
