@@ -20,16 +20,30 @@ function hataridoSzoveg() {
 }
 
 /**
- * A fooldal kiemelt blokkja: a filmszavazas. Felul a banner, alatta mindig
- * lathatoan a szavazas. Nincs lenyitas, a gombok csak odagorgetnek.
+ * A fooldal kiemelt blokkja: a filmszavazas. Felul a banner, alatta a
+ * lenyilo szavazas, ugyanazzal a panellel es TOBB/VISSZA gombbal, mint a
+ * helyszinkartyakon. Erkezeskor nyitva all, hogy a szavazas rogton
+ * lathato legyen, de be lehet csukni.
  */
 export default function MoziKartya() {
   const [utolsoNap, setUtolsoNap] = useState(false)
   const [kartyaLatszik, setKartyaLatszik] = useState(true)
   const [szavazasLatszik, setSzavazasLatszik] = useState(false)
+  const [nyitva, setNyitva] = useState(true)
   // A toplistat csak akkor frissitjuk, amikor tenyleg latszik is
-  const szavazas = useSzavazas({ frissitsen: szavazasLatszik })
+  const szavazas = useSzavazas({ frissitsen: szavazasLatszik && nyitva })
   const doboz = useRef<HTMLElement>(null)
+
+  /*
+   * A gorgeto fuggvenyek allando hivatkozasok, igy nem olvashatjak kozvetlenul
+   * a nyitva allapotot. Ez a ref koveti, hogy kell-e elobb kinyitni a panelt.
+   */
+  const nyitvaRef = useRef(true)
+  useEffect(() => {
+    nyitvaRef.current = nyitva
+  }, [nyitva])
+
+  const valt = useCallback(() => setNyitva((elozo) => !elozo), [])
 
   // Betolteskor mar tudjuk, hogy az utolso napban vagyunk-e
   useEffect(() => {
@@ -42,11 +56,18 @@ export default function MoziKartya() {
    * Odagorget a szavazas szakaszhoz. Tobbszor is probalkozik, mert a lusta
    * kepek betoltodve meg arrebb tolhatjak a celpontot.
    *
+   * Ha a panel zarva volt, elobb kinyitjuk, es az elso gorgetest kihagyjuk:
+   * a nulla magas szakaszra ugrani csak oda-vissza rantana a lapot. A 420 ms
+   * utani probalkozasok mar a 260 ms-os lenyilas utan futnak.
+   *
    * A megszakito figyelok csak keses utan kapcsolodnak be: telefonon maga a
    * koppintas is erintest valt ki, az kulonben rogton leallitana a
    * korrekciokat, es a lap felutan maradna.
    */
   const ugrasSzavazashoz = useCallback(() => {
+    const voltNyitva = nyitvaRef.current
+    setNyitva(true)
+
     let megszakit = false
     const megall = () => {
       megszakit = true
@@ -56,14 +77,15 @@ export default function MoziKartya() {
       document.getElementById('szavazas')?.scrollIntoView({ block: 'start' })
     }
 
-    oda()
+    if (voltNyitva) oda()
 
     const figyeloIdozito = window.setTimeout(() => {
       window.addEventListener('wheel', megall, { passive: true, once: true })
       window.addEventListener('touchmove', megall, { passive: true, once: true })
     }, 400)
 
-    const idozitok = [120, 420, 900, 1600].map((ms) => window.setTimeout(oda, ms))
+    const utemek = voltNyitva ? [120, 420, 900, 1600] : [320, 560, 1000, 1700]
+    const idozitok = utemek.map((ms) => window.setTimeout(oda, ms))
 
     window.setTimeout(() => {
       window.clearTimeout(figyeloIdozito)
@@ -85,6 +107,9 @@ export default function MoziKartya() {
     const inditas = () => {
       const hash = window.location.hash
       if (hash !== '#mozi' && hash !== '#szavazas') return
+
+      // Zart panelben a szavazas szakasz nulla magas, elobb ki kell nyitni.
+      if (hash === '#szavazas') setNyitva(true)
 
       takarit?.()
       let megszakit = false
@@ -220,12 +245,24 @@ export default function MoziKartya() {
             <button
               type="button"
               className="tn-kapszula hk-tobb mozi-fo-gomb"
-              onClick={ugrasSzavazashoz}
+              onClick={valt}
+              aria-expanded={nyitva}
+              aria-controls="mozi-reszletek"
             >
               <span className="tn-gomb-felirat tn-gomb-felirat-sotet mozi-gomb-felirat">
-                Szavazok
+                {nyitva ? 'Vissza' : 'Több'}
               </span>
-              <svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" className="mozi-gomb-nyil">
+              <svg
+                viewBox="0 0 24 24"
+                width="1em"
+                height="1em"
+                aria-hidden="true"
+                className="mozi-gomb-nyil"
+                style={{
+                  transform: nyitva ? 'rotate(180deg)' : 'none',
+                  transition: 'transform 200ms ease',
+                }}
+              >
                 <path
                   d="M12 4v13m0 0 6-6m-6 6-6-6"
                   fill="none"
@@ -240,9 +277,17 @@ export default function MoziKartya() {
         </div>
       </div>
 
-      {/* A szavazas mindig latszik, a banner folytatasakent */}
-      <div className="tn-panel-belso mozi-panel">
-        <MoziReszletek szavazas={szavazas} teljesOra />
+      {/* Ugyanaz a lenyilo panel, mint a helyszinkartyakon */}
+      <div
+        id="mozi-reszletek"
+        inert={!nyitva}
+        className={`tn-panel ${nyitva ? 'tn-panel-nyitva' : ''}`}
+      >
+        <div>
+          <div className="tn-panel-belso mozi-panel">
+            <MoziReszletek szavazas={szavazas} teljesOra />
+          </div>
+        </div>
       </div>
     </section>
 
