@@ -26,7 +26,14 @@ jobs:
           cache: npm
 
       - run: npm ci
+
+      # A .env.local nincs a repoban, ezert a build itt a titkokbol kapja meg
+      # a Supabase cimet es kulcsot. Nelkuluk a szavazas "most nem elerheto"
+      # uzenetet ir ki, mert a kliens ures cimmel es kulccsal keszul el.
       - run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
       - uses: actions/upload-pages-artifact@v3
         with:
