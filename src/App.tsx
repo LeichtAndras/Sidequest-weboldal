@@ -29,7 +29,7 @@ const categories = [...new Set(nyersPartnerek.map((partner) => partner.category)
 
 /** Harom merfoldko, minden harmadik kartya utan. */
 const merfoldkovek = [
-  { szam: '9', szoveg: 'partner Budapesten' },
+  { szam: '10', szoveg: 'partner Budapesten' },
   {
     szam: 'közel 10 ezer',
     szoveg: 'követő',

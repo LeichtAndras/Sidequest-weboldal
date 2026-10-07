@@ -162,5 +162,23 @@
     ],
     "conditions": "",
     "venue": "pixity.webp"
+  },
+  {
+    "name": "Yoáron",
+    "slug": "yoaron",
+    "addedDate": "2026-10-07",
+    "discount": "10%",
+    "category": "Secondhand",
+    "redeem": "QR kód a helyszínen",
+    "image": "/images/yoaron.jpg",
+    "description": "Ellenőrzött, eredeti márkás secondhand ruhák a bolti ár töredékéért. Ralph Lauren, Lacoste, Tommy Hilfiger, Carhartt, Stone Island és még sok más. Streetwear, vintage és old money darabok, folyamatosan frissülő kínálattal.",
+    "address": "Budapest, Csengery u. 59, 1067",
+    "steps": [
+      "Válaszd ki a ruhákat a boltban",
+      "Olvasd be a SideQuest QR kódot a kasszánál",
+      "Megkapod a kedvezményt"
+    ],
+    "conditions": "",
+    "venue": "yoaron.webp"
   }
 ]

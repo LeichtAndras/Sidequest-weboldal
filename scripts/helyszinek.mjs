@@ -27,6 +27,9 @@ const HELYSZINEK = {
   'leonoria-kvizbox': { forras: 'leonoria-kvizbox-v2.jpg', fokusz: 0.45 },
   'base-bar': { forras: 'base-bar-v2.jpg', fokusz: 0.45 },
   'pixity': { forras: 'pixity-v2.jpg', fokusz: 0.5, fenyero: 1.18, kontraszt: 1.08 },
+  // A forras mar a bekeretezett rajzrol levagott 4:3-as resz, keret es fal
+  // nelkul. Az enyhe vilagositas a papir szurkeseget viszi el.
+  'yoaron': { forras: 'yoaron.jpg', fokusz: 0.5, fenyero: 1.07, kontraszt: 1.04 },
 }
 
 /** 4:3-as kivagas a megadott fuggoleges fokusz korul. */
