@@ -33,6 +33,9 @@ const HELYSZINEK = {
   // A forras mar a bekeretezett rajzrol levagott 4:3-as resz, keret es fal
   // nelkul. Az enyhe vilagositas a papir szurkeseget viszi el.
   'yoaron': { forras: 'yoaron.jpg', fokusz: 0.5, fenyero: 1.07, kontraszt: 1.04 },
+  // Ideiglenes: a bika logo a sajat vilagos hatteren, 4:3-ra kiterjesztve.
+  // Ha jon a foto, eleg itt a forrast atirni es ujra futtatni a scriptet.
+  'rage-room-budapest': { forras: 'rage-room-budapest.jpg', fokusz: 0.5 },
 }
 
 /** 4:3-as kivagas a megadott fuggoleges fokusz korul. */

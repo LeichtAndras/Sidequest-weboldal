@@ -182,5 +182,24 @@
     "panelImage": "yoaron-ralph-lauren",
     "panelImageAlt": "Yoáron – Magyarország legnagyobb second hand Ralph Lauren kínálata",
     "venue": "yoaron.webp"
+  },
+  {
+    "name": "Rage Room Budapest",
+    "slug": "rage-room-budapest",
+    "addedDate": "2026-10-07",
+    "discount": "10%",
+    "category": "Élmény",
+    "redeem": "Online kuponkód",
+    "code": "SIDEQUEST10",
+    "image": "/images/rage-room-budapest.jpg",
+    "description": "Dolgozat, ex, hétfő? Mindegyiknek jár egy ütés. Kapsz egy baseballütőt és egy szobát tele törnivalóval, a többi rajtad múlik.",
+    "address": "Budapest, Kozma u. 7, Kozma Depó 8/2, 1108",
+    "steps": [
+      "Foglalj időpontot az oldalukon",
+      "A fizetésnél írd be a kuponkódot: SIDEQUEST10",
+      "A kedvezmény automatikusan levonásra kerül"
+    ],
+    "conditions": "Más kedvezménnyel nem összevonható.",
+    "venue": "rage-room-budapest.webp"
   }
 ]
