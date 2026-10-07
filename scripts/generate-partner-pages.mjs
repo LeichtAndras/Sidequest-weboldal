@@ -17,6 +17,9 @@ const VEG = '<!-- MEGOSZTAS VEGE -->'
 const GYOKER = '<div id="root"></div>'
 
 const partners = JSON.parse(readFileSync(join(gyoker, 'src/data/partners.json'), 'utf8'))
+const moziBeallitas = JSON.parse(readFileSync(join(gyoker, 'src/data/movie-vote.json'), 'utf8'))
+/** Ugyanaz a kapcsolo, mint a kliensben: hamisnal nincs /mozi oldal. */
+const moziAktiv = moziBeallitas.aktiv === true
 const kategoriaSzo = JSON.parse(readFileSync(join(gyoker, 'src/data/kategoriak.json'), 'utf8'))
 const alap = readFileSync(join(dist, 'index.html'), 'utf8')
 
@@ -155,9 +158,11 @@ for (const partner of partners) {
   db++
 }
 
-// Filmszavazas oldal
-mkdirSync(join(dist, 'mozi'), { recursive: true })
-writeFileSync(join(dist, 'mozi/index.html'), oldal('/mozi/', moziBlokk()))
+// Filmszavazas oldal, csak ha a vetites be van kapcsolva
+if (moziAktiv) {
+  mkdirSync(join(dist, 'mozi'), { recursive: true })
+  writeFileSync(join(dist, 'mozi/index.html'), oldal('/mozi/', moziBlokk()))
+}
 
 // Ismeretlen cimre is a weboldal jojjon be, ne a GitHub hibaoldala.
 writeFileSync(join(dist, '404.html'), oldal('/', null))
@@ -166,7 +171,7 @@ writeFileSync(join(dist, '404.html'), oldal('/', null))
 const ma = new Date().toISOString().slice(0, 10)
 const cimek = [
   `${SITE_URL}/`,
-  `${SITE_URL}/mozi/`,
+  ...(moziAktiv ? [`${SITE_URL}/mozi/`] : []),
   ...partners.map((partner) => `${SITE_URL}/${partner.slug}/`),
 ]
 const sitemap =
@@ -179,4 +184,7 @@ const sitemap =
 writeFileSync(join(dist, 'sitemap.xml'), sitemap)
 writeFileSync(join(gyoker, 'public/sitemap.xml'), sitemap)
 
-console.log(`Elorenderelve: fooldal + mozi + ${db} partner oldal + 404.html, sitemap: ${cimek.length} cim`)
+console.log(
+  `Elorenderelve: fooldal${moziAktiv ? ' + mozi' : ''} + ${db} partner oldal + 404.html, ` +
+    `sitemap: ${cimek.length} cim${moziAktiv ? '' : ' (a vetites ki van kapcsolva)'}`,
+)

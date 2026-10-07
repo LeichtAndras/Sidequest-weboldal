@@ -8,6 +8,12 @@ const idopont = z.string().refine((ertek) => !Number.isNaN(Date.parse(ertek)), {
 
 const Sema = z
   .object({
+    /**
+     * Ez a kapcsolo veszi le es teszi vissza az egesz vetitest. Hamisnal
+     * nincs mozi blokk a fooldalon, a /mozi oldal sem keszul el, es a
+     * sitemapbol is kimarad. A kod a helyen marad, csak nem latszik.
+     */
+    aktiv: z.boolean(),
     voteStart: idopont,
     voteEnd: idopont,
     /** Ha null, az esemeny idopontja meg nincs meg. */

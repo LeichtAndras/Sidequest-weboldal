@@ -2,6 +2,7 @@ import { Fragment, useEffect, useMemo, useState } from 'react'
 import partnersData from './data/partners.json'
 import ThumbCard from './components/ThumbCard'
 import MoziKartya from './components/MoziKartya'
+import { beallitas } from './mozi/beallitas'
 import CategoryFilter, { ALL } from './components/CategoryFilter'
 import Reveal from './components/Reveal'
 import Subscribe from './components/Subscribe'
@@ -145,7 +146,8 @@ export default function App({ utvonal }: Props = {}) {
       <div className="tartalom-szakasz">
         <div className="tartalom-arnyek" />
         <div className="tartalom-belso relative z-10 mx-auto w-full max-w-[480px] px-5 pb-12 md:max-w-[1120px]">
-          <MoziKartya />
+          {/* A vetites a movie-vote.json "aktiv" kapcsolojan mulik */}
+          {beallitas.aktiv ? <MoziKartya /> : null}
 
           <nav aria-label="Kategóriák" className="relative z-20 mt-10">
             <CategoryFilter categories={categories} active={category} onSelect={selectCategory} />
