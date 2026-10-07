@@ -569,10 +569,16 @@ body {
   padding: 4.5cqw 5.5cqw 6.5cqw;
 }
 
+/*
+ * A pre-line miatt a leirasban levo sortoresek megmaradnak, az ures sor
+ * pedig bekezdeskozt ad. Ahol a szovegben nincs sortores, ott semmi nem
+ * valtozik, mert a sor vegi tordelest a pre-line nem erinti.
+ */
 .tn-panel-szoveg {
   margin: 0;
   font-size: 4.3cqw;
   line-height: 1.55;
+  white-space: pre-line;
 }
 
 .tn-panel-blokk {

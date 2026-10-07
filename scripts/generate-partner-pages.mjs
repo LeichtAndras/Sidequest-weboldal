@@ -82,8 +82,10 @@ function metaBlokk(partner) {
   const leiras =
     partner.description?.trim() ||
     `${partner.name} ${partner.discount} kedvezménnyel, SideQuest-tel. ${partner.redeem}.`
-  // A kereso leiras rovid, a megosztasi elonezete maradhat teljes
+  // A kereso leiras rovid, a megosztasi elonezete maradhat teljes.
+  // A meta tagek egy soros ertekek, ezert a bekezdeskozoket osszevonjuk.
   const rovid = rovidLeiras(leiras)
+  const egysoros = leiras.replace(/\s+/g, ' ').trim()
 
   return [
     `<title>${esc(cim)}</title>`,
@@ -94,12 +96,12 @@ function metaBlokk(partner) {
     `<meta property="og:locale" content="hu_HU" />`,
     `<meta property="og:url" content="${url}" />`,
     `<meta property="og:title" content="${esc(`${partner.name} ${partner.discount} kedvezmény`)}" />`,
-    `<meta property="og:description" content="${esc(leiras)}" />`,
+    `<meta property="og:description" content="${esc(egysoros)}" />`,
     `<meta property="og:image" content="${kep}" />`,
     `<meta property="og:image:alt" content="${esc(kepLeiras(partner))}" />`,
     `<meta name="twitter:card" content="summary_large_image" />`,
     `<meta name="twitter:title" content="${esc(`${partner.name} ${partner.discount} kedvezmény`)}" />`,
-    `<meta name="twitter:description" content="${esc(leiras)}" />`,
+    `<meta name="twitter:description" content="${esc(egysoros)}" />`,
     `<meta name="twitter:image" content="${kep}" />`,
   ]
     .map((sor) => `    ${sor}`)
