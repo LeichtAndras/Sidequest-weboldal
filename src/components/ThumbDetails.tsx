@@ -13,6 +13,18 @@ export default function ThumbDetails({ partner }: { partner: Partner }) {
 
   return (
     <div className="tn-panel-belso">
+      {partner.panelImage ? (
+        <img
+          className="tn-panel-kep"
+          src={`/partnerkepek/${partner.panelImage}.webp`}
+          srcSet={`/partnerkepek/${partner.panelImage}-640.webp 640w, /partnerkepek/${partner.panelImage}.webp 960w`}
+          sizes="(min-width: 768px) 440px, 92vw"
+          alt={partner.panelImageAlt ?? ''}
+          loading="lazy"
+          decoding="async"
+        />
+      ) : null}
+
       {partner.description ? <p className="tn-panel-szoveg">{partner.description}</p> : null}
 
       {partner.code ? (

@@ -2,6 +2,9 @@
  * Helyszinkepek a kartyakhoz: eles, teljes kartyat kitolto foto, elmosas es
  * sotetites nelkul. Egy kep helyszinenkent, 4:3-ra vagva, ket meretben.
  *
+ * A vegen a lenyilo panelbe kerulo kepek is elkeszulnek. Azokat nem vagjuk,
+ * mert a rajtuk levo szoveg es logo nem eshet le a szelen.
+ *
  * Futtatas: npm run helyszinek
  */
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
@@ -82,3 +85,29 @@ for (const partner of partnerek) {
 }
 await writeFile('src/data/partners.json', JSON.stringify(partnerek, null, 2) + '\n')
 console.log(`Kesz. partners.json: ${valtozott} helyszinkep beirva.`)
+
+/*
+ * A lenyilo panel kepei. Ezeket nem vagjuk es nem tolteljuk ki: a sajat
+ * aranyukban maradnak, mert rajtuk szoveg es logo is lehet, aminek a
+ * szelen kellene lelognia. Csak kicsinyites megy, ket szelessegben.
+ */
+const PANELKEPEK = {
+  'yoaron-ralph-lauren': 'yoaron-ralph-lauren.jpg',
+}
+
+const PANEL_CEL = 'public/partnerkepek'
+await mkdir(PANEL_CEL, { recursive: true })
+
+for (const [nev, forras] of Object.entries(PANELKEPEK)) {
+  const { width, height } = await sharp(`${FORRAS}/${forras}`).metadata()
+  for (const szeles of MERETEK) {
+    const puffer = await sharp(`${FORRAS}/${forras}`)
+      .resize({ width: Math.min(szeles, width), withoutEnlargement: true })
+      .sharpen({ sigma: 0.6 })
+      .webp({ quality: 84 })
+      .toBuffer()
+    const fajl = szeles === MERETEK[0] ? `${nev}.webp` : `${nev}-${szeles}.webp`
+    await writeFile(`${PANEL_CEL}/${fajl}`, puffer)
+  }
+  console.log(`panelkep ${nev}: ${width}x${height} (${(width / height).toFixed(2)}:1) -> ${MERETEK.join(', ')}`)
+}

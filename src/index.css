@@ -570,6 +570,20 @@ body {
 }
 
 /*
+ * Kep a panel tetejen. Teljes szelesseg, sajat arany, nincs vagas: a
+ * kepen levo szoveg es logo a szelekig megmarad. A lekerekites ugyanaz a
+ * 14 px, mint a panel tobbi dobozan.
+ */
+.tn-panel-kep {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-bottom: 4.5cqw;
+  border-radius: 14px;
+  background-color: rgba(11, 27, 58, 0.06);
+}
+
+/*
  * A pre-line miatt a leirasban levo sortoresek megmaradnak, az ures sor
  * pedig bekezdeskozt ad. Ahol a szovegben nincs sortores, ott semmi nem
  * valtozik, mert a sor vegi tordelest a pre-line nem erinti.

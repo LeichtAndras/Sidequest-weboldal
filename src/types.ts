@@ -18,6 +18,15 @@ export type Partner = {
   image?: string
   /** CSS object-position a kephez, pl. "center 20%". Ures: kozep. */
   imagePosition?: string
+  /**
+   * Kep a lenyilo panel tetejen, a leiras folott, teljes szelessegben.
+   * A /public/partnerkepek mappabol a fajlnev kiterjesztes nelkul, pl.
+   * "yoaron-ralph-lauren". A scripts/helyszinek.mjs keszit belole webp-et
+   * ket szelessegben, vagas nelkul, igy a kepen levo szoveg nem esik le.
+   */
+  panelImage?: string
+  /** A panelkep alt szovege. Panelkep mellett mindig legyen megadva. */
+  panelImageAlt?: string
   /** Lenyilo resz. Ami ures, az nem jelenik meg. */
   description?: string
   address?: string
