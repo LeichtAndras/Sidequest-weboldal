@@ -28,9 +28,13 @@ const partners = [...nyersPartnerek].sort(
 // A szuro gombok sorrendje az eredeti listat koveti, nem az uj partnereket.
 const categories = [...new Set(nyersPartnerek.map((partner) => partner.category))]
 
-/** Harom merfoldko, minden harmadik kartya utan. */
+/**
+ * Harom merfoldko, minden harmadik kartya utan. A partnerek szamat nem
+ * irjuk be kezzel, mert uj hely felvetelekor konnyu elfelejteni: a
+ * listabol olvassuk.
+ */
 const merfoldkovek = [
-  { szam: '10', szoveg: 'partner Budapesten' },
+  { szam: String(nyersPartnerek.length), szoveg: 'partner Budapesten' },
   {
     szam: 'közel 10 ezer',
     szoveg: 'követő',
