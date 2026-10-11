@@ -1648,3 +1648,201 @@ body {
     transition: none;
   }
 }
+
+
+/* ===== Mai ajanlat ===== */
+
+/*
+ * Ez a blokk nem hoz uj szint, betut vagy arnyekot. A kartya ugyanaz a
+ * hk- keret, mint a helyszinkartyaknal, a krem resz ugyanaz a
+ * tn-panel-belso, a gomb ugyanaz a tn-kapszula. Itt csak az elrendezes van.
+ */
+
+.ma-szekcio {
+  margin-bottom: 2.5rem;
+}
+
+.ma-cim {
+  margin: 0 0 1rem;
+  text-align: center;
+  container-type: inline-size;
+}
+
+.ma-cim .tn-felirat {
+  font-size: 7.5cqw;
+}
+
+@media (min-width: 768px) {
+  .ma-cim .tn-felirat {
+    font-size: 2.6rem;
+  }
+}
+
+/* A krem resz alja: a leiras es a gomb egymas alatt, telefonon is kenyelmesen */
+.ma-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3.5cqw;
+}
+
+.ma-gomb {
+  text-decoration: none;
+}
+
+.ma-gomb-nyil {
+  font-size: 4.4cqw;
+  flex: none;
+}
+
+/*
+ * Holnapi teaser. Ugyanaz a kartyakeret, csak nincs benne foto: a krem
+ * panel tolti ki, mint a lenyilo reszt a helyszinkartyan.
+ */
+.ma-teaser {
+  margin-top: 0.9rem;
+  container-type: inline-size;
+}
+
+.ma-teaser-belso {
+  background-color: var(--color-cream);
+  color: var(--sotetkek);
+  padding: 4.5cqw 5.5cqw 5cqw;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2.4cqw;
+}
+
+/* A pirula itt nem a fotora kerul, hanem a szovegfolyamba */
+.ma-teaser-cimke {
+  position: static;
+  align-self: flex-start;
+}
+
+.ma-teaser-izelito {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 5.2cqw;
+  line-height: 1.15;
+  color: var(--sotetkek);
+}
+
+/*
+ * A holnapi nev elmosva. Nem valasztható ki es a felolvaso sem mondja,
+ * a kepernyon viszont latszik, hogy van ott valami.
+ */
+.ma-teaser-nev {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 6.4cqw;
+  line-height: 1.1;
+  color: rgba(11, 27, 58, 0.55);
+  filter: blur(0.9cqw);
+  user-select: none;
+  pointer-events: none;
+}
+
+.ma-teaser-ora {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 1.6cqw;
+  font-size: 3.6cqw;
+  color: rgba(11, 27, 58, 0.75);
+}
+
+.ma-teaser-felirat {
+  font-weight: 600;
+}
+
+.ma-teaser-ora .mozi-ora-digit {
+  font-size: 4.2cqw;
+  color: var(--sotetkek);
+}
+
+/*
+ * Asztalon a kartya 1080 pixel szeles, a partner kartyak 341 koruliek, ezert
+ * a cqw ertekek haromszor akkorak lennenek. Megoldas: a kartya ket oszlopra
+ * valik, es a fotos resz sajat konteneré valik. A benne levo cqw meretek igy
+ * a sajat 460 pixeles szelessegehez igazodnak, nem a teljes kartyahoz, tehat
+ * a nev, a pirula es a robbanas magatol akkora lesz, mint egy partner kartyan.
+ */
+@media (min-width: 768px) {
+  /*
+   * A szekcio keskenyebb, mint a kartyaracs. Egy darab kiemelt kartya
+   * teljes szelessegben uresnek hatna, igy viszont a fotos resz pont
+   * akkora, mint egy partner kartya a racsban.
+   */
+  .ma-szekcio {
+    max-width: 760px;
+    margin-inline: auto;
+  }
+
+  .ma-kartya {
+    display: flex;
+    align-items: stretch;
+  }
+
+  .ma-kartya .hk-lap {
+    flex: 0 0 44%;
+    container-type: inline-size;
+  }
+
+  .ma-kartya .ma-panel {
+    flex: 1;
+    min-width: 0;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1.6rem 1.9rem;
+  }
+
+  .ma-panel .tn-panel-szoveg {
+    font-size: 1rem;
+  }
+
+  /* A gomb a krem panelben mar nem cqw szerint meretezodik */
+  .ma-gomb {
+    padding: 0.3rem 0.75rem;
+    gap: 0.35rem;
+    border-width: 2px;
+    box-shadow: 0 2px 0 var(--sotetkek);
+  }
+
+  .ma-gomb .tn-gomb-felirat {
+    font-size: 0.95rem;
+  }
+
+  .ma-gomb-nyil {
+    font-size: 1.05rem;
+  }
+
+  .ma-teaser-belso {
+    gap: 0.55rem;
+    padding: 1.3rem 1.6rem 1.5rem;
+  }
+
+  .ma-teaser-cimke {
+    padding: 0.16rem 0.45rem;
+    border-width: 2px;
+    font-size: 0.71rem;
+  }
+
+  .ma-teaser-izelito {
+    font-size: 1.3rem;
+  }
+
+  .ma-teaser-nev {
+    font-size: 1.6rem;
+    filter: blur(5px);
+  }
+
+  .ma-teaser-ora {
+    gap: 0.4rem;
+    font-size: 0.9rem;
+  }
+
+  .ma-teaser-ora .mozi-ora-digit {
+    font-size: 1rem;
+  }
+}

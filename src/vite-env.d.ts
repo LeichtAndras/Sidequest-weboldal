@@ -10,3 +10,10 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv
 }
+
+/**
+ * A build napja budapesti ido szerint, "ÉÉÉÉ-HH-NN". A vite.config.ts teszi
+ * be. A szerveren es a bongeszo elso renderjeben is ez az ertek fut, igy a
+ * hidratalas illeszkedik, utana valtunk a valodi mai napra.
+ */
+declare const __BUILD_NAP__: string

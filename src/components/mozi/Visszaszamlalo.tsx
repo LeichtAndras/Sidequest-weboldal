@@ -10,8 +10,12 @@ type Props = {
   onLejart?: () => void
   /** Egyszer hivjuk, amikor 24 oranal kevesebb marad. */
   onUtolsoNap?: () => void
-  /** "rovid": egy sor szoveg. "ora": 07:00:52:10. Alapertelmezes: negy blokk. */
-  valtozat?: 'blokkok' | 'rovid' | 'ora'
+  /**
+   * "rovid": egy sor szoveg. "ora": 07:00:52:10. "ejfel": 07:52:10, nap
+   * nelkul, mert az ejfelig hatralevo ido sosem tobb egy napnal.
+   * Alapertelmezes: negy blokk.
+   */
+  valtozat?: 'blokkok' | 'rovid' | 'ora' | 'ejfel'
 }
 
 type Bontas = { nap: number; ora: number; perc: number; mp: number }
@@ -82,6 +86,16 @@ function Visszaszamlalo({ cel, onLejart, onUtolsoNap, valtozat = 'blokkok' }: Pr
     return (
       <span className="mozi-ora-rovid" role="timer" aria-live="off">
         {ertek ? rovidSzoveg(ertek) : 'Hamarosan'}
+      </span>
+    )
+  }
+
+  if (valtozat === 'ejfel') {
+    return (
+      <span className="mozi-ora-digit" role="timer" aria-live="off">
+        {ertek
+          ? `${ket(ertek.nap * 24 + ertek.ora)}:${ket(ertek.perc)}:${ket(ertek.mp)}`
+          : '--:--:--'}
       </span>
     )
   }

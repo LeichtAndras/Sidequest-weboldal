@@ -27,6 +27,17 @@ export type Partner = {
   panelImage?: string
   /** A panelkep alt szovege. Panelkep mellett mindig legyen megadva. */
   panelImageAlt?: string
+  /**
+   * Mely napokon van nyitva. 1 = hetfo ... 7 = vasarnap. Hianyzo vagy ures
+   * lista eseten minden nap nyitva. A mai ajanlat ez alapjan hagyja ki a
+   * zarva tarto helyeket.
+   */
+  openDays?: number[]
+  /**
+   * Rovid izelito a holnapi ajanlat teaserehez, pl. "valami pörgős". Ez nem
+   * a category mezo: az a szuro cimkeje, ez csak egy kedvcsinalo.
+   */
+  izelito?: string
   /** Lenyilo resz. Ami ures, az nem jelenik meg. */
   description?: string
   address?: string

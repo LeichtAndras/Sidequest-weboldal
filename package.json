@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "kepek": "node scripts/kepek.mjs",
     "helyszinek": "node scripts/helyszinek.mjs",
-    "mozikep": "node scripts/mozikep.mjs"
+    "mozikep": "node scripts/mozikep.mjs",
+    "teszt": "node --test \"src/**/*.teszt.ts\""
   },
   "dependencies": {
     "react": "^19.1.1",

@@ -28,7 +28,29 @@ function supabaseEllenorzes(kornyezet: Record<string, string>): Plugin {
   }
 }
 
+/**
+ * A build napja budapesti ido szerint. A mai ajanlat elso renderje ezt
+ * hasznalja a szerveren es a bongeszoben is, igy a hidratalas illeszkedik.
+ * A valodi mai napra a kliens a beakadas utan valt.
+ */
+function buildNap() {
+  const r: Record<string, string> = {}
+  const forma = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/Budapest',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  })
+  for (const resz of forma.formatToParts(Date.now())) {
+    if (resz.type !== 'literal') r[resz.type] = resz.value
+  }
+  return `${r.year}-${r.month}-${r.day}`
+}
+
 export default defineConfig(({ isSsrBuild, mode }) => ({
+  define: {
+    __BUILD_NAP__: JSON.stringify(buildNap()),
+  },
   // Az oldal a sidequestbp.hu gyokereben fut, ezert a base "/".
   // Ha valaha alkonyvtarbol szolgalnank ki, pl. felhasznalonev.github.io/sidequest/,
   // akkor ezt "/sidequest/"-re kell atirni.
