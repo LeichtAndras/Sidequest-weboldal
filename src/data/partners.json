@@ -85,6 +85,7 @@
     "addedDate": "",
     "discount": "15%",
     "category": "Élmény",
+    "dailyPick": false,
     "redeem": "Mondd a pénztárnál: \"SideQuest\"",
     "image": "/images/szelfimuzeum.jpg",
     "description": "Színes termek egymás után, mindegyik fotózásra kitalálva. Gyorsan végigmegy az ember rajta, viszont tele lesz a galéria.",

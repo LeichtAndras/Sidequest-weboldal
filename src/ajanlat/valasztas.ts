@@ -155,10 +155,13 @@ function egyNap(
  * kerdezzuk meg.
  */
 export function ajanlatRa(
-  partnerek: Partner[],
+  nyersPartnerek: Partner[],
   datum: string,
   felulirasok: Feluliras[] = [],
 ): Partner | null {
+  // Akinel a dailyPick false, az ki van veve a jatekbol. Ez nem napi
+  // korlatozas, hanem teljes kihagyas, ezert meg a felulirás sem hozza fel.
+  const partnerek = nyersPartnerek.filter((p) => p.dailyPick !== false)
   if (partnerek.length === 0) return null
 
   const tavolsag = Math.round((napToIdo(datum) - napToIdo(KEZDET)) / NAP)

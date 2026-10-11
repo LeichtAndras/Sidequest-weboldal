@@ -35,6 +35,12 @@ export type Partner = {
    */
   openDays?: number[]
   /**
+   * Szerepeljen-e a mai ajanlat forgatasaban. Hianyzo mezo eseten igen.
+   * A false teljes kihagyast jelent, nem csak egy-egy napot: ilyenkor a
+   * hely sosem kerul fel mai vagy holnapi ajanlatkent.
+   */
+  dailyPick?: boolean
+  /**
    * Rovid izelito a holnapi ajanlat teaserehez, pl. "valami pörgős". Ez nem
    * a category mezo: az a szuro cimkeje, ez csak egy kedvcsinalo.
    */

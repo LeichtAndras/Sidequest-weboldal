@@ -174,3 +174,28 @@ test('valodi adatok: minden napra jut ajanlat, es nincs ket egyforma egymas utan
     elozo = mai.slug
   }
 })
+
+test('a dailyPick false teljesen kiveszi a forgatasbol', () => {
+  const lista = [p('a'), p('b'), { ...(p('c') as object), dailyPick: false } as never]
+  let nap = KEZDET
+  for (let i = 0; i < 200; i++) {
+    nap = kovetkezoNap(nap)
+    assert.notEqual(ajanlatRa(lista, nap)?.slug, 'c', `${nap}: a kihagyott hely megis feljott`)
+  }
+  // Meg a felulirás sem hozza fel
+  assert.notEqual(ajanlatRa(lista, '2026-11-05', [{ datum: '2026-11-05', slug: 'c' }])?.slug, 'c')
+})
+
+test('valodi adatok: a Szelfimuzeum sosem jon fel', () => {
+  const sm = (VALODI as unknown as Array<{ slug: string; dailyPick?: boolean }>).find(
+    (x) => x.slug === 'szelfimuzeum',
+  )
+  assert.ok(sm, 'nincs szelfimuzeum a partnerek kozott')
+  assert.equal(sm.dailyPick, false)
+
+  let nap = KEZDET
+  for (let i = 0; i < 400; i++) {
+    nap = kovetkezoNap(nap)
+    assert.notEqual(ajanlatRa(VALODI, nap)?.slug, 'szelfimuzeum', `${nap}: megis a Szelfimuzeum jott`)
+  }
+})

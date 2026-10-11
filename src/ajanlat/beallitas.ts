@@ -34,10 +34,20 @@ if (!eredmeny.success) {
  * Elgepelt slug eseten a felulirás csendben hatastalan lenne, ezert inkabb
  * mar a buildnel elszallunk. Ugyanigy a ketszer felvett napnal.
  */
+const kihagyottak = new Set(partnerek.filter((p) => p.dailyPick === false).map((p) => p.slug))
+
 const ismert = new Set<string>()
 for (const f of eredmeny.data.felulirasok) {
   if (!slugok.has(f.slug)) {
     throw new Error(`Hibas src/data/ajanlat.json: nincs ilyen partner: "${f.slug}" (${f.datum})`)
+  }
+  // Nem hagyjuk, hogy a felulirás csendben hatastalan legyen.
+  if (kihagyottak.has(f.slug)) {
+    throw new Error(
+      `Hibas src/data/ajanlat.json: "${f.slug}" ki van veve a mai ajanlatbol (dailyPick: false), ` +
+        `igy a ${f.datum} napi felulirás nem lepne eletbe. Vedd ki a felulirást, vagy ` +
+        `allitsd vissza a partnernel a dailyPick mezot.`,
+    )
   }
   if (ismert.has(f.datum)) {
     throw new Error(`Hibas src/data/ajanlat.json: ${f.datum} ketszer szerepel`)
