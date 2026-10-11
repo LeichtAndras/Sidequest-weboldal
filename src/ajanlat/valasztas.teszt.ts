@@ -137,3 +137,40 @@ test('nyitva: hianyzo vagy ures lista minden napot jelent', () => {
   assert.equal(nyitva(p('a', []) as never, '2026-10-18'), true)
   assert.equal(nyitva(p('a', [1]) as never, '2026-10-18'), false)
 })
+
+/*
+ * Az alabbiak mar a valodi partnerlistan futnak, nem kitalalt adatokon.
+ * Igy ha valaki elrontja az openDays mezot, a teszt szol.
+ */
+
+const VALODI = (await import('../data/partners.json', { with: { type: 'json' } })).default as never[]
+
+test('valodi adatok: a Magic Rooms sosem esik hetvegere', () => {
+  const magic = (VALODI as unknown as Array<{ slug: string; openDays?: number[] }>).find(
+    (x) => x.slug === 'magic-rooms',
+  )
+  assert.ok(magic, 'nincs magic-rooms a partnerek kozott')
+  assert.deepEqual(magic.openDays, [1, 2, 3, 4, 5], 'a Magic Rooms feltetele: csak hetkoznap')
+
+  let nap = KEZDET
+  for (let i = 0; i < 400; i++) {
+    nap = kovetkezoNap(nap)
+    const hetvege = hetNapja(nap) >= 6
+    const valasztott = ajanlatRa(VALODI, nap)
+    if (hetvege) {
+      assert.notEqual(valasztott?.slug, 'magic-rooms', `${nap} hetvege, megis a Magic Rooms jott`)
+    }
+  }
+})
+
+test('valodi adatok: minden napra jut ajanlat, es nincs ket egyforma egymas utan', () => {
+  let nap = KEZDET
+  let elozo: string | undefined
+  for (let i = 0; i < 400; i++) {
+    nap = kovetkezoNap(nap)
+    const mai = ajanlatRa(VALODI, nap)
+    assert.ok(mai, `${nap}: nem jott ajanlat`)
+    assert.notEqual(mai.slug, elozo, `${nap}: ket egymas utani napon ugyanaz`)
+    elozo = mai.slug
+  }
+})

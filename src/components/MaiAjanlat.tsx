@@ -176,7 +176,8 @@ export default function MaiAjanlat() {
           <div className="ma-teaser-belso">
             <span className="hk-kategoria ma-teaser-cimke">Holnap</span>
 
-            <p className="ma-teaser-izelito">{holnapi.izelito ?? 'meglepetés'}</p>
+            {/* Izelito csak akkor, ha tenyleg van. Kitalalt helykitolto nincs. */}
+            {holnapi.izelito ? <p className="ma-teaser-izelito">{holnapi.izelito}</p> : null}
 
             <p className="ma-teaser-nev" aria-hidden="true">
               {holnapi.name}

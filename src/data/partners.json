@@ -23,6 +23,13 @@
     "addedDate": "",
     "discount": "25%",
     "category": "Szoba",
+    "openDays": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
     "redeem": "Add meg foglaláskor a kódot",
     "image": "/images/magicrooms.jpg",
     "description": "Szabadulószobák egész sorozata, a Harry Potter hangulatútól a Jumanjiig. Az egyik legjobbra értékelt hely a városban, kezdőknek is működik.",

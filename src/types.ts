@@ -28,9 +28,10 @@ export type Partner = {
   /** A panelkep alt szovege. Panelkep mellett mindig legyen megadva. */
   panelImageAlt?: string
   /**
-   * Mely napokon van nyitva. 1 = hetfo ... 7 = vasarnap. Hianyzo vagy ures
-   * lista eseten minden nap nyitva. A mai ajanlat ez alapjan hagyja ki a
-   * zarva tarto helyeket.
+   * Mely napokon hasznalhato a kedvezmeny. 1 = hetfo ... 7 = vasarnap.
+   * Hianyzo vagy ures lista eseten minden nap. A mai ajanlat ez alapjan
+   * hagyja ki azt, aki aznap zarva van vagy akinel a kedvezmeny nem el.
+   * Pl. a Magic Rooms feltetele: "Csak hetkoznap ervenyes."
    */
   openDays?: number[]
   /**
