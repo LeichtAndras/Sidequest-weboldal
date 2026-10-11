@@ -5,9 +5,8 @@ import type { Partner } from '../types'
 import { ROBBANAS } from '../robbanas'
 import { QrIcon, SpeechIcon, TagIcon } from './Icons'
 import Felirat from './Felirat'
-import Visszaszamlalo from './mozi/Visszaszamlalo'
 import { felulirasok } from '../ajanlat/beallitas'
-import { ajanlatRa, budapestiNap, kovetkezoEjfel, kovetkezoNap } from '../ajanlat/valasztas'
+import { ajanlatRa, budapestiNap, kovetkezoEjfel } from '../ajanlat/valasztas'
 import { KATTINTAS, MEGJELENT, kovet } from '../ajanlat/esemeny'
 
 const partnerek = partnersData as Partner[]
@@ -44,9 +43,8 @@ function egySor(szoveg?: string) {
 }
 
 /**
- * Mai ajanlat. Egy helyszin naponta, mindenkinek ugyanaz, budapesti nap
- * szerint. Alatta a holnapi ajanlat elmosott teaserrel es visszaszamlaloval,
- * ami ejfelkor magatol atvalt, oldalfrissites nelkul.
+ * Mai Quest. Egy helyszin naponta, mindenkinek ugyanaz, budapesti nap
+ * szerint. Ejfelkor magatol atvalt, oldalfrissites nelkul.
  *
  * A kartya a helyszinkartya vizualis nyelvet hasznalja: ugyanaz a hk-
  * keret, kategoria pirula, kedvezmeny robbanas es krem panel. Uj szin,
@@ -56,25 +54,34 @@ export default function MaiAjanlat() {
   // A build napja. A szerveren es a bongeszo elso renderjeben is ez fut,
   // ezert a hidratalas pontosan illeszkedik.
   const [nap, setNap] = useState(__BUILD_NAP__)
-  const [ejfel, setEjfel] = useState<number | null>(null)
   const doboz = useRef<HTMLElement>(null)
   const [kepHiba, setKepHiba] = useState(false)
 
-  hatasAzonnal(() => {
-    setNap(budapestiNap())
-    setEjfel(kovetkezoEjfel())
-  }, [])
+  const frissit = useCallback(() => setNap(budapestiNap()), [])
 
-  // Ejfelkor ujraszamolunk. Kis keses, hogy biztosan atlepjuk a hatart.
-  const lejart = useCallback(() => {
-    window.setTimeout(() => {
-      setNap(budapestiNap())
-      setEjfel(kovetkezoEjfel())
-    }, 1200)
-  }, [])
+  hatasAzonnal(() => {
+    frissit()
+  }, [frissit])
+
+  /*
+   * Ejfelkor atvaltunk. A kis raadas azert kell, hogy biztosan atlepjuk a
+   * hatart. Hatterbe tett fulon a bongeszo lassithatja az idozitot, ezert
+   * elotunesre is ujraszamolunk.
+   */
+  useEffect(() => {
+    const varakozas = Math.max(kovetkezoEjfel() - Date.now(), 0) + 1200
+    const ido = window.setTimeout(frissit, varakozas)
+    const elotunt = () => {
+      if (document.visibilityState === 'visible') frissit()
+    }
+    document.addEventListener('visibilitychange', elotunt)
+    return () => {
+      window.clearTimeout(ido)
+      document.removeEventListener('visibilitychange', elotunt)
+    }
+  }, [nap, frissit])
 
   const mai = useMemo(() => ajanlatRa(partnerek, nap, felulirasok), [nap])
-  const holnapi = useMemo(() => ajanlatRa(partnerek, kovetkezoNap(nap), felulirasok), [nap])
 
   // Megjelenes esemeny: akkor szol, amikor a kartya tenyleg lathatova valt.
   const szoltRol = useRef<string | null>(null)
@@ -101,9 +108,9 @@ export default function MaiAjanlat() {
   const leiras = egySor(mai.description)
 
   return (
-    <section className="ma-szekcio" aria-labelledby="mai-ajanlat-cim">
-      <h2 id="mai-ajanlat-cim" className="ma-cim">
-        <Felirat szoveg="Mit csináljunk ma?" />
+    <section className="ma-szekcio" aria-labelledby="mai-quest-cim">
+      <h2 id="mai-quest-cim" className="ma-cim">
+        <Felirat szoveg="Mai Quest" />
       </h2>
 
       <article ref={doboz} className="hk-kartya ma-kartya">
@@ -170,30 +177,6 @@ export default function MaiAjanlat() {
           </a>
         </div>
       </article>
-
-      {holnapi ? (
-        <div className="hk-kartya ma-teaser">
-          <div className="ma-teaser-belso">
-            <span className="hk-kategoria ma-teaser-cimke">Holnap</span>
-
-            {/* Izelito csak akkor, ha tenyleg van. Kitalalt helykitolto nincs. */}
-            {holnapi.izelito ? <p className="ma-teaser-izelito">{holnapi.izelito}</p> : null}
-
-            <p className="ma-teaser-nev" aria-hidden="true">
-              {holnapi.name}
-            </p>
-
-            <p className="ma-teaser-ora">
-              <span className="ma-teaser-felirat">Feloldás:</span>{' '}
-              {ejfel === null ? (
-                <span className="mozi-ora-digit">--:--:--</span>
-              ) : (
-                <Visszaszamlalo cel={ejfel} valtozat="ejfel" onLejart={lejart} />
-              )}
-            </p>
-          </div>
-        </div>
-      ) : null}
     </section>
   )
 }

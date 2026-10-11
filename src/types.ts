@@ -40,11 +40,6 @@ export type Partner = {
    * hely sosem kerul fel mai vagy holnapi ajanlatkent.
    */
   dailyPick?: boolean
-  /**
-   * Rovid izelito a holnapi ajanlat teaserehez, pl. "valami pörgős". Ez nem
-   * a category mezo: az a szuro cimkeje, ez csak egy kedvcsinalo.
-   */
-  izelito?: string
   /** Lenyilo resz. Ami ures, az nem jelenik meg. */
   description?: string
   address?: string

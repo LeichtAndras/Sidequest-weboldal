@@ -253,7 +253,6 @@ body {
   }
 }
 
-
 /*
  * Helyszinkartya. Egy felepites minden helyre: eles foto a teljes kartyan,
  * alul sotetedo gradient, es azon a nev meg a ket gomb.
@@ -686,7 +685,6 @@ body {
   }
 }
 
-
 /* ===== Mozi szavazas blokk ===== */
 
 .mozi-hero-ures {
@@ -705,7 +703,6 @@ body {
 .mozi-ora-rovid {
   font-variant-numeric: tabular-nums;
 }
-
 
 /* ===== A fooldal mozi kartyaja ===== */
 
@@ -801,7 +798,6 @@ body {
   }
 }
 
-
 /* ----- Hatarido jelzesek a mozi kartyan ----- */
 
 /* Rovid magyarazo sor a cim alatt */
@@ -845,8 +841,6 @@ body {
     justify-content: center;
   }
 }
-
-
 
 /* Ketyego visszaszamlalo: pink alap, krem szam, vastag keret, kemeny arnyek */
 .mozi-ora-pirula {
@@ -897,7 +891,6 @@ body {
     font-size: 0.9rem;
   }
 }
-
 
 /*
  * A banner mindket nezetben ket reszbol all: a kep es a sotetkek
@@ -1649,7 +1642,6 @@ body {
   }
 }
 
-
 /* ===== Mai ajanlat ===== */
 
 /*
@@ -1693,72 +1685,6 @@ body {
 .ma-gomb-nyil {
   font-size: 4.4cqw;
   flex: none;
-}
-
-/*
- * Holnapi teaser. Ugyanaz a kartyakeret, csak nincs benne foto: a krem
- * panel tolti ki, mint a lenyilo reszt a helyszinkartyan.
- */
-.ma-teaser {
-  margin-top: 0.9rem;
-  container-type: inline-size;
-}
-
-.ma-teaser-belso {
-  background-color: var(--color-cream);
-  color: var(--sotetkek);
-  padding: 4.5cqw 5.5cqw 5cqw;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2.4cqw;
-}
-
-/* A pirula itt nem a fotora kerul, hanem a szovegfolyamba */
-.ma-teaser-cimke {
-  position: static;
-  align-self: flex-start;
-}
-
-.ma-teaser-izelito {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: 5.2cqw;
-  line-height: 1.15;
-  color: var(--sotetkek);
-}
-
-/*
- * A holnapi nev elmosva. Nem valasztható ki es a felolvaso sem mondja,
- * a kepernyon viszont latszik, hogy van ott valami.
- */
-.ma-teaser-nev {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: 6.4cqw;
-  line-height: 1.1;
-  color: rgba(11, 27, 58, 0.55);
-  filter: blur(0.9cqw);
-  user-select: none;
-  pointer-events: none;
-}
-
-.ma-teaser-ora {
-  margin: 0;
-  display: flex;
-  align-items: baseline;
-  gap: 1.6cqw;
-  font-size: 3.6cqw;
-  color: rgba(11, 27, 58, 0.75);
-}
-
-.ma-teaser-felirat {
-  font-weight: 600;
-}
-
-.ma-teaser-ora .mozi-ora-digit {
-  font-size: 4.2cqw;
-  color: var(--sotetkek);
 }
 
 /*
@@ -1815,34 +1741,5 @@ body {
 
   .ma-gomb-nyil {
     font-size: 1.05rem;
-  }
-
-  .ma-teaser-belso {
-    gap: 0.55rem;
-    padding: 1.3rem 1.6rem 1.5rem;
-  }
-
-  .ma-teaser-cimke {
-    padding: 0.16rem 0.45rem;
-    border-width: 2px;
-    font-size: 0.71rem;
-  }
-
-  .ma-teaser-izelito {
-    font-size: 1.3rem;
-  }
-
-  .ma-teaser-nev {
-    font-size: 1.6rem;
-    filter: blur(5px);
-  }
-
-  .ma-teaser-ora {
-    gap: 0.4rem;
-    font-size: 0.9rem;
-  }
-
-  .ma-teaser-ora .mozi-ora-digit {
-    font-size: 1rem;
   }
 }
