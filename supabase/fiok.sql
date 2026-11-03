@@ -34,9 +34,9 @@ create policy "sajat profil olvasasa"
   to authenticated
   using (id = auth.uid());
 
--- Az anon szerepkor semmit nem csinalhat a tablaval, meg RLS mogott sem.
-revoke all on public.profiles from anon;
-revoke insert, update, delete on public.profiles from authenticated;
+-- Az anon semmit nem csinalhat a tablaval, a belepett user csak olvashat.
+-- Minden mas jogot elveszunk, a truncate-et is, amire az RLS nem vonatkozik.
+revoke all on public.profiles from anon, authenticated;
 grant select on public.profiles to authenticated;
 
 -- ---------------------------------------------------------------------

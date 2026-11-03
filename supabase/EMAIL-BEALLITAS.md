@@ -1,7 +1,15 @@
 # Belépés e-mail kóddal: Supabase és Resend beállítása
 
-Ezt egyszer kell végigcsinálni. A sorrend számít: előbb az SQL és a sablon,
-mert enélkül a levélben link megy kód helyett, és a belépés nem működik.
+Ezt egyszer kell végigcsinálni. A projekt: **sidequest**
+(`qkmzfccvpgymejgmvlin`), nem a régi Sidequest-mozi.
+
+Fontos: a Supabase a sablonokat **csak saját SMTP mellett** engedi
+szerkeszteni, az alap sablon pedig linket küld, nem kódot. Ezért a sorrend:
+SQL, beállítások, **Resend (4–6. pont)**, és csak utána a sablon (3. pont).
+Amíg a sablon nincs átírva, a kódos belépés nem működik.
+
+Állapot: az 1. és 2. pont kész (az SQL lefutott és ellenőrizve, a kód 6
+jegyű, 10 percig érvényes).
 
 ## 1. Az adatbázis
 
@@ -71,9 +79,8 @@ Body:
 
 Mentsd el mindkettőt.
 
-> A beépített e-mail-küldés **csak teszteléshez** jó: óránként kb. 2 levelet
-> küld, és csak a Supabase szervezeted tagjainak e-mail-címére. A saját
-> címeddel így ki tudod próbálni, de élesbe a Resend kell.
+> A beépített e-mail-küldés ehhez nem elég: a sablonját nem lehet
+> átírni, ezért mindenképp linket küld. A Resend tehát nem utólagos lépés.
 
 ## 4. Resend: domain
 
