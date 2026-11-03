@@ -16,6 +16,12 @@ export type Partner = {
    * "online_kod": foglalaskor egyedi koddal (3. fazis).
    */
   redemptionMode?: 'helyszini' | 'online_kod'
+  /**
+   * Partnerenkenti kapcsolo az uj fiokos beváltáshoz. Hamisnal a latogato
+   * a regi modon latja (QR, kozos kod). Teszteleshez ?uj=1, lasd
+   * src/fiok/kapcsolo.ts.
+   */
+  ujBevaltas?: boolean
   /** Online partnernel a foglalasi oldal, ide visz a kod mellett a gomb. */
   bookingUrl?: string
   /**

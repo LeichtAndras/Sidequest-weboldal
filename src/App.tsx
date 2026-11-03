@@ -4,6 +4,7 @@ import ThumbCard from './components/ThumbCard'
 import MoziKartya from './components/MoziKartya'
 import MaiAjanlat from './components/MaiAjanlat'
 import BelepesAblak from './components/fiok/BelepesAblak'
+import { useUjRendszer } from './fiok/kapcsolo'
 import { beallitas } from './mozi/beallitas'
 import CategoryFilter, { ALL } from './components/CategoryFilter'
 import Reveal from './components/Reveal'
@@ -62,6 +63,7 @@ type Props = {
 }
 
 export default function App({ utvonal }: Props = {}) {
+  const uj = useUjRendszer()
   const [openPartner, setOpenPartner] = useState<string | null>(
     () => partnerACimbol(utvonal)?.name ?? null,
   )
@@ -228,7 +230,7 @@ export default function App({ utvonal }: Props = {}) {
           </footer>
         </div>
       </div>
-      <BelepesAblak />
+      {uj ? <BelepesAblak /> : null}
     </div>
   )
 }

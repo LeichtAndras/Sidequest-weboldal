@@ -1,4 +1,5 @@
 import FiokPirula from './fiok/FiokPirula'
+import { useUjRendszer } from '../fiok/kapcsolo'
 
 type Fotó = {
   src: string
@@ -23,13 +24,16 @@ const fotok: Fotó[] = [
 ]
 
 export default function Header() {
+  const uj = useUjRendszer()
   return (
     <header className="hero pt-5">
       <div className="hero-fatyol" />
       <div className="hero-doboz relative mx-auto w-full max-w-[480px] px-4">
-        <div className="fiok-pirula-hely">
-          <FiokPirula />
-        </div>
+        {uj ? (
+          <div className="fiok-pirula-hely">
+            <FiokPirula />
+          </div>
+        ) : null}
         {/* Fotokollazs */}
         <div className="hero-kollazs relative">
           {fotok.map((foto) => (
