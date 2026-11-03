@@ -3,6 +3,8 @@ import Felirat from './Felirat'
 import CouponCode from './CouponCode'
 import ShareButton from './ShareButton'
 import { InfoIcon, MapPinIcon } from './Icons'
+import BevaltasBlokk from './fiok/BevaltasBlokk'
+import OnlineKodBlokk from './fiok/OnlineKodBlokk'
 
 const terkepLink = (cim: string) =>
   `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(cim)}`
@@ -24,6 +26,10 @@ export default function ThumbDetails({ partner }: { partner: Partner }) {
           decoding="async"
         />
       ) : null}
+
+      {/* Helyszini partnernel gombnyomasos beváltás, online partnernel szemelyes kod */}
+      {partner.redemptionMode === 'helyszini' ? <BevaltasBlokk partner={partner} /> : null}
+      {partner.redemptionMode === 'online_kod' ? <OnlineKodBlokk partner={partner} /> : null}
 
       {partner.description ? <p className="tn-panel-szoveg">{partner.description}</p> : null}
 

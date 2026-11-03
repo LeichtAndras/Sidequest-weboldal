@@ -10,7 +10,8 @@
     "kepek": "node scripts/kepek.mjs",
     "helyszinek": "node scripts/helyszinek.mjs",
     "mozikep": "node scripts/mozikep.mjs",
-    "teszt": "node --test \"src/**/*.teszt.ts\""
+    "teszt": "node --test \"src/**/*.teszt.ts\"",
+    "partnerek-sql": "node scripts/partnerek-sql.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.118.0",

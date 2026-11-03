@@ -1901,3 +1901,388 @@ body {
 .fiok-veszely {
   color: #9d1142;
 }
+
+
+/* ===== Beváltás a kasszanal ===== */
+
+/*
+ * Uj szin es betu nincs: a krem panel, a sotetkek szoveg, a rozsaszin
+ * kedvezmeny robbanas, a kek kapszula es a Titan One. A gomb a kartya
+ * lenyilo reszen all, ezert cqw-ben meretezodik, mint a panel tobbi eleme.
+ */
+.bev-blokk {
+  margin-bottom: 4.5cqw;
+}
+
+.bev-gomb {
+  width: 100%;
+  justify-content: center;
+  padding: 2.2cqw 4cqw;
+}
+
+/* A hosszu felirat ket sorba torhet, a tobbi gomb egy sorban marad */
+.bev-gomb-felirat {
+  white-space: normal;
+  text-align: center;
+  font-size: 4.4cqw;
+  line-height: 1.2;
+}
+
+.bev-gomb:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.bev-megerosites-cim {
+  margin: 0 2.8rem 0 0;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  line-height: 1.1;
+  text-transform: uppercase;
+  color: var(--sotetkek);
+}
+
+/* Teljes kepernyo a pénztár elott */
+.bev-kepernyo {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  display: flex;
+  justify-content: center;
+  padding: calc(0.75rem + env(safe-area-inset-top)) 0.75rem calc(0.75rem + env(safe-area-inset-bottom));
+  background-color: var(--color-ink);
+}
+
+.bev-lap {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  text-align: center;
+  border: 2px solid rgba(255, 255, 255, 0.16);
+  border-radius: 20px;
+}
+
+.bev-cimke {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(11, 27, 58, 0.65);
+}
+
+.bev-partner {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 8vw, 2.2rem);
+  line-height: 1.05;
+  text-transform: uppercase;
+  color: var(--sotetkek);
+}
+
+.bev-szazalek {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 15rem;
+  height: 10.7rem;
+  margin: 0.3rem 0;
+}
+
+/* A robbanas folyamatosan forog: elo kepernyon mozog, kepernyokepen all */
+.bev-robbanas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  animation: bev-forog 6s linear infinite;
+}
+
+.bev-szazalek-szam {
+  position: relative;
+  font-family: var(--font-display);
+  font-size: 4.2rem;
+  line-height: 1;
+  color: #ffffff;
+  text-shadow: 0 3px 0 var(--sotetkek);
+}
+
+.bev-nev {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  line-height: 1.1;
+  color: var(--sotetkek);
+}
+
+.bev-ora {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 2.6rem;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  color: var(--sotetkek);
+}
+
+/* A masik mozgo jel: ide-oda csuszo kek csik */
+.bev-sav {
+  width: 100%;
+  max-width: 18rem;
+  height: 0.7rem;
+  overflow: hidden;
+  border: 2px solid var(--sotetkek);
+  border-radius: 99px;
+  background-color: rgba(11, 27, 58, 0.08);
+}
+
+.bev-sav span {
+  display: block;
+  width: 30%;
+  height: 100%;
+  border-radius: 99px;
+  background-color: var(--color-accent);
+  animation: bev-csuszik 1.4s ease-in-out infinite alternate;
+}
+
+@keyframes bev-forog {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes bev-csuszik {
+  to {
+    transform: translateX(233%);
+  }
+}
+
+.bev-allapot {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--sotetkek);
+}
+
+/* Ugyanaz a szin, mint a mozi-hiba szovege */
+.bev-allapot-lejart {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  color: #9d1142;
+}
+
+.bev-kod {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--sotetkek);
+}
+
+.bev-kod strong {
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  font-weight: 400;
+  letter-spacing: 0.15em;
+}
+
+.bev-tipp {
+  max-width: 20rem;
+}
+
+/* Lejarva minden megall es elszurkul, hogy messzirol is latszodjon */
+.bev-lejart .bev-robbanas,
+.bev-lejart .bev-sav span {
+  animation: none;
+  filter: grayscale(1);
+  opacity: 0.45;
+}
+
+.bev-lejart .bev-szazalek-szam,
+.bev-lejart .bev-ora {
+  opacity: 0.45;
+}
+
+/*
+ * Csokkentett mozgasnal sem allitjuk meg: a mozgas itt nem diszlet, hanem
+ * azt bizonyitja, hogy a kepernyo el. Csak lassabb.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .bev-robbanas {
+    animation-duration: 14s;
+  }
+
+  .bev-sav span {
+    animation-duration: 3s;
+  }
+}
+
+/* A Fiokom oldal listaja: nev balra, adat jobbra, vekony elvalasztoval */
+.fiok-lista {
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fiok-lista li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid rgba(11, 27, 58, 0.12);
+  font-size: 0.92rem;
+  color: var(--sotetkek);
+}
+
+.fiok-lista-nev {
+  font-weight: 700;
+}
+
+.fiok-lista-adat {
+  color: rgba(11, 27, 58, 0.7);
+  text-align: right;
+}
+
+/* Szemelyes online kod a kartyan es a Fiokom oldalon, a meglevo kuponkod dobozzal */
+.bev-kod-sor {
+  margin-bottom: 0.9rem;
+}
+
+.bev-kod-cimke {
+  margin: 0 0 0.35rem;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--sotetkek);
+}
+
+.bev-kod-cimke span {
+  font-weight: 400;
+  color: rgba(11, 27, 58, 0.7);
+}
+
+.bev-foglalas {
+  text-decoration: none;
+}
+
+/*
+ * Adatkezelesi tajekoztato. A mozi-panel krem lapjan hosszu szoveg:
+ * bekezdesek, listak es tablazatok ugyanazzal a betumerettel.
+ */
+.adat-szoveg p,
+.adat-szoveg li,
+.adat-tabla {
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.adat-szoveg p {
+  margin: 0.7rem 0 0;
+}
+
+.adat-szoveg .adat-fej {
+  margin-top: 0;
+}
+
+.adat-szoveg a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  overflow-wrap: anywhere;
+}
+
+.adat-alcim {
+  margin: 1.1rem 0 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.adat-lista {
+  margin: 0.6rem 0 0;
+  padding-left: 1.2rem;
+  list-style: disc;
+}
+
+.adat-lista li + li {
+  margin-top: 0.35rem;
+}
+
+.adat-tabla {
+  width: 100%;
+  margin-top: 0.7rem;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.adat-tabla th,
+.adat-tabla td {
+  padding: 0.55rem 0.6rem 0.55rem 0;
+  border-bottom: 1px solid rgba(11, 27, 58, 0.12);
+  vertical-align: top;
+}
+
+.adat-tabla th {
+  font-weight: 700;
+  border-bottom-width: 2px;
+  border-bottom-color: var(--sotetkek);
+}
+
+.adat-tabla td:first-child {
+  font-weight: 700;
+}
+
+/*
+ * Telefonon a tablazat sorai egymas alatti kartyak: a cella elott kis
+ * betuvel az oszlop neve, igy semmit nem kell oldalra gorgetni.
+ */
+@media (max-width: 559px) {
+  .adat-tabla thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+
+  .adat-tabla,
+  .adat-tabla tbody,
+  .adat-tabla tr,
+  .adat-tabla td {
+    display: block;
+  }
+
+  .adat-tabla tr {
+    padding: 0.6rem 0.75rem;
+    border: 2px solid var(--sotetkek);
+    border-radius: 14px;
+    background-color: rgba(11, 27, 58, 0.04);
+  }
+
+  .adat-tabla tr + tr {
+    margin-top: 0.55rem;
+  }
+
+  .adat-tabla td {
+    padding: 0;
+    border: 0;
+  }
+
+  .adat-tabla td + td {
+    margin-top: 0.4rem;
+  }
+
+  .adat-tabla td::before {
+    content: attr(data-cimke);
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: rgba(11, 27, 58, 0.6);
+  }
+}

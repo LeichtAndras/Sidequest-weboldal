@@ -1,5 +1,8 @@
 import { useState } from 'react'
+import partnersData from './data/partners.json'
+import type { Partner } from './types'
 import Felirat from './components/Felirat'
+import CouponCode from './components/CouponCode'
 import BelepesAblak from './components/fiok/BelepesAblak'
 import { FiokHiba, belepesNyitasa, fiokTorlese, kijelentkezes, useFiok } from './fiok/fiok'
 
@@ -10,8 +13,19 @@ import { FiokHiba, belepesNyitasa, fiokTorlese, kijelentkezes, useFiok } from '.
  * A beváltások es az online kodok a 2. es 3. fazisban kerulnek ide, addig
  * a helyuk mar megvan, ures allapottal.
  */
+const nevek = new Map((partnersData as Partner[]).map((p) => [p.slug, p.name]))
+
+const DATUM = new Intl.DateTimeFormat('hu-HU', {
+  timeZone: 'Europe/Budapest',
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+})
+
 export default function Fiokom() {
   const fiok = useFiok()
+  const udvozlok = (fiok.bevaltasok ?? []).filter((b) => b.tipus === 'welcome')
+  const kodok = (fiok.bevaltasok ?? []).filter((b) => b.code)
   const [torlesKerdes, setTorlesKerdes] = useState(false)
   const [dolgozik, setDolgozik] = useState(false)
   const [hiba, setHiba] = useState<string | null>(null)
@@ -84,14 +98,42 @@ export default function Fiokom() {
                     <h2 className="tn-panel-cim">
                       <Felirat szoveg="Üdvözlő kedvezmények" kicsi valtozat="sotet" className="mozi-fejlec" />
                     </h2>
-                    <p className="mozi-jelzes">Még nem váltottál be üdvözlő kedvezményt.</p>
+                    {udvozlok.length === 0 ? (
+                      <p className="mozi-jelzes">Még nem váltottál be üdvözlő kedvezményt.</p>
+                    ) : (
+                      <ul className="fiok-lista">
+                        {udvozlok.map((b) => (
+                          <li key={b.partner_slug}>
+                            <span className="fiok-lista-nev">{nevek.get(b.partner_slug) ?? b.partner_slug}</span>
+                            <span className="fiok-lista-adat">
+                              {b.pct}% · {DATUM.format(new Date(b.created_at))}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
 
                   <div className="tn-panel-blokk">
                     <h2 className="tn-panel-cim">
                       <Felirat szoveg="Online kódjaid" kicsi valtozat="sotet" className="mozi-fejlec" />
                     </h2>
-                    <p className="mozi-jelzes">Még nem kaptál online kódot.</p>
+                    {kodok.length === 0 ? (
+                      <p className="mozi-jelzes">Még nem kaptál online kódot.</p>
+                    ) : (
+                      kodok.map((b) => (
+                        <div key={b.code} className="bev-kod-sor">
+                          <p className="bev-kod-cimke">
+                            {nevek.get(b.partner_slug) ?? b.partner_slug} · {b.tipus === 'welcome' ? 'üdvözlő' : 'havi'} kód ({b.pct}%)
+                            <span>
+                              {' '}
+                              · {Date.parse(b.expires_at) > Date.now() ? `${DATUM.format(new Date(Date.parse(b.expires_at) - 1000)).replace(/\.$/, '')}-ig érvényes` : 'lejárt'}
+                            </span>
+                          </p>
+                          <CouponCode code={b.code!} />
+                        </div>
+                      ))
+                    )}
                   </div>
 
                   {hiba ? <p className="mozi-hiba">{hiba}</p> : null}

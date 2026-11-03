@@ -6,6 +6,19 @@ export type Partner = {
   addedDate?: string
   discount: string
   /**
+   * Az udvozlo kedvezmeny szazaleka, amit a user partnerenkent egyszer kap
+   * meg. A normal kedvezmeny a discount mezo. Ha valtozik, az adatbazisba is
+   * at kell vinni: npm run partnerek-sql, aztan a supabase/partnerek.sql.
+   */
+  welcomeDiscount?: number
+  /**
+   * "helyszini": a kasszanal, gombnyomassal valtja be.
+   * "online_kod": foglalaskor egyedi koddal (3. fazis).
+   */
+  redemptionMode?: 'helyszini' | 'online_kod'
+  /** Online partnernel a foglalasi oldal, ide visz a kod mellett a gomb. */
+  bookingUrl?: string
+  /**
    * A helyszinkep fajlneve a /public/venues mappabol, pl. "base-bar.webp".
    * Az npm run helyszinek irja be. Uj hely eseten eleg ezt megadni.
    */
