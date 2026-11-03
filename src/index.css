@@ -1743,3 +1743,161 @@ body {
     font-size: 1.05rem;
   }
 }
+
+
+/* ===== Fiok: belepes, Fiokom oldal ===== */
+
+/*
+ * Nincs uj szin, betu vagy arnyek. A gombok a meglevo tn-kapszula, a mezok
+ * a mozi szavazas mozi-mezo stilusai, az ablak a /mozi oldal krem panelje.
+ * Itt csak az elrendezes es nehany fix meret van.
+ */
+
+/* Belepes / Fiokom a hero jobb felso sarkaban */
+.fiok-pirula-hely {
+  position: absolute;
+  z-index: 30;
+  top: 0;
+  right: 1rem;
+}
+
+.fiok-pirula {
+  gap: 0.3rem;
+  padding: 0.32rem 0.85rem;
+  border-width: 2px;
+  box-shadow: 0 2px 0 var(--sotetkek);
+  text-decoration: none;
+}
+
+.fiok-pirula .tn-gomb-felirat {
+  font-size: 0.82rem;
+}
+
+/*
+ * Az ablak: telefonon alulrol jon fel, asztalon kozepen all. A hatter az
+ * oldal sajat ink szine, attetszoen.
+ */
+.fiok-retes {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0.75rem 0.75rem calc(0.75rem + env(safe-area-inset-bottom));
+  background-color: rgba(5, 32, 46, 0.82);
+}
+
+@media (min-width: 640px) {
+  .fiok-retes {
+    align-items: center;
+  }
+}
+
+.fiok-lap {
+  width: 100%;
+  max-width: 480px;
+  max-height: calc(100dvh - 1.5rem);
+  margin-top: 0;
+  overflow-y: auto;
+}
+
+.fiok-lap-belso {
+  position: relative;
+  padding-top: 1.2rem;
+}
+
+.fiok-zaro {
+  position: absolute;
+  top: 0.8rem;
+  right: 0.8rem;
+  display: grid;
+  place-items: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border: 2px solid var(--sotetkek);
+  border-radius: 99px;
+  background-color: var(--color-cream);
+  color: var(--sotetkek);
+  font-size: 0.95rem;
+  box-shadow: 0 2px 0 var(--sotetkek);
+  cursor: pointer;
+}
+
+/* A cim ne csusszon a bezaro gomb ala */
+.fiok-lap-belso form > .tn-panel-cim:first-child,
+.fiok-lap-belso > div > .tn-panel-cim:first-child {
+  padding-right: 2.8rem;
+}
+
+/*
+ * Onallo mezo, nem a kereso soraban. 16 pixel, mert iPhone-on ennel
+ * kisebb betunel a Safari raközelit a mezore, es elcsuszik az oldal.
+ */
+.fiok-mezo {
+  display: block;
+  width: 100%;
+  font-size: 1rem;
+}
+
+.fiok-kod {
+  text-align: center;
+  font-size: 1.35rem;
+  letter-spacing: 0.35em;
+  font-variant-numeric: tabular-nums;
+}
+
+.fiok-pipa {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  margin-top: 0.85rem;
+  font-size: 0.92rem;
+  line-height: 1.4;
+  font-weight: 600;
+  color: var(--sotetkek);
+  cursor: pointer;
+}
+
+.fiok-pipa input {
+  flex: none;
+  width: 1.2rem;
+  height: 1.2rem;
+  margin: 0.05rem 0 0;
+  accent-color: var(--sotetkek);
+}
+
+.fiok-pipa a {
+  color: var(--sotetkek);
+  text-decoration: underline;
+}
+
+.fiok-masodlagos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin-top: 0.85rem;
+}
+
+.fiok-szoveggomb {
+  padding: 0.3rem 0;
+  border: 0;
+  background: none;
+  color: var(--sotetkek);
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.fiok-szoveggomb:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Ugyanaz a szin, mint a mozi-hiba szovege */
+.fiok-veszely {
+  color: #9d1142;
+}

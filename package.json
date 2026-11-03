@@ -13,6 +13,7 @@
     "teszt": "node --test \"src/**/*.teszt.ts\""
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.118.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "zod": "^4.6.5"

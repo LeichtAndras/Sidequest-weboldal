@@ -166,6 +166,30 @@ if (moziAktiv) {
   writeFileSync(join(dist, 'mozi/index.html'), oldal('/mozi/', moziBlokk()))
 }
 
+/**
+ * Sajat oldalak, amik nem kellenek a keresonek: a Fiokom szemelyes, az
+ * adatkezelesi tajekoztato pedig egyelore helykitolto. Ezert noindex, es a
+ * sitemapbe sem kerulnek.
+ */
+function belsoBlokk(utvonal, cim, leiras) {
+  return [
+    `<title>${esc(cim)}</title>`,
+    `<meta name="description" content="${esc(leiras)}" />`,
+    `<meta name="robots" content="noindex" />`,
+    `<link rel="canonical" href="${SITE_URL}${utvonal}" />`,
+  ]
+    .map((sor) => `    ${sor}`)
+    .join('\n')
+}
+
+for (const [utvonal, cim, leiras] of [
+  ['/fiokom/', 'Fiókom | SideQuest Budapest', 'A SideQuest fiókod: beváltott kedvezmények és online kódok.'],
+  ['/adatkezeles/', 'Adatkezelési tájékoztató | SideQuest Budapest', 'A SideQuest adatkezelési tájékoztatója.'],
+]) {
+  mkdirSync(join(dist, utvonal), { recursive: true })
+  writeFileSync(join(dist, utvonal, 'index.html'), oldal(utvonal, belsoBlokk(utvonal, cim, leiras)))
+}
+
 // Ismeretlen cimre is a weboldal jojjon be, ne a GitHub hibaoldala.
 writeFileSync(join(dist, '404.html'), oldal('/', null))
 

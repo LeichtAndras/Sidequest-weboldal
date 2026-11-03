@@ -1,3 +1,5 @@
+import FiokPirula from './fiok/FiokPirula'
+
 type Fotó = {
   src: string
   /** Mit abrazol a kep. Kepolvasonak es kereso motornak is ez szol. */
@@ -25,6 +27,9 @@ export default function Header() {
     <header className="hero pt-5">
       <div className="hero-fatyol" />
       <div className="hero-doboz relative mx-auto w-full max-w-[480px] px-4">
+        <div className="fiok-pirula-hely">
+          <FiokPirula />
+        </div>
         {/* Fotokollazs */}
         <div className="hero-kollazs relative">
           {fotok.map((foto) => (
