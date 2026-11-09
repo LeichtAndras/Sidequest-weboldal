@@ -4,9 +4,11 @@ A Pixity és a Rage Room Budapest (és minden `online_kod` módú partner)
 személyes kódokat oszt. A kódokat a partner adja, te töltöd fel a
 `code_pool` táblába.
 
-- **`normal`**: havi kód. Egy user egy partnertől havonta egyet kap.
+- **`normal`**: az alap kedvezmény kódja. Egy user egy partnertől naponta
+  legfeljebb egyet kap (`napi_limit`), a havi keret erejéig.
+- **`drop`**: dropok kódjai (lásd a 4. fázist).
 - **`welcome`**: üdvözlő kód. Csak az kapja, aki ezt a partnert választotta
-  üdvözlő ajándéknak (`welcome_offers`, lásd `supabase/ajandek.sql`).
+  üdvözlő ajándéknak (welcome ajánlat az `offers` táblában, lásd `AJANLATOK.md`).
   Online partnernél annyi ajándék választható, ahány szabad `welcome` kód
   van fent, ezért ha ajánlatot indítasz egy online partnerhez, előbb töltsd
   fel hozzá a kódokat.
