@@ -70,15 +70,26 @@ export default function BevaltasKepernyo({ bevaltas, onBezar }: Props) {
           </svg>
         </button>
 
-        <p className="bev-cimke">{bevaltas.tipus === 'welcome' ? 'Üdvözlő ajándék' : 'SideQuest kedvezmény'}</p>
+        <p className="bev-cimke">{bevaltas.tipus === 'welcome' ? 'Üdvözlő ajándék' : bevaltas.tipus === 'drop' ? 'Drop' : 'SideQuest kedvezmény'}</p>
         <h2 className="bev-partner">{bevaltas.partner}</h2>
 
-        <div className="bev-szazalek">
-          <svg className="bev-robbanas" viewBox="0 0 140 100" aria-hidden="true">
-            <path d={ROBBANAS} fill="#FF2D78" stroke="#0B1B3A" strokeWidth="3.4" strokeLinejoin="round" />
-          </svg>
-          <span className="bev-szazalek-szam">{bevaltas.pct}%</span>
-        </div>
+        {/* A forgo robbanas a jelvennyel; ha nincs jelveny, a csik es az ora ved */}
+        {bevaltas.jelveny ? (
+          <div className="bev-szazalek">
+            <svg className="bev-robbanas" viewBox="0 0 140 100" aria-hidden="true">
+              <path d={ROBBANAS} fill="#FF2D78" stroke="#0B1B3A" strokeWidth="3.4" strokeLinejoin="round" />
+            </svg>
+            <span
+              className="bev-szazalek-szam"
+              // A hosszabb jelveny (pl. "−5000") kisebb betuvel fer a robbanasba
+              style={bevaltas.jelveny.length > 4 ? { fontSize: bevaltas.jelveny.length > 6 ? '2.1rem' : '2.9rem' } : undefined}
+            >
+              {bevaltas.jelveny}
+            </span>
+          </div>
+        ) : null}
+
+        <p className="bev-ajanlat">{bevaltas.szoveg}</p>
 
         <p className="bev-nev">{bevaltas.keresztnev}</p>
 
@@ -102,12 +113,12 @@ export default function BevaltasKepernyo({ bevaltas, onBezar }: Props) {
           Azonosító: <strong>{bevaltas.rovidKod}</strong>
         </p>
 
+        <p className="bev-egy-kod">1 kód / foglalás</p>
+
         <p className="mozi-jelzes bev-tipp">
           {!lejart
-            ? 'Mutasd meg a pénztárosnak. Az óra és a mozgó jel mutatja, hogy élő a képernyő.'
-            : bevaltas.tipus === 'welcome'
-              ? 'Ez a beváltás lejárt. Az üdvözlő kedvezmény ennél a helynél fel van használva.'
-              : 'Ez a beváltás lejárt. Ha kell, a kártyán indíthatsz újat.'}
+            ? 'Mutasd meg a pultnál. Az óra és a mozgó jel mutatja, hogy élő a képernyő.'
+            : 'Ez a beváltás lejárt, és fel van használva.'}
         </p>
       </div>
     </div>,

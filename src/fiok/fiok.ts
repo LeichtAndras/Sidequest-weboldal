@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from 'react'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { kliens, vanTaroltMunkamenet } from './kliens'
-import { ajanlatokFrissitese } from './ajanlatok'
+import { kinalatFrissitese } from './kinalat'
 
 /**
  * A fiok allapota, egy helyen. A hero pirula, a belepo ablak, a Fiokom
@@ -17,54 +17,62 @@ export type Fiok = {
   email: string | null
   keresztnev: string | null
   /**
-   * A sajat beváltások, legujabb elol. Null, amig nincs betoltve. Ebbol
-   * tudja a kartya, hogy az udvozlo kedvezmeny fel van-e mar hasznalva.
+   * A sajat igenylesek (claims), legujabb elol. Null, amig nincs betoltve.
+   * Ebbol tudja a kartya, hogy van-e aktiv beváltás, es ma bevaltotta-e mar.
    */
-  bevaltasok: Bevaltas[] | null
-  /** Az udvozlo ajandek allapota. Null, amig nincs betoltve. */
-  ajandek: Ajandek | null
+  igenylesek: Igenyles[] | null
   /** Nyitva van-e a belepo ablak. */
   ablak: boolean
 }
 
-/** Egy sor a redemptions tablabol, ahogy a user latja. */
-export type Bevaltas = {
+/** Egy sor a claims tablabol, ahogy a user latja. */
+export type Igenyles = {
+  id: string
+  offer_id: number
   partner_slug: string
-  tipus: 'welcome' | 'normal'
-  pct: number
-  created_at: string
-  expires_at: string
+  tipus: 'alap' | 'welcome' | 'drop'
+  szoveg: string
+  igenyelve: string
+  bevaltva: string | null
+  lejarat: string
   /** Online partnernel a kiosztott kod, kulonben null. */
-  code: string | null
+  kod: string | null
+  rovid_kod: string
 }
 
 /**
- * Az udvozlo ajandek, ahogy a szerver latja (ajandekom RPC).
- *   nincs: meg nem valasztott
- *   aktiv: valasztott, 14 napja van bevaltani
+ * A welcome ajandek allapota, a sajat igenylesekbol szamolva:
+ *   nincs:     meg nem valasztott
+ *   aktiv:     valasztott, a lejaratig a pultnal bevalthato
  *   bevaltott: felhasznalta, tobbet nem valaszthat
- *   lejart: nem valtotta be idoben, ujra valaszthat
+ *   lejart:    nem valtotta be idoben, ujra valaszthat
  */
-export type Ajandek = {
+export type WelcomeAllapot = {
   statusz: 'nincs' | 'aktiv' | 'bevaltott' | 'lejart'
-  partner_slug?: string
-  partner?: string
-  pct?: number
-  valasztva?: string
-  lejarat?: string
-  bevaltva?: string | null
+  igenyles: Igenyles | null
 }
 
-/** Valaszthat-e most ajandekot. */
-export const valaszthat = (a: Ajandek | null) => a !== null && (a.statusz === 'nincs' || a.statusz === 'lejart')
-
-/** Az aktiv ajandek ennel a partnernel, ha van, es meg nem jart le. */
-export function aktivAjandek(a: Ajandek | null, slug: string): Ajandek | null {
-  if (a?.statusz !== 'aktiv' || a.partner_slug !== slug || !a.lejarat) return null
-  return Date.parse(a.lejarat) > Date.now() ? a : null
+/** Null, amig az igenylesek nincsenek betoltve. */
+export function welcomeAllapot(igenylesek: Igenyles[] | null): WelcomeAllapot | null {
+  if (igenylesek === null) return null
+  const sajat = igenylesek.filter((c) => c.tipus === 'welcome')
+  const bevaltott = sajat.find((c) => c.bevaltva !== null)
+  if (bevaltott) return { statusz: 'bevaltott', igenyles: bevaltott }
+  const utolso = sajat[0] ?? null
+  if (!utolso) return { statusz: 'nincs', igenyles: null }
+  return { statusz: Date.parse(utolso.lejarat) > Date.now() ? 'aktiv' : 'lejart', igenyles: utolso }
 }
 
-const KINT = { email: null, keresztnev: null, bevaltasok: null, ajandek: null }
+/** Valaszthat-e most welcome ajandekot. */
+export const valaszthat = (w: WelcomeAllapot | null) => w !== null && (w.statusz === 'nincs' || w.statusz === 'lejart')
+
+/** Az aktiv, meg be nem valtott welcome ajandek ennel a partnernel, ha van. */
+export function aktivWelcome(igenylesek: Igenyles[] | null, slug: string): Igenyles | null {
+  const w = welcomeAllapot(igenylesek)
+  return w?.statusz === 'aktiv' && w.igenyles?.partner_slug === slug ? w.igenyles : null
+}
+
+const KINT = { email: null, keresztnev: null, igenylesek: null }
 
 const SZERVER: Fiok = { allapot: 'ismeretlen', ...KINT, ablak: false }
 
@@ -174,58 +182,26 @@ export async function profilBetoltese() {
     email: felhasznalo.user.email ?? null,
     keresztnev: (data?.first_name as string | undefined) ?? null,
   })
-  await Promise.all([bevaltasokBetoltese(), ajandekBetoltese()])
+  await igenylesekBetoltese()
 }
 
-/** A sajat udvozlo ajandek allapota. Hiba eseten "nincs"-kent kezeljuk. */
-export async function ajandekBetoltese() {
-  const sb = await sbKliens()
-  const { data, error } = await sb.rpc('ajandekom')
-  const v = data as Ajandek | { statusz: 'nincs_belepve' } | null
-  beallit({ ajandek: error || !v || v.statusz === 'nincs_belepve' ? { statusz: 'nincs' } : (v as Ajandek) })
-}
-
-const AJANDEK_UZENET: Record<string, string> = {
-  nincs_belepve: 'Lejárt a belépésed. Lépj be újra.',
-  nincs_profil: 'Előbb add meg a keresztneved a Fiókom oldalon.',
-  mar_bevaltotta: 'Az üdvözlő ajándékodat már beváltottad.',
-  mar_valasztott: 'Már választottál ajándékot. Előbb azt váltsd be.',
-  nincs_ajanlat: 'Ez az ajánlat már nem elérhető.',
-  elfogyott: 'Ez az ajánlat közben elfogyott. Válassz egy másikat.',
-}
-
-/** Ajandek valasztasa. Hogy jar-e meg darab, azt a szerver donti el. */
-export async function ajandekValasztasa(ajanlat: number): Promise<Ajandek> {
-  const sb = await sbKliens()
-  const { data, error } = await sb.rpc('ajandek_valasztasa', { p_ajanlat: ajanlat })
-  if (error) throw forditas(error)
-  const v = data as { statusz?: string; ajandek?: Ajandek } | null
-  void ajanlatokFrissitese()
-  if (v?.statusz !== 'ok' || !v.ajandek) {
-    void ajandekBetoltese()
-    throw new FiokHiba(AJANDEK_UZENET[v?.statusz ?? ''] ?? 'Nem sikerült a választás. Próbáld újra.')
-  }
-  beallit({ ajandek: v.ajandek })
-  return v.ajandek
-}
-
-/** A sajat beváltások. Az RLS miatt mas userei nem jonnek le. */
-export async function bevaltasokBetoltese() {
+/** A sajat igenylesek. Az RLS miatt mas userei nem jonnek le. */
+export async function igenylesekBetoltese() {
   const sb = await sbKliens()
   const { data, error } = await sb
-    .from('redemptions')
-    .select('partner_slug, tipus, pct, created_at, expires_at, code')
-    .order('created_at', { ascending: false })
-  // Ha a tabla meg nincs letrehozva, ures listaval megyunk tovabb
-  beallit({ bevaltasok: error ? [] : ((data ?? []) as Bevaltas[]) })
+    .from('claims')
+    .select('id, offer_id, partner_slug, tipus, szoveg, igenyelve, bevaltva, lejarat, kod, rovid_kod')
+    .order('igenyelve', { ascending: false })
+  beallit({ igenylesek: error ? [] : ((data ?? []) as Igenyles[]) })
 }
 
-/** A szerver valasza egy beváltásra, ezt mutatja a teljes kepernyos ablak. */
+/** A szerver valasza egy helyszini beváltásra, ezt mutatja a teljes kepernyo. */
 export type AktivBevaltas = {
   id: string
   partner: string
-  tipus: 'welcome' | 'normal'
-  pct: number
+  tipus: 'alap' | 'welcome' | 'drop'
+  szoveg: string
+  jelveny: string | null
   keresztnev: string
   rovidKod: string
   lejarat: number
@@ -236,46 +212,122 @@ export type AktivBevaltas = {
 const BEVALTAS_UZENET: Record<string, string> = {
   nincs_belepve: 'Lejárt a belépésed. Lépj be újra.',
   nincs_profil: 'Előbb add meg a keresztneved a Fiókom oldalon.',
-  nincs_partner: 'Ennél a helynél most nem lehet kedvezményt beváltani.',
-  online_partner: 'Ennél a helynél online, foglaláskor kapod a kedvezményt.',
-  mar_felhasznalt: 'Az üdvözlő ajándékodat már beváltottad.',
-  nincs_ajandek: 'Ennél a helynél nincs aktív üdvözlő ajándékod.',
+  nincs_ajanlat: 'Ennél a helynél most nincs beváltható kedvezmény.',
+  nem_elerheto: 'Ennél a helynél még nem működik a beváltás.',
   ma_nem_ervenyes: 'Ez a kedvezmény ma nem érvényes. Nézd meg a feltételeket.',
-  hibas_keres: 'Valami félrement. Próbáld újra.',
+  napi_limit: 'Ma már beváltottad ennél a helynél. Holnap újra beválthatod.',
+  elfogyott: 'Erre a hónapra elfogyott a keret.',
 }
 
 /**
- * Beváltás a kasszanal. A szabalyokat a szerver ellenorzi, itt csak
- * leforditjuk a valaszt. Siker utan a sajat listat is frissitjuk, hogy a
- * kartya rogton a normal kedvezmenyre valtson.
+ * Alap kedvezmeny: az igenyles es a beváltás egy lepes. Helyszini
+ * partnernel a teljes kepernyo adatai jonnek vissza, online partnernel a
+ * kod. A szabalyokat (napi limit, keret, napok) a szerver ellenorzi, itt
+ * csak forditunk. Utana a sajat listat es a kinalatot is frissitjuk.
  */
-export async function bevaltasInditasa(slug: string, tipus: 'welcome' | 'normal'): Promise<AktivBevaltas> {
+export async function alapBevaltasa(ajanlat: number): Promise<{ kepernyo: AktivBevaltas | null; kod: string | null }> {
   const sb = await sbKliens()
   const kuldve = Date.now()
-  const { data, error } = await sb.rpc('bevaltas_inditasa', { p_partner: slug, p_tipus: tipus })
+  const { data, error } = await sb.rpc('alap_bevaltas', { p_ajanlat: ajanlat })
   if (error) throw forditas(error)
   const v = data as Record<string, unknown> | null
   const statusz = String(v?.statusz ?? '')
+  void kinalatFrissitese()
+  void igenylesekBetoltese()
   if (statusz !== 'ok' || !v) {
-    void bevaltasokBetoltese()
-    void ajandekBetoltese()
     throw new FiokHiba(BEVALTAS_UZENET[statusz] ?? 'Nem sikerült a beváltás. Próbáld újra.')
   }
+  if (v.mod === 'online_kod') return { kepernyo: null, kod: String(v.kod) }
+  return { kod: null, kepernyo: kepernyoAdat(v, kuldve) }
+}
+
+/** A szerver valaszabol a teljes kepernyo adatai. */
+function kepernyoAdat(v: Record<string, unknown>, kuldve: number): AktivBevaltas {
   // A halozati ido felet hozzaadjuk, igy az ora masodpercre pontos marad
   const megjott = Date.now()
   const eltolas = Date.parse(String(v.most)) - (kuldve + megjott) / 2
-  void bevaltasokBetoltese()
-  if (v.tipus === 'welcome') void ajandekBetoltese()
   return {
     id: String(v.id),
     partner: String(v.partner),
-    tipus: v.tipus === 'welcome' ? 'welcome' : 'normal',
-    pct: Number(v.pct),
+    tipus: v.tipus === 'welcome' ? 'welcome' : v.tipus === 'drop' ? 'drop' : 'alap',
+    szoveg: String(v.szoveg),
+    jelveny: v.jelveny ? String(v.jelveny) : null,
     keresztnev: String(v.keresztnev),
     rovidKod: String(v.rovid_kod),
     lejarat: Date.parse(String(v.lejarat)),
     eltolas,
   }
+}
+
+const WELCOME_UZENET: Record<string, string> = {
+  nincs_belepve: 'Lejárt a belépésed. Lépj be újra.',
+  nincs_profil: 'Előbb add meg a keresztneved a Fiókom oldalon.',
+  mar_bevaltotta: 'Az üdvözlő ajándékodat már beváltottad.',
+  mar_valasztott: 'Már választottál ajándékot. Előbb azt váltsd be.',
+  nincs_ajanlat: 'Ez az ajánlat már nem elérhető.',
+  nem_elerheto: 'Ennél a helynél még nem működik az ajándék.',
+  elfogyott: 'Ez az ajánlat közben elfogyott. Válassz egy másikat.',
+  nincs_ajandek: 'Nincs aktív üdvözlő ajándékod.',
+  online_partner: 'Ennél a helynél a kódodat foglaláskor kell beírni.',
+  mar_felhasznalt: 'Az üdvözlő ajándékodat már beváltottad.',
+  lejart: 'Az üdvözlő ajándékod lejárt. Válassz újat.',
+  ma_nem_ervenyes: 'Ez az ajándék ma nem érvényes. Nézd meg a feltételeket.',
+}
+
+/** Welcome ajandek valasztasa. Hogy jar-e meg darab, azt a szerver donti el. */
+export async function welcomeValasztasa(ajanlat: number) {
+  const sb = await sbKliens()
+  const { data, error } = await sb.rpc('welcome_valasztas', { p_ajanlat: ajanlat })
+  if (error) throw forditas(error)
+  const statusz = String((data as { statusz?: string } | null)?.statusz ?? '')
+  void kinalatFrissitese()
+  await igenylesekBetoltese()
+  if (statusz !== 'ok') throw new FiokHiba(WELCOME_UZENET[statusz] ?? 'Nem sikerült a választás. Próbáld újra.')
+}
+
+/**
+ * Welcome vagy drop bevaltasa a pultnal, ugyanazzal a teljes kepernyovel.
+ * Online partnernel nincs ilyen: ott a kod kiadasa a beváltás.
+ */
+export async function igenylesBevaltasa(igenyles: string): Promise<AktivBevaltas> {
+  const sb = await sbKliens()
+  const kuldve = Date.now()
+  const { data, error } = await sb.rpc('igenyles_bevaltas', { p_igenyles: igenyles })
+  if (error) throw forditas(error)
+  const v = data as Record<string, unknown> | null
+  const statusz = String(v?.statusz ?? '')
+  void igenylesekBetoltese()
+  if (statusz !== 'ok' || !v) throw new FiokHiba(BEVALTAS2_UZENET[statusz] ?? 'Nem sikerült a beváltás. Próbáld újra.')
+  return kepernyoAdat(v, kuldve)
+}
+
+const BEVALTAS2_UZENET: Record<string, string> = {
+  ...WELCOME_UZENET,
+  nincs_igenyles: 'Ezt a kódot nem találjuk a fiókodban.',
+  mar_felhasznalt: 'Ezt a kódot már beváltottad.',
+  lejart: 'Ez a kód lejárt.',
+}
+
+const DROP_UZENET: Record<string, string> = {
+  nincs_belepve: 'Lejárt a belépésed. Lépj be újra.',
+  nincs_profil: 'Előbb add meg a keresztneved a Fiókom oldalon.',
+  nincs_ajanlat: 'Ez a drop már nem elérhető.',
+  nem_elerheto: 'Ennél a helynél még nem működik a drop.',
+  meg_nem_indult: 'A drop még nem indult el.',
+  lezarult: 'A drop lezárult.',
+  mar_igenyelted: 'Ebből a dropból már igényeltél.',
+  elfogyott: 'Elfogyott. Legközelebb gyorsabbnak kell lenned!',
+}
+
+/** Drop igenylese. Hogy jar-e meg darab, azt a szerver donti el. */
+export async function dropIgenyles(ajanlat: number) {
+  const sb = await sbKliens()
+  const { data, error } = await sb.rpc('drop_igenyles', { p_ajanlat: ajanlat })
+  if (error) throw forditas(error)
+  const statusz = String((data as { statusz?: string } | null)?.statusz ?? '')
+  void kinalatFrissitese()
+  await igenylesekBetoltese()
+  if (statusz !== 'ok') throw new FiokHiba(DROP_UZENET[statusz] ?? 'Nem sikerült az igénylés. Próbáld újra.')
 }
 
 /** 6 jegyu kodot kuld e-mailben. Uj cimnel a fiokot is letrehozza. */
@@ -334,28 +386,4 @@ export async function fiokTorlese() {
   // A szerveren mar nincs meg a fiok, ezert csak helyben toroljuk a munkamenetet
   await sb.auth.signOut({ scope: 'local' })
   beallit({ allapot: 'kint', ...KINT })
-}
-
-const KOD_UZENET: Record<string, string> = {
-  nincs_belepve: 'Lejárt a belépésed. Lépj be újra.',
-  nincs_profil: 'Előbb add meg a keresztneved a Fiókom oldalon.',
-  nincs_partner: 'Ennél a helynél most nem lehet kódot kérni.',
-  helyszini_partner: 'Ennél a helynél a kasszánál kapod a kedvezményt.',
-  elfogyott: 'Erre a hónapra elfogytak a kódok.',
-}
-
-/**
- * Online kod kerese. Hogy melyik kod jar (udvozlo, ha itt aktiv az
- * ajandeka; kulonben a honap mar meglevo kodja vagy egy uj havi), azt a
- * szerver donti el, itt csak forditunk.
- */
-export async function onlineKodKerese(slug: string) {
-  const sb = await sbKliens()
-  const { data, error } = await sb.rpc('online_kod_kerese', { p_partner: slug })
-  if (error) throw forditas(error)
-  const v = data as Record<string, unknown> | null
-  const statusz = String(v?.statusz ?? '')
-  if (statusz !== 'ok' || !v) throw new FiokHiba(KOD_UZENET[statusz] ?? 'Nem sikerült kódot kérni. Próbáld újra.')
-  await Promise.all([bevaltasokBetoltese(), v.tipus === 'welcome' ? ajandekBetoltese() : null])
-  return { ujra: Boolean(v.ujra), tipus: v.tipus === 'welcome' ? 'welcome' : 'normal', kod: String(v.kod) } as const
 }

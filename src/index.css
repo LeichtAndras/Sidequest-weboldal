@@ -1759,6 +1759,9 @@ body {
   z-index: 30;
   top: 0;
   right: 1rem;
+  /* "Drop" es "Belépés" egymas mellett */
+  display: flex;
+  gap: 0.4rem;
 }
 
 .fiok-pirula {
@@ -1992,7 +1995,9 @@ body {
   place-items: center;
   width: 15rem;
   height: 10.7rem;
-  margin: 0.3rem 0;
+  /* Forgas kozben a robbanas magasabb, mint a doboz: ennyi hely kell
+     felul es alul, hogy ne takarja a nevet es az ajanlat szoveget */
+  margin: 1.9rem 0 2.1rem;
 }
 
 /* A robbanas folyamatosan forog: elo kepernyon mozog, kepernyokepen all */
@@ -2360,4 +2365,100 @@ body {
 .ajandek-darab {
   font-size: 0.86rem;
   color: rgba(11, 27, 58, 0.7);
+}
+
+/* Az ajanlat szovege a beváltó kepernyon, pl. "2 jegy 1 áráért" */
+.bev-ajanlat {
+  margin: 0;
+  max-width: 20rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 6vw, 1.6rem);
+  line-height: 1.15;
+  text-transform: uppercase;
+  color: var(--sotetkek);
+}
+
+/* "1 kód / foglalás": jol lathato kapszula, a meglevo keretes stilusban */
+.bev-egy-kod {
+  display: inline-block;
+  margin: 0.5rem 0 0;
+  padding: 0.3rem 0.8rem;
+  border: 2px solid var(--sotetkek);
+  border-radius: 999px;
+  background-color: #ffffff;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  color: var(--sotetkek);
+}
+
+.bev-lejart .bev-egy-kod {
+  opacity: 0.45;
+}
+
+/* A keret szamlaloja a kartya gombja alatt */
+.bev-keret {
+  margin: 0.5rem 0 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--sotetkek);
+}
+
+.bev-keret-elfogyott {
+  color: rgba(11, 27, 58, 0.6);
+}
+
+/* ----- Drop ----- */
+
+.drop-tetel + .drop-tetel {
+  padding-top: 1.3rem;
+  border-top: 1px solid rgba(11, 27, 58, 0.12);
+}
+
+.drop-kartya-partner {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  line-height: 1.1;
+  text-transform: uppercase;
+  color: var(--sotetkek);
+}
+
+.drop-ajanlat {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0.35rem 0 0.9rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--sotetkek);
+}
+
+/* A jelveny kis pink matrica, a robbanas szinevel */
+.drop-jelveny {
+  padding: 0.15rem 0.55rem;
+  border: 2px solid var(--sotetkek);
+  border-radius: 999px;
+  background-color: var(--pink);
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  color: #ffffff;
+}
+
+.drop-zarva {
+  margin: 0.2rem 0 0;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  color: rgba(11, 27, 58, 0.55);
+}
+
+.drop-sajat {
+  margin-top: 0.4rem;
+}
+
+.drop-lezart .drop-ajanlat {
+  color: rgba(11, 27, 58, 0.6);
 }

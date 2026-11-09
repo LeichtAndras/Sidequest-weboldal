@@ -5,6 +5,7 @@ import MoziKartya from './components/MoziKartya'
 import MaiAjanlat from './components/MaiAjanlat'
 import BelepesAblak from './components/fiok/BelepesAblak'
 import AjandekPopup from './components/fiok/AjandekPopup'
+import DropKartya from './components/fiok/DropKartya'
 import { useUjRendszer } from './fiok/kapcsolo'
 import { beallitas } from './mozi/beallitas'
 import CategoryFilter, { ALL } from './components/CategoryFilter'
@@ -157,6 +158,9 @@ export default function App({ utvonal }: Props = {}) {
         <div className="tartalom-belso relative z-10 mx-auto w-full max-w-[480px] px-5 pb-12 md:max-w-[1120px]">
           {/* A vetites a movie-vote.json "aktiv" kapcsolojan mulik */}
           {beallitas.aktiv ? <MoziKartya /> : null}
+
+          {/* A drop csak az uj rendszerben, es csak kozelgo vagy elo dropnal latszik */}
+          {uj ? <DropKartya /> : null}
 
           <MaiAjanlat />
 

@@ -167,9 +167,11 @@ if (moziAktiv) {
 }
 
 /**
- * Sajat oldalak, amik nem kellenek a keresonek: a Fiokom es az ajandek
- * valasztas szemelyes, az adatkezelesi tajekoztatot pedig kozvetlenul
- * linkeljuk. Ezert noindex, es a sitemapbe sem kerulnek.
+ * Sajat oldalak, amik nem kellenek a keresonek: a Fiokom szemelyes, az
+ * adatkezelesi tajekoztatot pedig kozvetlenul linkeljuk. Ezert noindex, es
+ * a sitemapbe sem kerulnek. Az uj rendszer oldalai (/ajandek/, /drop/)
+ * szandekosan nincsenek eloreneneleve: amig nincs elesites, a 404.html
+ * (fooldal) szolgalja ki oket, es a kliens csak tesztelonek mutatja.
  */
 function belsoBlokk(utvonal, cim, leiras) {
   return [
@@ -185,7 +187,6 @@ function belsoBlokk(utvonal, cim, leiras) {
 for (const [utvonal, cim, leiras] of [
   ['/fiokom/', 'Fiókom | SideQuest Budapest', 'A SideQuest fiókod: beváltott kedvezmények és online kódok.'],
   ['/adatkezeles/', 'Adatkezelési tájékoztató | SideQuest Budapest', 'A SideQuest adatkezelési tájékoztatója.'],
-  ['/ajandek/', 'Üdvözlő ajándék | SideQuest Budapest', 'Válaszd ki a SideQuest üdvözlő ajándékodat.'],
 ]) {
   mkdirSync(join(dist, utvonal), { recursive: true })
   writeFileSync(join(dist, utvonal, 'index.html'), oldal(utvonal, belsoBlokk(utvonal, cim, leiras)))

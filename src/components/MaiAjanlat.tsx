@@ -2,9 +2,9 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import partnersData from '../data/partners.json'
 import kategoriaSzo from '../data/kategoriak.json'
 import type { Partner } from '../types'
-import { ROBBANAS } from '../robbanas'
 import { QrIcon, SpeechIcon, TagIcon } from './Icons'
 import Felirat from './Felirat'
+import KedvezmenyJelveny from './KedvezmenyJelveny'
 import { felulirasok } from '../ajanlat/beallitas'
 import { ajanlatRa, budapestiNap, kovetkezoEjfel } from '../ajanlat/valasztas'
 import { KATTINTAS, MEGJELENT, kovet } from '../ajanlat/esemeny'
@@ -142,15 +142,7 @@ export default function MaiAjanlat() {
 
           <span className="hk-kategoria">{mai.category}</span>
 
-          <div className="hk-kedvezmeny">
-            <svg viewBox="0 0 140 100" aria-hidden="true">
-              <path d={ROBBANAS} fill="#FF2D78" stroke="#0B1B3A" strokeWidth="3.4" strokeLinejoin="round" />
-            </svg>
-            <span className="hk-kedvezmeny-szoveg">
-              <span className="hk-kedvezmeny-szam">{mai.discount}</span>
-              <span className="hk-kedvezmeny-felirat">Kedvezmény</span>
-            </span>
-          </div>
+          <KedvezmenyJelveny partner={mai} />
 
           <div className="hk-also">
             <h3 className="hk-nev">{mai.name}</h3>

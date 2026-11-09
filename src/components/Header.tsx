@@ -31,6 +31,9 @@ export default function Header() {
       <div className="hero-doboz relative mx-auto w-full max-w-[480px] px-4">
         {uj ? (
           <div className="fiok-pirula-hely">
+            <a href="/drop/" className="tn-kapszula fiok-pirula">
+              <span className="tn-gomb-felirat tn-gomb-felirat-sotet">Drop</span>
+            </a>
             <FiokPirula />
           </div>
         ) : null}

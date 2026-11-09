@@ -1,9 +1,9 @@
 import { memo, useState } from 'react'
 import type { Partner } from '../types'
 import { ujPartner } from '../partner'
-import { ROBBANAS } from '../robbanas'
 import kategoriaSzo from '../data/kategoriak.json'
 import ThumbDetails from './ThumbDetails'
+import KedvezmenyJelveny from './KedvezmenyJelveny'
 import { useUjRendszer } from '../fiok/kapcsolo'
 import { QrIcon, SpeechIcon, TagIcon } from './Icons'
 
@@ -84,15 +84,7 @@ function ThumbCard({ partner, open, onToggle }: Props) {
 
         <span className="hk-kategoria">{cimke}</span>
 
-        <div className="hk-kedvezmeny">
-          <svg viewBox="0 0 140 100" aria-hidden="true">
-            <path d={ROBBANAS} fill="#FF2D78" stroke="#0B1B3A" strokeWidth="3.4" strokeLinejoin="round" />
-          </svg>
-          <span className="hk-kedvezmeny-szoveg">
-            <span className="hk-kedvezmeny-szam">{partner.discount}</span>
-            <span className="hk-kedvezmeny-felirat">Kedvezmény</span>
-          </span>
-        </div>
+        <KedvezmenyJelveny partner={partner} />
 
         <div className="hk-also">
           <h3 className="hk-nev">{partner.name}</h3>

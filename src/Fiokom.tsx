@@ -4,8 +4,8 @@ import type { Partner } from './types'
 import Felirat from './components/Felirat'
 import CouponCode from './components/CouponCode'
 import BelepesAblak from './components/fiok/BelepesAblak'
-import { FiokHiba, belepesNyitasa, fiokTorlese, kijelentkezes, useFiok, valaszthat } from './fiok/fiok'
-import { hataridoNap } from './fiok/ajanlatok'
+import { FiokHiba, belepesNyitasa, fiokTorlese, kijelentkezes, useFiok, valaszthat, welcomeAllapot } from './fiok/fiok'
+import { hataridoNap } from './fiok/kinalat'
 
 /**
  * Fiokom oldal. A keret ugyanaz, mint a kulon /mozi oldale: vissza link,
@@ -25,8 +25,10 @@ const DATUM = new Intl.DateTimeFormat('hu-HU', {
 
 export default function Fiokom() {
   const fiok = useFiok()
-  const ajandek = fiok.ajandek
-  const kodok = (fiok.bevaltasok ?? []).filter((b) => b.code)
+  const w = welcomeAllapot(fiok.igenylesek)
+  const ajandek = w?.igenyles ?? null
+  // Az 5. fazisban ebbol lesz a teljes Kodjaim lista
+  const kodok = (fiok.igenylesek ?? []).filter((c) => c.kod)
   const [torlesKerdes, setTorlesKerdes] = useState(false)
   const [dolgozik, setDolgozik] = useState(false)
   const [hiba, setHiba] = useState<string | null>(null)
@@ -99,14 +101,14 @@ export default function Fiokom() {
                     <h2 className="tn-panel-cim">
                       <Felirat szoveg="Üdvözlő ajándék" kicsi valtozat="sotet" className="mozi-fejlec" />
                     </h2>
-                    {ajandek === null ? <p className="mozi-jelzes">Betöltés...</p> : null}
-                    {ajandek?.statusz === 'aktiv' ? (
+                    {w === null ? <p className="mozi-jelzes">Betöltés...</p> : null}
+                    {w?.statusz === 'aktiv' && ajandek ? (
                       <>
                         <ul className="fiok-lista">
                           <li>
-                            <span className="fiok-lista-nev">{ajandek.partner}</span>
+                            <span className="fiok-lista-nev">{nevek.get(ajandek.partner_slug) ?? ajandek.partner_slug}</span>
                             <span className="fiok-lista-adat">
-                              {ajandek.pct}% · {ajandek.lejarat ? `${hataridoNap(ajandek.lejarat)}-ig` : ''}
+                              {ajandek.szoveg} · {hataridoNap(ajandek.lejarat)}-ig
                             </span>
                           </li>
                         </ul>
@@ -115,21 +117,21 @@ export default function Fiokom() {
                         </a>
                       </>
                     ) : null}
-                    {ajandek?.statusz === 'bevaltott' ? (
+                    {w?.statusz === 'bevaltott' && ajandek ? (
                       <ul className="fiok-lista">
                         <li>
-                          <span className="fiok-lista-nev">{ajandek.partner}</span>
+                          <span className="fiok-lista-nev">{nevek.get(ajandek.partner_slug) ?? ajandek.partner_slug}</span>
                           <span className="fiok-lista-adat">
-                            {ajandek.pct}% · beváltva{ajandek.bevaltva ? ` ${DATUM.format(new Date(ajandek.bevaltva))}` : ''}
+                            {ajandek.szoveg} · beváltva {DATUM.format(new Date(ajandek.bevaltva!))}
                           </span>
                         </li>
                       </ul>
                     ) : null}
-                    {valaszthat(ajandek) ? (
+                    {valaszthat(w) ? (
                       <>
                         <p className="mozi-jelzes">
-                          {ajandek?.statusz === 'lejart'
-                            ? 'Az ajándékod lejárt, mert 14 napon belül nem váltottad be. Válassz újat.'
+                          {w?.statusz === 'lejart'
+                            ? 'Az ajándékod lejárt, mert nem váltottad be időben. Válassz újat.'
                             : 'Még nem választottál üdvözlő ajándékot.'}
                         </p>
                         <a className="tn-kapszula mozi-gomb" href="/ajandek/">
@@ -146,16 +148,16 @@ export default function Fiokom() {
                     {kodok.length === 0 ? (
                       <p className="mozi-jelzes">Még nem kaptál online kódot.</p>
                     ) : (
-                      kodok.map((b) => (
-                        <div key={b.code} className="bev-kod-sor">
+                      kodok.map((c) => (
+                        <div key={c.id} className="bev-kod-sor">
                           <p className="bev-kod-cimke">
-                            {nevek.get(b.partner_slug) ?? b.partner_slug} · {b.tipus === 'welcome' ? 'üdvözlő' : 'havi'} kód ({b.pct}%)
+                            {nevek.get(c.partner_slug) ?? c.partner_slug} · {c.szoveg}
                             <span>
                               {' '}
-                              · {Date.parse(b.expires_at) > Date.now() ? `${DATUM.format(new Date(Date.parse(b.expires_at) - 1000)).replace(/\.$/, '')}-ig érvényes` : 'lejárt'}
+                              · {Date.parse(c.lejarat) > Date.now() ? `${DATUM.format(new Date(Date.parse(c.lejarat) - 1000)).replace(/\.$/, '')}-ig érvényes` : 'lejárt'}
                             </span>
                           </p>
-                          <CouponCode code={b.code!} />
+                          <CouponCode code={c.kod!} />
                         </div>
                       ))
                     )}

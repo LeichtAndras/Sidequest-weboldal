@@ -3,32 +3,28 @@ import { createPortal } from 'react-dom'
 import type { Partner } from '../../types'
 import CouponCode from '../CouponCode'
 import { budapestiNap } from '../../ajanlat/valasztas'
-import { FiokHiba, aktivAjandek, belepesNyitasa, onlineKodKerese, useFiok } from '../../fiok/fiok'
-import { hataridoNap, kijelentkezettFelirat, useAjanlatok } from '../../fiok/ajanlatok'
+import { FiokHiba, alapBevaltasa, belepesNyitasa, useFiok } from '../../fiok/fiok'
+import { alapAjanlat, keretSzoveg, kijelentkezettFelirat, useKinalat } from '../../fiok/kinalat'
 
 const DATUM = new Intl.DateTimeFormat('hu-HU', { timeZone: 'Europe/Budapest', month: 'long', day: 'numeric' })
 
-/** "2026-11" alaku honap a budapesti naptar szerint. */
-const honap = (ido: number) => budapestiNap(ido).slice(0, 7)
-
 /**
- * Online partnereknel (Pixity, Rage Room) a kedvezmeny egy szemelyes kod,
- * amit foglalaskor kell beirni. Ha itt aktiv az udvozlo ajandeka, udvozlo
- * kodot kap; kulonben havonta egy normal kodot. Hogy melyik, azt a szerver
- * donti el, ez a blokk csak kiirja.
+ * Online partnereknel (Pixity, Rage Room) az alap kedvezmeny egy
+ * szemelyes kod a kodbankbol, amit foglalaskor kell beirni. Ugyanaz a
+ * keret es napi limit, mint a helyszinieknel; a kod kiadasa a beváltás.
+ * Hogy jar-e kod, azt a szerver donti el, ez a blokk csak kiirja.
  */
 export default function OnlineKodBlokk({ partner }: { partner: Partner }) {
   const fiok = useFiok()
-  const ajanlatok = useAjanlatok()
+  const kinalat = useKinalat()
   const [kerdes, setKerdes] = useState(false)
   const [dolgozik, setDolgozik] = useState(false)
   const [hiba, setHiba] = useState<string | null>(null)
 
-  const ajandek = aktivAjandek(fiok.ajandek, partner.slug)
-  const udvozlo = ajandek?.pct ?? 0
-  const sajat = (fiok.bevaltasok ?? []).filter((b) => b.partner_slug === partner.slug && b.code)
-  const ervenyes = sajat.filter((b) => Date.parse(b.expires_at) > Date.now())
-  const ehaviMegvan = sajat.some((b) => honap(Date.parse(b.created_at)) === honap(Date.now()))
+  const alap = alapAjanlat(kinalat, partner.slug)
+  const sajat = (fiok.igenylesek ?? []).filter((c) => c.partner_slug === partner.slug && c.kod)
+  const ervenyes = sajat.filter((c) => Date.parse(c.lejarat) > Date.now())
+  const maiDarab = sajat.filter((c) => c.tipus === 'alap' && budapestiNap(Date.parse(c.igenyelve)) === budapestiNap()).length
 
   useEffect(() => {
     if (!kerdes) return
@@ -39,11 +35,14 @@ export default function OnlineKodBlokk({ partner }: { partner: Partner }) {
     }
   }, [kerdes])
 
+  if (kinalat && !alap && ervenyes.length === 0) return null
+
   const kerd = async () => {
+    if (!alap) return
     setDolgozik(true)
     setHiba(null)
     try {
-      await onlineKodKerese(partner.slug)
+      await alapBevaltasa(alap.id)
       setKerdes(false)
     } catch (h) {
       setHiba(h instanceof FiokHiba ? h.message : 'Nem sikerült kódot kérni. Próbáld újra.')
@@ -54,43 +53,54 @@ export default function OnlineKodBlokk({ partner }: { partner: Partner }) {
 
   const belepve = fiok.allapot === 'bent' && fiok.keresztnev !== null
   const betolt =
-    fiok.allapot === 'bent' &&
-    (fiok.email === null || (fiok.keresztnev !== null && (fiok.bevaltasok === null || fiok.ajandek === null)))
+    !kinalat || (fiok.allapot === 'bent' && (fiok.email === null || (fiok.keresztnev !== null && fiok.igenylesek === null)))
+  const szoveg = alap?.szoveg ?? partner.discount
+  const elfogyott = alap !== null && alap.szabad < 1
+  const napiLimit = Boolean(alap?.napi_limit && maiDarab >= alap.napi_limit)
 
-  let gomb: { felirat: string; katt: () => void } | null = null
-  if (betolt) gomb = { felirat: 'Betöltés...', katt: () => {} }
-  else if (!belepve)
-    gomb = { felirat: kijelentkezettFelirat(ajanlatok, partner.slug, partner.discount), katt: belepesNyitasa }
-  else if (ajandek) gomb = { felirat: `Üdvözlő kód kérése (${udvozlo}%)`, katt: () => setKerdes(true) }
-  else if (!ehaviMegvan) gomb = { felirat: `Havi kód kérése (${partner.discount})`, katt: () => void kerd() }
+  let felirat = `Kódot kérek: ${szoveg}`
+  let kattintas: () => void = () => {
+    setHiba(null)
+    setKerdes(true)
+  }
+  let tiltva = elfogyott || napiLimit
+  if (betolt) {
+    felirat = 'Betöltés...'
+    tiltva = true
+  } else if (!belepve) {
+    felirat = kijelentkezettFelirat(kinalat, partner.slug, szoveg)
+    kattintas = belepesNyitasa
+    tiltva = false
+  }
 
   return (
     <div className="bev-blokk">
-      {belepve && ervenyes.length > 0
-        ? ervenyes.map((b) => (
-            <div key={b.code} className="bev-kod-sor">
+      {belepve
+        ? ervenyes.map((c) => (
+            <div key={c.id} className="bev-kod-sor">
               <p className="bev-kod-cimke">
-                {b.tipus === 'welcome' ? `Üdvözlő kódod (${b.pct}%)` : `Havi kódod (${b.pct}%)`}
-                <span> · {DATUM.format(new Date(Date.parse(b.expires_at) - 1000)).replace(/\.$/, '')}-ig</span>
+                {c.tipus === 'welcome' ? `Üdvözlő ajándék: ${c.szoveg}` : c.szoveg}
+                <span> · {DATUM.format(new Date(Date.parse(c.lejarat) - 1000)).replace(/\.$/, '')}-ig</span>
               </p>
-              <CouponCode code={b.code!} />
+              <CouponCode code={c.kod!} />
+              <p className="bev-egy-kod">1 kód / foglalás</p>
             </div>
           ))
         : null}
 
-      {gomb ? (
-        <button type="button" className="tn-kapszula bev-gomb" onClick={gomb.katt} disabled={betolt || dolgozik}>
+      {/* Alap ajanlat nelkul csak a meglevo (pl. welcome) kodok latszanak */}
+      {alap || !kinalat ? (
+        <button type="button" className="tn-kapszula bev-gomb" onClick={kattintas} disabled={tiltva || dolgozik}>
           <span className="tn-gomb-felirat tn-gomb-felirat-sotet bev-gomb-felirat">
-            {dolgozik && !kerdes ? 'Pillanat...' : gomb.felirat}
+            {dolgozik && !kerdes ? 'Pillanat...' : felirat}
           </span>
         </button>
-      ) : belepve ? (
-        <p className="mozi-jelzes">Ebben a hónapban már megkaptad a kódodat. Jövő hónapban kérhetsz újat.</p>
       ) : null}
 
-      {belepve && ajandek?.lejarat ? (
-        <p className="bev-hatarido">Az üdvözlő ajándékod {hataridoNap(ajandek.lejarat)}-ig kérhető.</p>
+      {alap && kinalat ? (
+        <p className={`bev-keret${elfogyott ? ' bev-keret-elfogyott' : ''}`}>{keretSzoveg(alap, kinalat)}</p>
       ) : null}
+      {belepve && napiLimit ? <p className="bev-hatarido">Ma már kértél kódot. Holnap kérhetsz újat.</p> : null}
 
       {belepve && partner.bookingUrl ? (
         <a className="tn-kapszula tn-kapszula-panel bev-foglalas" href={partner.bookingUrl} target="_blank" rel="noopener noreferrer">
@@ -108,16 +118,16 @@ export default function OnlineKodBlokk({ partner }: { partner: Partner }) {
               className="fiok-retes"
               role="dialog"
               aria-modal="true"
-              aria-label="Üdvözlő kód kérése"
+              aria-label="Kód kérése"
               onClick={(e) => {
                 if (e.target === e.currentTarget && !dolgozik) setKerdes(false)
               }}
             >
               <div className="fiok-lap mozi-oldal-panel">
                 <div className="tn-panel-belso mozi-panel fiok-lap-belso">
-                  <p className="bev-megerosites-cim">Az üdvözlő ajándék egyszer jár</p>
+                  <p className="bev-megerosites-cim">1 kód / foglalás</p>
                   <p className="mozi-jelzes">
-                    {`Most megkapod a ${udvozlo}%-os üdvözlő kódodat. Akkor kérd, ha foglalni akarsz: amint megkapod, az ajándékod felhasználtnak számít.`}
+                    {`${partner.name}: ${szoveg}. Akkor kérd, ha foglalni akarsz: amint megkapod, felhasználtnak számít. A kódot foglaláskor írd be.`}
                   </p>
                   {hiba ? <p className="mozi-hiba">{hiba}</p> : null}
                   <button type="button" className="tn-kapszula mozi-gomb" onClick={() => void kerd()} disabled={dolgozik}>

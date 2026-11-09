@@ -1,17 +1,18 @@
 import { useEffect, useId, useState } from 'react'
 import Felirat from '../Felirat'
 import { belepesNyitasa, useFiok } from '../../fiok/fiok'
-import { legnagyobbSzazalek, useAjanlatok } from '../../fiok/ajanlatok'
+import { useKinalat } from '../../fiok/kinalat'
 
 const KULCS = 'sq-ajandek-popup'
-const HET = 7 * 24 * 60 * 60 * 1000
+/** Bezaras utan ennyi ideig nem jon fel ujra: egy nap. */
+const SZUNET = 24 * 60 * 60 * 1000
 /** Ezeken az oldalakon soha nem jelenik meg. */
 const TILTOTT = ['fiokom', 'adatkezeles', 'ajandek']
 
 function nemregBezarta(): boolean {
   try {
     const mikor = Number(localStorage.getItem(KULCS))
-    return Number.isFinite(mikor) && Date.now() - mikor < HET
+    return Number.isFinite(mikor) && Date.now() - mikor < SZUNET
   } catch {
     return false
   }
@@ -28,7 +29,7 @@ function bezartaMost() {
 /**
  * Regisztracios popup kijelentkezett latogatonak, az uj rendszerben. Az
  * oldal betoltese utan kb. egy masodperccel jon fel, a hatterben latszik
- * az oldal. Ha bezarja, 7 napig nem jon elo ujra. Ha nincs szabad
+ * az oldal. Ha bezarja, egy napig nem jon elo ujra. Ha nincs szabad
  * ajandek, nem jelenik meg.
  */
 export default function AjandekPopup() {
@@ -46,19 +47,19 @@ export default function AjandekPopup() {
 }
 
 function Ablak({ onBezar }: { onBezar: () => void }) {
-  const ajanlatok = useAjanlatok()
+  const kinalat = useKinalat()
   const azon = useId()
   const [lathato, setLathato] = useState(false)
 
-  const kinalat = (ajanlatok ?? []).filter((a) => a.szabad > 0)
-  const max = legnagyobbSzazalek(ajanlatok)
+  // A valaszthato welcome ajanlatok, a kinalat RPC-bol
+  const ajanlatok = (kinalat?.ajanlatok ?? []).filter((a) => a.tipus === 'welcome' && a.szabad > 0)
 
   useEffect(() => {
     const ido = window.setTimeout(() => setLathato(true), 1000)
     return () => window.clearTimeout(ido)
   }, [])
 
-  const nyitva = lathato && max !== null
+  const nyitva = lathato && ajanlatok.length > 0
 
   const mostNem = () => {
     bezartaMost()
@@ -101,7 +102,7 @@ function Ablak({ onBezar }: { onBezar: () => void }) {
 
           <h2 id={`${azon}-cim`} className="tn-panel-cim">
             <Felirat
-              szoveg={`Regisztrálj, és egy alkalommal akár ${max}% kedvezményt kapsz`}
+              szoveg="Regisztrálj, és válassz egy üdvözlő ajándékot"
               kicsi
               valtozat="sotet"
               className="mozi-fejlec"
@@ -109,11 +110,11 @@ function Ablak({ onBezar }: { onBezar: () => void }) {
           </h2>
 
           <ul className="fiok-lista">
-            {kinalat.map((a) => (
+            {ajanlatok.map((a) => (
               <li key={a.id}>
                 <span className="fiok-lista-nev">{a.partner}</span>
                 <span className="fiok-lista-adat">
-                  {a.pct}% · még {a.szabad} db
+                  {a.szoveg} · még {a.szabad} db
                 </span>
               </li>
             ))}
