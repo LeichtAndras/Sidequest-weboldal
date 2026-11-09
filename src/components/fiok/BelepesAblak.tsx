@@ -20,7 +20,8 @@ const uzenet = (hiba: unknown) =>
 /**
  * Belepes es regisztracio egy ablakban. Link es Google-belepes nincs, mert
  * az Instagram beepitett bongeszojeben nem mukodnek: 6 jegyu kod megy
- * e-mailben. Ha a cim uj, a kod utan keresztnev es a ket elfogadas jon.
+ * e-mailben. Ha a cim uj, a kod utan keresztnev es a ket elfogadas jon,
+ * utana az /ajandek/ oldal, ahol az udvozlo ajandekot valasztja.
  *
  * Kinezet: a mozi szavazas krem panelje, mezoi es gombjai, uj stilus nincs.
  */
@@ -108,7 +109,12 @@ export default function BelepesAblak() {
     e.preventDefault()
     void futtat(async () => {
       await profilMentese(nev, elmult16, elfogadja)
-      setLepes('kesz')
+      // Uj regisztracio: rogton az ajandek valasztasa jon
+      if (window.location.pathname.replace(/\/+$/, '') === '/ajandek') {
+        belepesBezarasa()
+      } else {
+        window.location.assign('/ajandek/')
+      }
     })
   }
 

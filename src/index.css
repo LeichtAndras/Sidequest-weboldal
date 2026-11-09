@@ -2286,3 +2286,78 @@ body {
     color: rgba(11, 27, 58, 0.6);
   }
 }
+
+/* Az aktiv udvozlo ajandek hatarideje a kartya gombja alatt */
+.bev-hatarido {
+  margin: 0.5rem 0 0;
+  font-size: 0.86rem;
+  line-height: 1.4;
+  color: rgba(11, 27, 58, 0.75);
+}
+
+/*
+ * Udvozlo ajandek: a popup hattere attetszobb, hogy latsszon mogotte az
+ * oldal; az /ajandek/ lista sorai gombok, az elfogyott sor szurke.
+ */
+.fiok-retes-attetszo {
+  background-color: rgba(5, 32, 46, 0.55);
+}
+
+.ajandek-szoveg {
+  margin-bottom: 0.6rem;
+}
+
+.ajandek-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin: 0.8rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ajandek-sor {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 0.15rem 0.75rem;
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  border: 2px solid var(--sotetkek);
+  border-radius: 14px;
+  box-shadow: 0 3px 0 var(--sotetkek);
+  background-color: #ffffff;
+  color: var(--sotetkek);
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+
+.ajandek-sor:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--sotetkek);
+}
+
+.ajandek-sor:disabled {
+  cursor: default;
+  opacity: 0.45;
+  filter: grayscale(1);
+  box-shadow: none;
+}
+
+.ajandek-nev {
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.ajandek-pct {
+  grid-row: span 2;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.ajandek-darab {
+  font-size: 0.86rem;
+  color: rgba(11, 27, 58, 0.7);
+}

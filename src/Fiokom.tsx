@@ -4,14 +4,15 @@ import type { Partner } from './types'
 import Felirat from './components/Felirat'
 import CouponCode from './components/CouponCode'
 import BelepesAblak from './components/fiok/BelepesAblak'
-import { FiokHiba, belepesNyitasa, fiokTorlese, kijelentkezes, useFiok } from './fiok/fiok'
+import { FiokHiba, belepesNyitasa, fiokTorlese, kijelentkezes, useFiok, valaszthat } from './fiok/fiok'
+import { hataridoNap } from './fiok/ajanlatok'
 
 /**
  * Fiokom oldal. A keret ugyanaz, mint a kulon /mozi oldale: vissza link,
  * nagy cim a falon, alatta a krem panel.
  *
- * A beváltások es az online kodok a 2. es 3. fazisban kerulnek ide, addig
- * a helyuk mar megvan, ures allapottal.
+ * Itt latszik a valasztott udvozlo ajandek a hataridovel, es amig nem
+ * valasztott (vagy lejart), innen jut el az /ajandek/ oldalra.
  */
 const nevek = new Map((partnersData as Partner[]).map((p) => [p.slug, p.name]))
 
@@ -24,7 +25,7 @@ const DATUM = new Intl.DateTimeFormat('hu-HU', {
 
 export default function Fiokom() {
   const fiok = useFiok()
-  const udvozlok = (fiok.bevaltasok ?? []).filter((b) => b.tipus === 'welcome')
+  const ajandek = fiok.ajandek
   const kodok = (fiok.bevaltasok ?? []).filter((b) => b.code)
   const [torlesKerdes, setTorlesKerdes] = useState(false)
   const [dolgozik, setDolgozik] = useState(false)
@@ -96,22 +97,46 @@ export default function Fiokom() {
 
                   <div className="tn-panel-blokk">
                     <h2 className="tn-panel-cim">
-                      <Felirat szoveg="Üdvözlő kedvezmények" kicsi valtozat="sotet" className="mozi-fejlec" />
+                      <Felirat szoveg="Üdvözlő ajándék" kicsi valtozat="sotet" className="mozi-fejlec" />
                     </h2>
-                    {udvozlok.length === 0 ? (
-                      <p className="mozi-jelzes">Még nem váltottál be üdvözlő kedvezményt.</p>
-                    ) : (
-                      <ul className="fiok-lista">
-                        {udvozlok.map((b) => (
-                          <li key={b.partner_slug}>
-                            <span className="fiok-lista-nev">{nevek.get(b.partner_slug) ?? b.partner_slug}</span>
+                    {ajandek === null ? <p className="mozi-jelzes">Betöltés...</p> : null}
+                    {ajandek?.statusz === 'aktiv' ? (
+                      <>
+                        <ul className="fiok-lista">
+                          <li>
+                            <span className="fiok-lista-nev">{ajandek.partner}</span>
                             <span className="fiok-lista-adat">
-                              {b.pct}% · {DATUM.format(new Date(b.created_at))}
+                              {ajandek.pct}% · {ajandek.lejarat ? `${hataridoNap(ajandek.lejarat)}-ig` : ''}
                             </span>
                           </li>
-                        ))}
+                        </ul>
+                        <a className="tn-kapszula mozi-gomb" href={`/${ajandek.partner_slug}/`}>
+                          <span className="tn-gomb-felirat tn-gomb-felirat-sotet">Irány a kártyája</span>
+                        </a>
+                      </>
+                    ) : null}
+                    {ajandek?.statusz === 'bevaltott' ? (
+                      <ul className="fiok-lista">
+                        <li>
+                          <span className="fiok-lista-nev">{ajandek.partner}</span>
+                          <span className="fiok-lista-adat">
+                            {ajandek.pct}% · beváltva{ajandek.bevaltva ? ` ${DATUM.format(new Date(ajandek.bevaltva))}` : ''}
+                          </span>
+                        </li>
                       </ul>
-                    )}
+                    ) : null}
+                    {valaszthat(ajandek) ? (
+                      <>
+                        <p className="mozi-jelzes">
+                          {ajandek?.statusz === 'lejart'
+                            ? 'Az ajándékod lejárt, mert 14 napon belül nem váltottad be. Válassz újat.'
+                            : 'Még nem választottál üdvözlő ajándékot.'}
+                        </p>
+                        <a className="tn-kapszula mozi-gomb" href="/ajandek/">
+                          <span className="tn-gomb-felirat tn-gomb-felirat-sotet">Ajándék választása</span>
+                        </a>
+                      </>
+                    ) : null}
                   </div>
 
                   <div className="tn-panel-blokk">

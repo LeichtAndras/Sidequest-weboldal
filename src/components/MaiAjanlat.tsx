@@ -8,6 +8,7 @@ import Felirat from './Felirat'
 import { felulirasok } from '../ajanlat/beallitas'
 import { ajanlatRa, budapestiNap, kovetkezoEjfel } from '../ajanlat/valasztas'
 import { KATTINTAS, MEGJELENT, kovet } from '../ajanlat/esemeny'
+import { useUjRendszer } from '../fiok/kapcsolo'
 
 const partnerek = partnersData as Partner[]
 
@@ -19,7 +20,13 @@ const partnerek = partnersData as Partner[]
 const hatasAzonnal = typeof window === 'undefined' ? useEffect : useLayoutEffect
 
 /** Ugyanaz a harom lehetoseg, mint a helyszinkartyan, lasd ThumbCard. */
-function bevaltasMod(partner: Partner) {
+function bevaltasMod(partner: Partner, uj = false) {
+  // Az uj, fiokos rendszerben ket mod van: kassza vagy szemelyes kod
+  if (uj) {
+    return partner.redemptionMode === 'online_kod'
+      ? { szoveg: 'Személyes kód', Ikon: TagIcon }
+      : { szoveg: 'Beváltás a kasszánál', Ikon: TagIcon }
+  }
   if (partner.code) return { szoveg: 'Online kuponkód', Ikon: TagIcon }
   if (partner.redeem.includes('QR')) return { szoveg: 'QR a helyszínen', Ikon: QrIcon }
   return { szoveg: 'Mondd: SideQuest', Ikon: SpeechIcon }
@@ -82,6 +89,7 @@ export default function MaiAjanlat() {
   }, [nap, frissit])
 
   const mai = useMemo(() => ajanlatRa(partnerek, nap, felulirasok), [nap])
+  const uj = useUjRendszer(mai ?? undefined)
 
   // Megjelenes esemeny: akkor szol, amikor a kartya tenyleg lathatova valt.
   const szoltRol = useRef<string | null>(null)
@@ -103,7 +111,7 @@ export default function MaiAjanlat() {
 
   if (!mai) return null
 
-  const bevaltas = bevaltasMod(mai)
+  const bevaltas = bevaltasMod(mai, uj)
   const kep = mai.venue && !kepHiba ? `/venues/${mai.venue}` : null
   const leiras = egySor(mai.description)
 

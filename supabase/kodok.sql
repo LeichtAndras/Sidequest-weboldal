@@ -5,7 +5,8 @@
 -- Szabalyok, mind itt kikenyszeritve:
 --   - kodot csak belepett user kaphat, kitoltott profillal, online partnernel
 --   - egy kodot ket user sosem kaphat meg: a kiosztas FOR UPDATE SKIP LOCKED
---   - az udvozlo kod partnerenkent egyszer jar (a redemptions egyedi indexe)
+--   - udvozlo kod csak aktiv udvozlo ajandekkal jar (supabase/ajandek.sql),
+--     es kiadasakor az ajandek bevaltott lesz
 --   - ugyanattol a partnertol ugyanabban a honapban ugyanazt a kodot kapja
 --     vissza, nem ujat; egy usernel ket egyszerre erkezo keres sem visz el
 --     ket kodot (tranzakcios zar userenkent es partnerenkent)
@@ -40,8 +41,10 @@ revoke all on public.code_pool from anon, authenticated;
 
 -- ---------------------------------------------------------------------
 -- 2. Kod kerese. A szerver donti el, melyik jar:
---    a) ha ebben a honapban mar kapott kodot ettol a partnertol: ugyanazt
---    b) kulonben, ha meg nem kapott udvozlo kodot es van szabad: azt
+--    a) ha a usernek ennel a partnernel aktiv udvozlo ajandeka van
+--       (supabase/ajandek.sql): egy udvozlo kod, es az ajandek bevaltott
+--    b) kulonben, ha ebben a honapban mar kapott kodot ettol a partnertol:
+--       ugyanazt
 --    c) kulonben egy uj havi kodot
 --    Ha nincs szabad kod: "elfogyott".
 -- ---------------------------------------------------------------------
@@ -58,6 +61,8 @@ declare
   v_r public.redemptions%rowtype;
   v_kod public.code_pool%rowtype;
   v_tipus text;
+  v_pct integer;
+  v_ajandek uuid;
   v_ma date := (now() at time zone 'Europe/Budapest')::date;
   v_honap_eleje timestamptz :=
     date_trunc('month', now() at time zone 'Europe/Budapest') at time zone 'Europe/Budapest';
@@ -85,37 +90,42 @@ begin
   -- Egy user egy partnernel egyszerre csak egy kerest futtathat
   perform pg_advisory_xact_lock(hashtext(v_uid::text || '|' || p_partner));
 
-  -- a) a honap kodja, ha mar megvan (udvozlo vagy havi)
-  select * into v_r
-  from public.redemptions
-  where user_id = v_uid and partner_slug = p_partner
-    and code is not null and created_at >= v_honap_eleje
-  order by created_at desc
-  limit 1;
+  -- a) aktiv udvozlo ajandek ennel a partnernel
+  select c.id, o.pct into v_ajandek, v_pct
+  from public.welcome_claims c
+  join public.welcome_offers o on o.id = c.offer_id
+  where c.user_id = v_uid and o.partner_slug = p_partner
+    and c.redeemed_at is null and c.expires_at > now()
+  order by c.claimed_at desc
+  limit 1
+  for update of c;
 
-  if found then
-    v_ujra := true;
-  else
-    -- b) udvozlo kod, ha meg nem kapott
-    if not exists (
-      select 1 from public.redemptions
-      where user_id = v_uid and partner_slug = p_partner and tipus = 'welcome'
-    ) then
-      select * into v_kod
-      from public.code_pool
-      where partner_slug = p_partner and tipus = 'welcome' and assigned_at is null
-        and (valid_until is null or valid_until >= v_ma)
-      order by valid_until nulls last, id
-      limit 1
-      for update skip locked;
+  if v_ajandek is not null then
+    select * into v_kod
+    from public.code_pool
+    where partner_slug = p_partner and tipus = 'welcome' and assigned_at is null
+      and (valid_until is null or valid_until >= v_ma)
+    order by valid_until nulls last, id
+    limit 1
+    for update skip locked;
 
-      if found then
-        v_tipus := 'welcome';
-      end if;
+    if not found then
+      return json_build_object('statusz', 'elfogyott');
     end if;
+    v_tipus := 'welcome';
+  else
+    -- b) a honap kodja, ha mar megvan
+    select * into v_r
+    from public.redemptions
+    where user_id = v_uid and partner_slug = p_partner
+      and code is not null and created_at >= v_honap_eleje
+    order by created_at desc
+    limit 1;
 
-    -- c) uj havi kod
-    if v_tipus is null then
+    if found then
+      v_ujra := true;
+    else
+      -- c) uj havi kod
       select * into v_kod
       from public.code_pool
       where partner_slug = p_partner and tipus = 'normal' and assigned_at is null
@@ -128,6 +138,7 @@ begin
         return json_build_object('statusz', 'elfogyott');
       end if;
       v_tipus := 'normal';
+      v_pct := v_p.normal_pct;
     end if;
   end if;
 
@@ -145,12 +156,12 @@ begin
     );
 
     insert into public.redemptions (user_id, partner_slug, tipus, pct, short_code, code, expires_at)
-    values (
-      v_uid, p_partner, v_tipus,
-      case when v_tipus = 'welcome' then v_p.welcome_pct else v_p.normal_pct end,
-      public.rovid_kod(), v_kod.code, v_lejarat
-    )
+    values (v_uid, p_partner, v_tipus, v_pct, public.rovid_kod(), v_kod.code, v_lejarat)
     returning * into v_r;
+
+    if v_ajandek is not null then
+      update public.welcome_claims set redeemed_at = now() where id = v_ajandek;
+    end if;
   end if;
 
   return json_build_object(

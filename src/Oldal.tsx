@@ -2,6 +2,7 @@ import App from './App'
 import Mozi from './Mozi'
 import Fiokom from './Fiokom'
 import Adatkezeles from './Adatkezeles'
+import Ajandek from './Ajandek'
 import { beallitas } from './mozi/beallitas'
 import { slugFromPath } from './site'
 
@@ -20,6 +21,7 @@ export default function Oldal({ utvonal }: Props) {
   const slug = slugFromPath(ut)
   if (slug === 'fiokom') return <Fiokom />
   if (slug === 'adatkezeles') return <Adatkezeles />
+  if (slug === 'ajandek') return <Ajandek />
   const mozi = beallitas.aktiv && slug === 'mozi'
   return mozi ? <Mozi /> : <App utvonal={utvonal} />
 }

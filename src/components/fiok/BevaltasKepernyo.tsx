@@ -70,7 +70,7 @@ export default function BevaltasKepernyo({ bevaltas, onBezar }: Props) {
           </svg>
         </button>
 
-        <p className="bev-cimke">{bevaltas.tipus === 'welcome' ? 'Üdvözlő kedvezmény' : 'SideQuest kedvezmény'}</p>
+        <p className="bev-cimke">{bevaltas.tipus === 'welcome' ? 'Üdvözlő ajándék' : 'SideQuest kedvezmény'}</p>
         <h2 className="bev-partner">{bevaltas.partner}</h2>
 
         <div className="bev-szazalek">

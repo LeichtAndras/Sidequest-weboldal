@@ -6,12 +6,6 @@ export type Partner = {
   addedDate?: string
   discount: string
   /**
-   * Az udvozlo kedvezmeny szazaleka, amit a user partnerenkent egyszer kap
-   * meg. A normal kedvezmeny a discount mezo. Ha valtozik, az adatbazisba is
-   * at kell vinni: npm run partnerek-sql, aztan a supabase/partnerek.sql.
-   */
-  welcomeDiscount?: number
-  /**
    * "helyszini": a kasszanal, gombnyomassal valtja be.
    * "online_kod": foglalaskor egyedi koddal (3. fazis).
    */

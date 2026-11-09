@@ -6,8 +6,8 @@ import type { SupabaseClient } from '@supabase/supabase-js'
  * nem kell, a szavazas sima fetch-csel megy tovabb (lasd mozi/api.ts).
  */
 
-const CIM = import.meta.env.VITE_SUPABASE_URL?.replace(/\/+$/, '') ?? ''
-const KULCS = import.meta.env.VITE_SUPABASE_ANON_KEY ?? ''
+export const CIM = import.meta.env.VITE_SUPABASE_URL?.replace(/\/+$/, '') ?? ''
+export const KULCS = import.meta.env.VITE_SUPABASE_ANON_KEY ?? ''
 
 /**
  * Ezen a kulcson tarolja a munkamenetet a bongeszo. Sajat nev, hogy a

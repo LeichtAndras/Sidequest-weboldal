@@ -5,10 +5,12 @@
 --
 -- Minden szabaly itt van kikenyszeritve, nem a frontenden:
 --   - beváltást csak belepett user indithat, kitoltott profillal
---   - az udvozlo kedvezmeny partnerenkent egyszer valthato be: ezt egy
---     egyedi index garantalja, ket egyszerre erkezo keres sem jut at
+--   - udvozlo kedvezmeny csak ott jar, ahol a usernek aktiv udvozlo
+--     ajandeka van (supabase/ajandek.sql); beváltáskor az ajandek
+--     bevaltottnak szamit, ket egyszerre erkezo keres sem jut at
 --   - a beváltás 5 percig ervenyes; a lejaratot es a rovid kodot a szerver adja
---   - a szazalekot a partners tablabol veszi, nem a telefontol
+--   - a szazalekot a partners, udvozlonel a welcome_offers tablabol veszi,
+--     nem a telefontol
 --   - ha a partnernel napi korlatozas van (pl. Magic Rooms: csak hetkoznap),
 --     mas napon nem lehet beváltani
 --   - a user csak a sajat beváltásait latja
@@ -22,7 +24,6 @@
 create table if not exists public.partners (
   slug text primary key,
   name text not null,
-  welcome_pct integer not null check (welcome_pct between 0 and 100),
   normal_pct integer not null check (normal_pct between 0 and 100),
   mode text not null check (mode in ('helyszini', 'online_kod')),
   -- 1 = hetfo ... 7 = vasarnap. Null: minden nap.
@@ -50,11 +51,6 @@ create table if not exists public.redemptions (
   created_at timestamptz not null default now(),
   expires_at timestamptz not null
 );
-
--- Udvozlo kedvezmeny: userenkent es partnerenkent legfeljebb egy sor
-create unique index if not exists redemptions_egy_udvozlo
-  on public.redemptions (user_id, partner_slug)
-  where tipus = 'welcome';
 
 create index if not exists redemptions_user_idx on public.redemptions (user_id, created_at desc);
 create index if not exists redemptions_partner_idx on public.redemptions (partner_slug, created_at);
@@ -88,7 +84,7 @@ $$;
 
 -- ---------------------------------------------------------------------
 -- 4. Beváltás inditasa a kasszanal. A megerosites pillanataban fut, az
---    udvozlo kedvezmeny itt szamit felhasznaltnak.
+--    udvozlo ajandek itt szamit bevaltottnak.
 --    Ha 5 percen belul ugyanazt nyitja meg ujra, a meglevot adja vissza.
 -- ---------------------------------------------------------------------
 create or replace function public.bevaltas_inditasa(p_partner text, p_tipus text)
@@ -103,6 +99,7 @@ declare
   v_p public.partners%rowtype;
   v_r public.redemptions%rowtype;
   v_pct integer;
+  v_ajandek uuid;
   v_nap integer := extract(isodow from (now() at time zone 'Europe/Budapest'))::int;
 begin
   if v_uid is null then
@@ -127,6 +124,9 @@ begin
     return json_build_object('statusz', 'online_partner');
   end if;
 
+  -- Egy user egy partnernel egyszerre csak egy beváltást indithat
+  perform pg_advisory_xact_lock(hashtext(v_uid::text || '|' || p_partner));
+
   -- Ujranyitas: ugyanez a fajta, ugyanennel a partnernel, meg ervenyes
   select * into v_r
   from public.redemptions
@@ -140,13 +140,25 @@ begin
     end if;
 
     if p_tipus = 'welcome' then
-      if exists (
-        select 1 from public.redemptions
-        where user_id = v_uid and partner_slug = p_partner and tipus = 'welcome'
-      ) then
-        return json_build_object('statusz', 'mar_felhasznalt');
+      select c.id, o.pct into v_ajandek, v_pct
+      from public.welcome_claims c
+      join public.welcome_offers o on o.id = c.offer_id
+      where c.user_id = v_uid and o.partner_slug = p_partner
+        and c.redeemed_at is null and c.expires_at > now()
+      order by c.claimed_at desc
+      limit 1
+      for update of c;
+
+      if not found then
+        if exists (
+          select 1 from public.welcome_claims c
+          join public.welcome_offers o on o.id = c.offer_id
+          where c.user_id = v_uid and o.partner_slug = p_partner and c.redeemed_at is not null
+        ) then
+          return json_build_object('statusz', 'mar_felhasznalt');
+        end if;
+        return json_build_object('statusz', 'nincs_ajandek');
       end if;
-      v_pct := v_p.welcome_pct;
     else
       v_pct := v_p.normal_pct;
     end if;
@@ -155,8 +167,12 @@ begin
       insert into public.redemptions (user_id, partner_slug, tipus, pct, short_code, expires_at)
       values (v_uid, p_partner, p_tipus, v_pct, public.rovid_kod(), now() + interval '5 minutes')
       returning * into v_r;
+
+      if v_ajandek is not null then
+        update public.welcome_claims set redeemed_at = now() where id = v_ajandek;
+      end if;
     exception when unique_violation then
-      -- Ket keres egyszerre: az egyik nyert, a masik mar felhasznaltnak latja
+      -- Mar van bevaltott ajandeka: a masodik nem jut at
       return json_build_object('statusz', 'mar_felhasznalt');
     end;
   end if;

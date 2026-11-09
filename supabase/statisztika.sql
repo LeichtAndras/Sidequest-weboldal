@@ -38,6 +38,7 @@ order by nap desc;
 -- 2. Bevaltasok partnerenkent es havonta
 --    Helyszini partnernel egy gombnyomas egy bevaltas (az 5 percen belul
 --    ujranyitott ugyanaz marad). Online partnernel egy kiosztott kod.
+--    Az udvozlo oszlop a beváltott udvozlo ajandekokat szamolja.
 -- ---------------------------------------------------------------------
 select
   to_char(r.created_at at time zone 'Europe/Budapest', 'YYYY-MM') as honap,
@@ -85,3 +86,32 @@ left join public.code_pool c on c.partner_slug = pa.slug and c.tipus = t.tipus
 where pa.mode = 'online_kod' and pa.active
 group by pa.name, t.tipus
 order by pa.name, t.tipus desc;
+
+
+-- ---------------------------------------------------------------------
+-- 4. Udvozlo ajandekok ajanlatonkent
+--    osszes:     ennyi darab van az ajanlatbol (welcome_offers.total)
+--    bevaltott:  valasztottak es be is valtottak
+--    aktiv:      valasztottak, a 14 nap meg nem telt le
+--    lejart:     valasztottak, de nem valtottak be idoben (a darab visszakerult)
+--    szabad:     meg valaszthato; online partnernel a szabad udvozlo kodok
+--                szama is korlatozza
+-- ---------------------------------------------------------------------
+select
+  p.name as partner,
+  o.pct,
+  o.total as osszes,
+  count(c.id) filter (where c.redeemed_at is not null) as bevaltott,
+  count(c.id) filter (
+    where c.redeemed_at is null and c.user_id is not null and c.expires_at > now()
+  ) as aktiv,
+  count(c.id) filter (
+    where c.redeemed_at is null and (c.expires_at <= now() or c.user_id is null)
+  ) as lejart,
+  public.ajanlat_szabad(o.id) as szabad,
+  o.active as ajanlat_aktiv
+from public.welcome_offers o
+join public.partners p on p.slug = o.partner_slug
+left join public.welcome_claims c on c.offer_id = o.id
+group by o.id, p.name
+order by o.active desc, o.pct desc, p.name;

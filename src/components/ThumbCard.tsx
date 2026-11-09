@@ -4,6 +4,7 @@ import { ujPartner } from '../partner'
 import { ROBBANAS } from '../robbanas'
 import kategoriaSzo from '../data/kategoriak.json'
 import ThumbDetails from './ThumbDetails'
+import { useUjRendszer } from '../fiok/kapcsolo'
 import { QrIcon, SpeechIcon, TagIcon } from './Icons'
 
 type Props = {
@@ -13,7 +14,13 @@ type Props = {
 }
 
 /** A bevaltas modja: harom lehetoseg, mindig ugyanazokkal a szavakkal. */
-function bevaltasMod(partner: Partner) {
+function bevaltasMod(partner: Partner, uj = false) {
+  // Az uj, fiokos rendszerben ket mod van: kassza vagy szemelyes kod
+  if (uj) {
+    return partner.redemptionMode === 'online_kod'
+      ? { szoveg: 'Személyes kód', Ikon: TagIcon }
+      : { szoveg: 'Beváltás a kasszánál', Ikon: TagIcon }
+  }
   if (partner.code) return { szoveg: 'Online kuponkód', Ikon: TagIcon }
   if (partner.redeem.includes('QR')) return { szoveg: 'QR a helyszínen', Ikon: QrIcon }
   return { szoveg: 'Mondd: SideQuest', Ikon: SpeechIcon }
@@ -53,7 +60,8 @@ function ThumbCard({ partner, open, onToggle }: Props) {
   const lenyithato = vanReszlet(partner)
   const panelId = `reszletek-${partner.slug}`
   const cimke = ujPartner(partner) ? `ÚJ · ${partner.category}` : partner.category
-  const bevaltas = bevaltasMod(partner)
+  const uj = useUjRendszer(partner)
+  const bevaltas = bevaltasMod(partner, uj)
   const kep = partner.venue && !kepHiba ? `/venues/${partner.venue}` : null
 
   return (

@@ -4,6 +4,7 @@ import ThumbCard from './components/ThumbCard'
 import MoziKartya from './components/MoziKartya'
 import MaiAjanlat from './components/MaiAjanlat'
 import BelepesAblak from './components/fiok/BelepesAblak'
+import AjandekPopup from './components/fiok/AjandekPopup'
 import { useUjRendszer } from './fiok/kapcsolo'
 import { beallitas } from './mozi/beallitas'
 import CategoryFilter, { ALL } from './components/CategoryFilter'
@@ -231,6 +232,7 @@ export default function App({ utvonal }: Props = {}) {
         </div>
       </div>
       {uj ? <BelepesAblak /> : null}
+      {uj ? <AjandekPopup /> : null}
     </div>
   )
 }

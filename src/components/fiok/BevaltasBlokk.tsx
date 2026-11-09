@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { Partner } from '../../types'
-import { FiokHiba, belepesNyitasa, bevaltasInditasa, useFiok, type AktivBevaltas } from '../../fiok/fiok'
+import { FiokHiba, aktivAjandek, belepesNyitasa, bevaltasInditasa, useFiok, type AktivBevaltas } from '../../fiok/fiok'
+import { hataridoNap, kijelentkezettFelirat, useAjanlatok } from '../../fiok/ajanlatok'
 import BevaltasKepernyo from './BevaltasKepernyo'
 
 type Tipus = 'welcome' | 'normal'
@@ -9,24 +10,25 @@ type Tipus = 'welcome' | 'normal'
 /**
  * A kedvezmeny gombja a kartya lenyilo reszen, helyszini partnereknel.
  *
- *   kijelentkezve: "Regisztrálj, és az első alkalommal X% kedvezményt kapsz"
- *   belepve, udvozlo meg nincs: "Üdvözlő kedvezmény beváltása (X%)"
- *   belepve, udvozlo mar megvan: a normal kedvezmeny gombja
+ *   kijelentkezve: az itt valaszthato ajandek, vagy a normal kedvezmeny
+ *   belepve, itt aktiv az udvozlo ajandeka: "Üdvözlő ajándék beváltása (X%)"
+ *   belepve, mashol vagy nincs ajandeka: a normal kedvezmeny gombja
  *   5 percen belul ujranyithato az aktiv beváltás
  *
  * A gomb csak kenyelmi: hogy mi valthato be, azt a szerver donti el.
  */
 export default function BevaltasBlokk({ partner }: { partner: Partner }) {
   const fiok = useFiok()
+  const ajanlatok = useAjanlatok()
   const [kerdes, setKerdes] = useState<Tipus | null>(null)
   const [aktiv, setAktiv] = useState<AktivBevaltas | null>(null)
   const [dolgozik, setDolgozik] = useState(false)
   const [hiba, setHiba] = useState<string | null>(null)
   const [, setUtem] = useState(0)
 
-  const udvozlo = partner.welcomeDiscount ?? 0
+  const ajandek = aktivAjandek(fiok.ajandek, partner.slug)
+  const udvozlo = ajandek?.pct ?? 0
   const sajat = fiok.bevaltasok?.filter((b) => b.partner_slug === partner.slug) ?? []
-  const udvozloKesz = sajat.some((b) => b.tipus === 'welcome')
   const aktivSor = sajat.find((b) => Date.parse(b.expires_at) > Date.now())
 
   // Amig van aktiv beváltás, figyeljuk a lejaratat, hogy a gomb idoben visszavaltson
@@ -63,11 +65,13 @@ export default function BevaltasBlokk({ partner }: { partner: Partner }) {
   // Ujranyitas: csak ha tenyleg ervenyes meg, kulonben a rendes, megerositos ut jon
   const ujranyit = () => {
     if (aktivSor && Date.parse(aktivSor.expires_at) > Date.now()) void indit(aktivSor.tipus)
-    else setKerdes(udvozloKesz ? 'normal' : 'welcome')
+    else setKerdes(ajandek ? 'welcome' : 'normal')
   }
 
   const belepve = fiok.allapot === 'bent' && fiok.keresztnev !== null
-  const betolt = fiok.allapot === 'bent' && (fiok.email === null || (fiok.keresztnev !== null && fiok.bevaltasok === null))
+  const betolt =
+    fiok.allapot === 'bent' &&
+    (fiok.email === null || (fiok.keresztnev !== null && (fiok.bevaltasok === null || fiok.ajandek === null)))
 
   let felirat: string
   let kattintas: () => void
@@ -75,13 +79,13 @@ export default function BevaltasBlokk({ partner }: { partner: Partner }) {
     felirat = 'Betöltés...'
     kattintas = () => {}
   } else if (!belepve) {
-    felirat = `Regisztrálj, és az első alkalommal ${udvozlo}% kedvezményt kapsz`
+    felirat = kijelentkezettFelirat(ajanlatok, partner.slug, partner.discount)
     kattintas = belepesNyitasa
   } else if (aktivSor) {
     felirat = 'Aktív beváltás megnyitása'
     kattintas = ujranyit
-  } else if (!udvozloKesz) {
-    felirat = `Üdvözlő kedvezmény beváltása (${udvozlo}%)`
+  } else if (ajandek) {
+    felirat = `Üdvözlő ajándék beváltása (${udvozlo}%)`
     kattintas = () => {
       setHiba(null)
       setKerdes('welcome')
@@ -99,6 +103,10 @@ export default function BevaltasBlokk({ partner }: { partner: Partner }) {
       <button type="button" className="tn-kapszula bev-gomb" onClick={kattintas} disabled={betolt || dolgozik}>
         <span className="tn-gomb-felirat tn-gomb-felirat-sotet bev-gomb-felirat">{felirat}</span>
       </button>
+
+      {belepve && ajandek?.lejarat && !aktivSor ? (
+        <p className="bev-hatarido">Az üdvözlő ajándékod {hataridoNap(ajandek.lejarat)}-ig váltható be.</p>
+      ) : null}
 
       {hiba && !kerdes ? <p className="mozi-hiba">{hiba}</p> : null}
 
@@ -118,7 +126,7 @@ export default function BevaltasBlokk({ partner }: { partner: Partner }) {
                   <p className="bev-megerosites-cim">Csak a kasszánál nyomd meg!</p>
                   <p className="mozi-jelzes">
                     {kerdes === 'welcome'
-                      ? `Az üdvözlő kedvezmény (${udvozlo}%) egyszer használható. Amint megnyomod, felhasználtnak számít, és 5 percig látszik a képernyőn.`
+                      ? `Az üdvözlő ajándékod (${udvozlo}%) egyszer használható. Amint megnyomod, felhasználtnak számít, és 5 percig látszik a képernyőn.`
                       : `A kedvezmény (${partner.discount}) 5 percig látszik a képernyőn. Mutasd meg a pénztárosnak.`}
                   </p>
                   {hiba ? <p className="mozi-hiba">{hiba}</p> : null}

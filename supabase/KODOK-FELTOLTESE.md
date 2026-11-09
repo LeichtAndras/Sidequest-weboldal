@@ -2,8 +2,14 @@
 
 A Pixity és a Rage Room Budapest (és minden `online_kod` módú partner)
 személyes kódokat oszt. A kódokat a partner adja, te töltöd fel a
-`code_pool` táblába. Egy user egy partnertől egy hónapban egy kódot kap:
-először az üdvözlőt, utána havonta egy normált.
+`code_pool` táblába.
+
+- **`normal`**: havi kód. Egy user egy partnertől havonta egyet kap.
+- **`welcome`**: üdvözlő kód. Csak az kapja, aki ezt a partnert választotta
+  üdvözlő ajándéknak (`welcome_offers`, lásd `supabase/ajandek.sql`).
+  Online partnernél annyi ajándék választható, ahány szabad `welcome` kód
+  van fent, ezért ha ajánlatot indítasz egy online partnerhez, előbb töltsd
+  fel hozzá a kódokat.
 
 ## 1. A CSV fájl
 
@@ -28,7 +34,8 @@ Az `id`, `assigned_to`, `assigned_at` és `created_at` oszlopokat **ne** tedd
 bele, ezeket az adatbázis tölti ki.
 
 Ha a partner csak egyféle kódot ad, csak azt töltsd fel. Ha nincs üdvözlő
-kód, a user rögtön a havit kapja.
+kód, ennél a partnernél nem lehet üdvözlő ajándékot választani, a havi kód
+ettől még működik.
 
 Excelből vagy Google Táblázatból: **Fájl → Letöltés → CSV**.
 
