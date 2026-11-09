@@ -1,34 +1,23 @@
 import { useState } from 'react'
-import partnersData from './data/partners.json'
-import type { Partner } from './types'
 import Felirat from './components/Felirat'
-import CouponCode from './components/CouponCode'
 import BelepesAblak from './components/fiok/BelepesAblak'
+import Kodjaim from './components/fiok/Kodjaim'
+import { useUjRendszer } from './fiok/kapcsolo'
 import { FiokHiba, belepesNyitasa, fiokTorlese, kijelentkezes, useFiok, valaszthat, welcomeAllapot } from './fiok/fiok'
-import { hataridoNap } from './fiok/kinalat'
 
 /**
  * Fiokom oldal. A keret ugyanaz, mint a kulon /mozi oldale: vissza link,
  * nagy cim a falon, alatta a krem panel.
  *
- * Itt latszik a valasztott udvozlo ajandek a hataridovel, es amig nem
- * valasztott (vagy lejart), innen jut el az /ajandek/ oldalra.
+ * Az uj rendszerben: Kódjaim (aktiv, bevaltott, lejart igenylesek), es
+ * amig nem valasztott welcome ajandekot (vagy lejart), innen jut el az
+ * /ajandek/ oldalra. Az uj reszek csak tesztelonek latszanak, amig nincs
+ * elesites; a belepes es a fioktorles mindenkinek.
  */
-const nevek = new Map((partnersData as Partner[]).map((p) => [p.slug, p.name]))
-
-const DATUM = new Intl.DateTimeFormat('hu-HU', {
-  timeZone: 'Europe/Budapest',
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric',
-})
-
 export default function Fiokom() {
   const fiok = useFiok()
+  const uj = useUjRendszer()
   const w = welcomeAllapot(fiok.igenylesek)
-  const ajandek = w?.igenyles ?? null
-  // Az 5. fazisban ebbol lesz a teljes Kodjaim lista
-  const kodok = (fiok.igenylesek ?? []).filter((c) => c.kod)
   const [torlesKerdes, setTorlesKerdes] = useState(false)
   const [dolgozik, setDolgozik] = useState(false)
   const [hiba, setHiba] = useState<string | null>(null)
@@ -97,71 +86,24 @@ export default function Fiokom() {
                   </h2>
                   {fiok.email ? <p className="mozi-jelzes">{fiok.email}</p> : null}
 
-                  <div className="tn-panel-blokk">
-                    <h2 className="tn-panel-cim">
-                      <Felirat szoveg="Üdvözlő ajándék" kicsi valtozat="sotet" className="mozi-fejlec" />
-                    </h2>
-                    {w === null ? <p className="mozi-jelzes">Betöltés...</p> : null}
-                    {w?.statusz === 'aktiv' && ajandek ? (
-                      <>
-                        <ul className="fiok-lista">
-                          <li>
-                            <span className="fiok-lista-nev">{nevek.get(ajandek.partner_slug) ?? ajandek.partner_slug}</span>
-                            <span className="fiok-lista-adat">
-                              {ajandek.szoveg} · {hataridoNap(ajandek.lejarat)}-ig
-                            </span>
-                          </li>
-                        </ul>
-                        <a className="tn-kapszula mozi-gomb" href={`/${ajandek.partner_slug}/`}>
-                          <span className="tn-gomb-felirat tn-gomb-felirat-sotet">Irány a kártyája</span>
-                        </a>
-                      </>
-                    ) : null}
-                    {w?.statusz === 'bevaltott' && ajandek ? (
-                      <ul className="fiok-lista">
-                        <li>
-                          <span className="fiok-lista-nev">{nevek.get(ajandek.partner_slug) ?? ajandek.partner_slug}</span>
-                          <span className="fiok-lista-adat">
-                            {ajandek.szoveg} · beváltva {DATUM.format(new Date(ajandek.bevaltva!))}
-                          </span>
-                        </li>
-                      </ul>
-                    ) : null}
-                    {valaszthat(w) ? (
-                      <>
-                        <p className="mozi-jelzes">
-                          {w?.statusz === 'lejart'
-                            ? 'Az ajándékod lejárt, mert nem váltottad be időben. Válassz újat.'
-                            : 'Még nem választottál üdvözlő ajándékot.'}
-                        </p>
-                        <a className="tn-kapszula mozi-gomb" href="/ajandek/">
-                          <span className="tn-gomb-felirat tn-gomb-felirat-sotet">Ajándék választása</span>
-                        </a>
-                      </>
-                    ) : null}
-                  </div>
+                  {/* Az uj rendszer reszei csak tesztelonek (vagy elesites utan) latszanak */}
+                  {uj && valaszthat(w) ? (
+                    <div className="tn-panel-blokk">
+                      <h2 className="tn-panel-cim">
+                        <Felirat szoveg="Üdvözlő ajándék" kicsi valtozat="sotet" className="mozi-fejlec" />
+                      </h2>
+                      <p className="mozi-jelzes">
+                        {w?.statusz === 'lejart'
+                          ? 'Az ajándékod lejárt, mert nem váltottad be időben. Válassz újat.'
+                          : 'Még nem választottál üdvözlő ajándékot.'}
+                      </p>
+                      <a className="tn-kapszula mozi-gomb" href="/ajandek/">
+                        <span className="tn-gomb-felirat tn-gomb-felirat-sotet">Ajándék választása</span>
+                      </a>
+                    </div>
+                  ) : null}
 
-                  <div className="tn-panel-blokk">
-                    <h2 className="tn-panel-cim">
-                      <Felirat szoveg="Online kódjaid" kicsi valtozat="sotet" className="mozi-fejlec" />
-                    </h2>
-                    {kodok.length === 0 ? (
-                      <p className="mozi-jelzes">Még nem kaptál online kódot.</p>
-                    ) : (
-                      kodok.map((c) => (
-                        <div key={c.id} className="bev-kod-sor">
-                          <p className="bev-kod-cimke">
-                            {nevek.get(c.partner_slug) ?? c.partner_slug} · {c.szoveg}
-                            <span>
-                              {' '}
-                              · {Date.parse(c.lejarat) > Date.now() ? `${DATUM.format(new Date(Date.parse(c.lejarat) - 1000)).replace(/\.$/, '')}-ig érvényes` : 'lejárt'}
-                            </span>
-                          </p>
-                          <CouponCode code={c.kod!} />
-                        </div>
-                      ))
-                    )}
-                  </div>
+                  {uj ? <Kodjaim /> : null}
 
                   {hiba ? <p className="mozi-hiba">{hiba}</p> : null}
 
