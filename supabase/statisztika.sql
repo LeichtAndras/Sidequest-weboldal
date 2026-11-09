@@ -35,20 +35,21 @@ order by nap desc;
 
 
 -- ---------------------------------------------------------------------
--- 2. Bevaltasok partnerenkent es havonta
---    Helyszini partnernel egy gombnyomas egy bevaltas (az 5 percen belul
---    ujranyitott ugyanaz marad). Online partnernel egy kiosztott kod.
---    Az udvozlo oszlop a beváltott udvozlo ajandekokat szamolja.
+-- 2. Igenylesek partnerenkent es havonta, tipusonkent
+--    Alapnal az igenyles es a bevaltas egy lepes. A bevaltott oszlop
+--    mindharom tipust szamolja.
 -- ---------------------------------------------------------------------
 select
-  to_char(r.created_at at time zone 'Europe/Budapest', 'YYYY-MM') as honap,
+  to_char(c.igenyelve at time zone 'Europe/Budapest', 'YYYY-MM') as honap,
   pa.name as partner,
-  count(*) filter (where r.tipus = 'welcome') as udvozlo,
-  count(*) filter (where r.tipus = 'normal') as normal,
+  count(*) filter (where c.tipus = 'alap') as alap,
+  count(*) filter (where c.tipus = 'welcome') as welcome,
+  count(*) filter (where c.tipus = 'drop') as drop_,
+  count(*) filter (where c.bevaltva is not null) as bevaltott,
   count(*) as osszesen,
-  count(distinct r.user_id) as kulonbozo_user
-from public.redemptions r
-join public.partners pa on pa.slug = r.partner_slug
+  count(distinct c.user_id) as kulonbozo_user
+from public.claims c
+join public.partners pa on pa.slug = c.partner_slug
 group by 1, 2
 order by 1 desc, osszesen desc, partner;
 
@@ -89,29 +90,19 @@ order by pa.name, t.tipus desc;
 
 
 -- ---------------------------------------------------------------------
--- 4. Udvozlo ajandekok ajanlatonkent
---    osszes:     ennyi darab van az ajanlatbol (welcome_offers.total)
---    bevaltott:  valasztottak es be is valtottak
---    aktiv:      valasztottak, a 14 nap meg nem telt le
---    lejart:     valasztottak, de nem valtottak be idoben (a darab visszakerult)
---    szabad:     meg valaszthato; online partnernel a szabad udvozlo kodok
---                szama is korlatozza
+-- 4. Keret ajanlatonkent, ebben a honapban (dropnal osszesen)
+--    felhasznalt: alapnal az ehavi beváltások, welcome-nal az ehavi nem
+--                 lejart valasztasok, dropnal minden igenyles
+--    szabad:      meg igenyelheto; online partnernel a kodok szama is korlatozza
 -- ---------------------------------------------------------------------
 select
+  o.tipus,
   p.name as partner,
-  o.pct,
-  o.total as osszes,
-  count(c.id) filter (where c.redeemed_at is not null) as bevaltott,
-  count(c.id) filter (
-    where c.redeemed_at is null and c.user_id is not null and c.expires_at > now()
-  ) as aktiv,
-  count(c.id) filter (
-    where c.redeemed_at is null and (c.expires_at <= now() or c.user_id is null)
-  ) as lejart,
+  o.szoveg,
+  o.keret,
+  public.ajanlat_felhasznalt(o.id) as felhasznalt,
   public.ajanlat_szabad(o.id) as szabad,
-  o.active as ajanlat_aktiv
-from public.welcome_offers o
+  o.aktiv
+from public.offers o
 join public.partners p on p.slug = o.partner_slug
-left join public.welcome_claims c on c.offer_id = o.id
-group by o.id, p.name
-order by o.active desc, o.pct desc, p.name;
+order by o.aktiv desc, o.tipus, p.name;
