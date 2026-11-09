@@ -109,6 +109,11 @@ A push előtt meg kell mutatni:
 
 ## 5. Szövegek
 
+- [ ] Adatkezelési tájékoztató: a 2.2-es táblázatba az üdvözlő ajándék sora
+      (melyik hely, mennyi, a választás, a határidő és a beváltás ideje;
+      „hogy csak egyszer lehessen felhasználni, és a darabszám pontos
+      legyen”). 2026-11-09-én a push előtt kivettük, mert az élő oldalon
+      még semmi új nem látszhat; élesítéskor kell visszatenni.
 - [ ] Adatkezelési tájékoztató: fióktörléskor az igénylések név nélkül
       megmaradnak (a keret miatt), nem törlődnek. A 2.2 és a 4. pontot ehhez
       kell igazítani. A drop és a „Kódjaim” adatai is kerüljenek bele.

@@ -8,6 +8,7 @@ import {
   profilMentese,
   useFiok,
 } from '../../fiok/fiok'
+import { useUjRendszer } from '../../fiok/kapcsolo'
 
 type Lepes = 'email' | 'kod' | 'profil' | 'kesz'
 
@@ -20,13 +21,14 @@ const uzenet = (hiba: unknown) =>
 /**
  * Belepes es regisztracio egy ablakban. Link es Google-belepes nincs, mert
  * az Instagram beepitett bongeszojeben nem mukodnek: 6 jegyu kod megy
- * e-mailben. Ha a cim uj, a kod utan keresztnev es a ket elfogadas jon,
- * utana az /ajandek/ oldal, ahol az udvozlo ajandekot valasztja.
+ * e-mailben. Ha a cim uj, a kod utan keresztnev es a ket elfogadas jon; az
+ * uj rendszerben utana az /ajandek/ oldal, ahol az udvozlo ajandekot valasztja.
  *
  * Kinezet: a mozi szavazas krem panelje, mezoi es gombjai, uj stilus nincs.
  */
 export default function BelepesAblak() {
   const fiok = useFiok()
+  const uj = useUjRendszer()
   const azon = useId()
 
   const [lepes, setLepes] = useState<Lepes>('email')
@@ -109,8 +111,11 @@ export default function BelepesAblak() {
     e.preventDefault()
     void futtat(async () => {
       await profilMentese(nev, elmult16, elfogadja)
-      // Uj regisztracio: rogton az ajandek valasztasa jon
-      if (window.location.pathname.replace(/\/+$/, '') === '/ajandek') {
+      // Uj regisztracio: az uj rendszerben rogton az ajandek valasztasa jon,
+      // kulonben (pl. az eles /fiokom/ oldalon) a regi "kesz" lepes
+      if (!uj) {
+        setLepes('kesz')
+      } else if (window.location.pathname.replace(/\/+$/, '') === '/ajandek') {
         belepesBezarasa()
       } else {
         window.location.assign('/ajandek/')

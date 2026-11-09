@@ -130,11 +130,7 @@ export default function Adatkezeles() {
                   sorok={[
                     [
                       'Melyik partnernél, milyen kedvezményt (üdvözlő vagy normál) és mikor váltottál be',
-                      'Hogy a beváltási igazolás működjön.',
-                    ],
-                    [
-                      'A választott üdvözlő ajándék (melyik hely, hány százalék), a választás, a határidő és a beváltás ideje',
-                      'Hogy az üdvözlő ajándékot csak egyszer lehessen felhasználni, és az ajánlatok darabszáma pontos legyen.',
+                      'Hogy az üdvözlő kedvezményt partnerenként csak egyszer lehessen felhasználni, és hogy a beváltási igazolás működjön.',
                     ],
                     ['A beváltás rövid azonosítója és lejárata', 'Az igazolás ellenőrzéséhez a kasszánál.'],
                     [
