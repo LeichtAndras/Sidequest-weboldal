@@ -15,6 +15,9 @@ type Lepes = 'email' | 'kod' | 'profil' | 'kesz'
 /** Ennyi masodpercig nem lehet uj kodot kerni, hogy ne fussunk bele a korlatba. */
 const UJ_KOD_VARAKOZAS = 60
 
+/** A kod ennyi ideig ervenyes (Supabase: Email OTP Expiration = 600 mp). */
+const KOD_ERVENYES = 10 * 60 * 1000
+
 const uzenet = (hiba: unknown) =>
   hiba instanceof FiokHiba ? hiba.message : 'Valami félrement. Próbáld újra pár másodperc múlva.'
 
@@ -41,6 +44,12 @@ export default function BelepesAblak() {
   const [hiba, setHiba] = useState<string | null>(null)
   const [varakozas, setVarakozas] = useState(0)
   const elsoMezo = useRef<HTMLInputElement>(null)
+  // Kod lepes: mikor ment ki a kod, fut-e mar ellenorzes (szinkron, a dolgozik
+  // mellett, hogy a gepeles es a beillesztes egyszerre se kuldje ketszer), es
+  // az utolso rossz kod, amit nem kuldunk be ujra magatol
+  const kodKuldveIdo = useRef(0)
+  const ellenorzesFut = useRef(false)
+  const utolsoRossz = useRef<string | null>(null)
 
   // Nyitaskor: ha mar be van lepve, de nincs profilja, rogton a profil jon
   useEffect(() => {
@@ -93,18 +102,54 @@ export default function BelepesAblak() {
     e?.preventDefault()
     void futtat(async () => {
       await kodKuldese(email)
+      kodKuldveIdo.current = Date.now()
+      utolsoRossz.current = null
       setKod('')
       setVarakozas(UJ_KOD_VARAKOZAS)
       setLepes('kod')
     })
   }
 
+  // A kod ellenorzese. Egyszerre csak egy fut. Rossz kodnal (a 10 perces
+  // ervenyessegen belul) a mezo kiurul, es a fokusz marad, igy a billentyuzet
+  // nyitva marad; lejart kodnal a regi uzenet jon.
+  const ellenoriz = (beirt: string) => {
+    if (ellenorzesFut.current || dolgozik) return
+    ellenorzesFut.current = true
+    setDolgozik(true)
+    setHiba(null)
+    void (async () => {
+      try {
+        const { ujFiok } = await kodEllenorzese(email, beirt)
+        setLepes(ujFiok ? 'profil' : 'kesz')
+      } catch (h) {
+        if (h instanceof FiokHiba && h.ok === 'hibas_kod' && Date.now() - kodKuldveIdo.current < KOD_ERVENYES) {
+          setHiba('Hibás kód, próbáld újra')
+          utolsoRossz.current = beirt
+          setKod('')
+          elsoMezo.current?.focus()
+        } else {
+          setHiba(uzenet(h))
+        }
+      } finally {
+        ellenorzesFut.current = false
+        setDolgozik(false)
+      }
+    })()
+  }
+
   const ellenorzes = (e: FormEvent) => {
     e.preventDefault()
-    void futtat(async () => {
-      const { ujFiok } = await kodEllenorzese(email, kod)
-      setLepes(ujFiok ? 'profil' : 'kesz')
-    })
+    ellenoriz(kod)
+  }
+
+  // Szokozok es mas jelek nelkul (pl. beillesztett "596 466"). Az uj
+  // rendszerben 6 szamjegynel magatol bekuldi: gepelve, beillesztve vagy az
+  // iOS "Mailből" javaslatabol. A rossz kodot nem kuldi be ujra magatol.
+  const kodValtozas = (ertek: string) => {
+    const tiszta = ertek.replace(/\D/g, '').slice(0, 6)
+    setKod(tiszta)
+    if (uj && tiszta.length === 6 && tiszta !== utolsoRossz.current) ellenoriz(tiszta)
   }
 
   const mentes = (e: FormEvent) => {
@@ -199,11 +244,12 @@ export default function BelepesAblak() {
                 inputMode="numeric"
                 autoComplete="one-time-code"
                 pattern="\d{6}"
-                maxLength={6}
                 placeholder="123456"
                 value={kod}
-                onChange={(e) => setKod(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                disabled={dolgozik}
+                onChange={(e) => kodValtozas(e.target.value)}
+                // Ellenorzes kozben csak olvashato, nem tiltott: igy a fokusz es
+                // a billentyuzet megmarad
+                readOnly={dolgozik}
               />
               {hiba ? <p className="mozi-hiba">{hiba}</p> : null}
               <button type="submit" className="tn-kapszula mozi-gomb" disabled={dolgozik || !kodJo}>

@@ -149,15 +149,25 @@ export const belepesNyitasa = () => beallit({ ablak: true })
 export const belepesBezarasa = () => beallit({ ablak: false })
 
 /** Felhasznalonak mutathato hiba, mindig magyarul. */
-export class FiokHiba extends Error {}
+export class FiokHiba extends Error {
+  /** Gepnek szolo ok, ha a hivo maskepp kezelne (pl. "hibas_kod"). */
+  ok?: string
+
+  constructor(uzenet: string, ok?: string) {
+    super(uzenet)
+    this.ok = ok
+  }
+}
 
 function forditas(hiba: unknown): FiokHiba {
   const h = hiba as { code?: string; status?: number; message?: string; name?: string }
   if (h?.code === 'over_email_send_rate_limit' || h?.code === 'over_request_rate_limit' || h?.status === 429) {
     return new FiokHiba('Most túl sok kódot kértél. Várj egy kicsit, és próbáld újra.')
   }
+  // A Supabase a rossz es a lejart kodra ugyanazt mondja; a hivo az ido
+  // alapjan donti el, melyik volt (lasd BelepesAblak)
   if (h?.code === 'otp_expired' || /expired|invalid/i.test(h?.message ?? '')) {
-    return new FiokHiba('Ez a kód hibás vagy lejárt. Nézd meg újra, vagy kérj új kódot.')
+    return new FiokHiba('Ez a kód hibás vagy lejárt. Nézd meg újra, vagy kérj új kódot.', 'hibas_kod')
   }
   if (h?.code === 'email_address_invalid' || h?.code === 'validation_failed') {
     return new FiokHiba('Ez az e-mail-cím nem tűnik jónak. Nézd meg, nincs-e elírva.')
