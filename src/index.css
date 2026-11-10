@@ -2479,3 +2479,288 @@ body {
 .kodjaim-lejart li {
   opacity: 0.6;
 }
+
+/* ---- Regisztraciora terelo popup (AjandekPopup) ---- */
+.ap-retes {
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  animation: ap-elsotetul 0.25s ease-out both;
+}
+
+.ap-lap {
+  border: 2px solid var(--sotetkek);
+  border-radius: 26px;
+  box-shadow: 0 5px 0 var(--sotetkek), 0 24px 50px -16px rgba(0, 0, 0, 0.85);
+  animation: ap-becsuszik 0.42s cubic-bezier(0.2, 0.9, 0.25, 1.12) both;
+}
+
+.ap-belso {
+  padding-top: 1.35rem;
+}
+
+.ap-fogo {
+  display: block;
+  width: 2.6rem;
+  height: 0.3rem;
+  margin: -0.55rem auto 0.7rem;
+  border-radius: 99px;
+  background-color: rgba(11, 27, 58, 0.18);
+}
+
+.ap-cimke {
+  display: inline-block;
+  margin: 0 0 0.55rem;
+  padding: 0.22rem 0.6rem;
+  border: 2px solid var(--sotetkek);
+  border-radius: 99px;
+  background-color: var(--color-accent);
+  color: var(--sotetkek);
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transform: rotate(-2deg);
+}
+
+.ap-cim {
+  padding-right: 2.8rem;
+}
+
+.ap-cim .mozi-fejlec {
+  font-size: 1.55rem;
+  line-height: 1.05;
+}
+
+.ap-szoveg {
+  margin: 0.35rem 0 0;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  font-weight: 500;
+  color: rgba(11, 27, 58, 0.78);
+}
+
+.ap-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ap-lista li {
+  animation: ap-sor-be 0.4s cubic-bezier(0.2, 0.9, 0.25, 1.1) both;
+  animation-delay: calc(0.18s + var(--ap-sor, 0) * 0.07s);
+}
+
+.ap-ajandek {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-start;
+  gap: 0.3rem;
+  width: 100%;
+  min-height: 5.2rem;
+  padding: 0.65rem 6rem 0.65rem 0.85rem;
+  border: 2px solid var(--sotetkek);
+  border-radius: 16px;
+  box-shadow: 0 3px 0 var(--sotetkek);
+  background-color: var(--sotetkek);
+  background-position: center;
+  background-size: cover;
+  color: #ffffff;
+  text-align: left;
+  cursor: pointer;
+  overflow: visible;
+  isolation: isolate;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+/* Sotetites balrol, hogy a nev mindig olvashato legyen */
+.ap-ajandek::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: 14px;
+  background: linear-gradient(90deg, rgba(5, 20, 40, 0.9) 0%, rgba(5, 20, 40, 0.78) 50%, rgba(5, 20, 40, 0.2) 100%);
+}
+
+.ap-ajandek:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--sotetkek);
+}
+
+.ap-ajandek-nev {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  line-height: 1.05;
+  text-transform: uppercase;
+  text-shadow: 0 2px 0 var(--sotetkek);
+}
+
+.ap-keszlet {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 1px 0 var(--sotetkek);
+}
+
+.ap-sav {
+  display: block;
+  width: 3.2rem;
+  height: 0.38rem;
+  border-radius: 99px;
+  background-color: rgba(255, 255, 255, 0.22);
+  overflow: hidden;
+}
+
+.ap-sav span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background-color: var(--color-accent);
+}
+
+.ap-keszlet-keves {
+  color: var(--pink);
+}
+
+.ap-keszlet-keves .ap-sav span {
+  background-color: var(--pink);
+}
+
+.ap-robbanas {
+  position: absolute;
+  top: 50%;
+  right: 0.45rem;
+  display: grid;
+  place-items: center;
+  width: 5.4rem;
+  height: 4rem;
+  margin-top: -2rem;
+  transform: rotate(-7deg);
+  animation: ap-pukkan 0.45s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+  animation-delay: calc(0.35s + var(--ap-sor, 0) * 0.07s);
+}
+
+.ap-robbanas svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 2px 0 var(--sotetkek));
+}
+
+.ap-robbanas-szoveg {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  line-height: 1;
+  color: #ffffff;
+  text-transform: uppercase;
+  -webkit-text-stroke: 0.5px var(--sotetkek);
+}
+
+/* Mint a partnerkartya robbanasan: kis "Kedvezmény" a szam alatt */
+.ap-robbanas-felirat {
+  margin-top: 0.1rem;
+  font-size: 0.42rem;
+  letter-spacing: 0.04em;
+  -webkit-text-stroke: 0;
+}
+
+/* A cimben a szazalek pink, a tobbi sotet */
+.ap-cim-szam {
+  color: var(--pink);
+}
+
+/* Osszevetes a sima kedvezmennyel, a CTA folott */
+.ap-osszevetes {
+  margin: 0.85rem 0 0;
+  font-size: 0.86rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--sotetkek);
+}
+
+/* Ket osztaly, hogy a .mozi-panel .tn-kapszula paddingjat !important nelkul irja felul */
+.ap-belso .ap-cta {
+  margin-top: 1.1rem;
+  padding: 0.8rem 1rem;
+  color: var(--sotetkek);
+}
+
+.ap-belso .ap-osszevetes + .ap-cta {
+  margin-top: 0.45rem;
+}
+
+.ap-cta .tn-gomb-felirat {
+  font-size: 1.05rem;
+}
+
+.ap-also {
+  align-items: center;
+}
+
+.ap-megjegyzes {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(11, 27, 58, 0.5);
+}
+
+@media (max-width: 639px) {
+  .ap-retes {
+    padding: 0;
+  }
+
+  .ap-lap {
+    max-width: none;
+    border-bottom: 0;
+    border-radius: 26px 26px 0 0;
+    box-shadow: 0 -4px 0 var(--sotetkek), 0 -18px 40px -14px rgba(0, 0, 0, 0.7);
+    max-height: 92dvh;
+  }
+
+  .ap-belso {
+    padding-bottom: calc(1.2rem + env(safe-area-inset-bottom));
+  }
+}
+
+@media (min-width: 640px) {
+  .ap-fogo {
+    display: none;
+  }
+}
+
+@keyframes ap-elsotetul {
+  from { opacity: 0; }
+}
+
+@keyframes ap-becsuszik {
+  from { opacity: 0; transform: translateY(40px); }
+}
+
+@keyframes ap-sor-be {
+  from { opacity: 0; transform: translateY(12px); }
+}
+
+@keyframes ap-pukkan {
+  from { opacity: 0; transform: rotate(-7deg) scale(0.3); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ap-retes,
+  .ap-lap,
+  .ap-lista li,
+  .ap-robbanas {
+    animation: none;
+  }
+}
