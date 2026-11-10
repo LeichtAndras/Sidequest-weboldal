@@ -49,7 +49,7 @@ create table if not exists public.offers (
   keret integer not null check (keret >= 0),
   -- alap: ennyiszer valthatja be egy user ugyanannal a partnernel egy nap
   napi_limit integer check (napi_limit is null or napi_limit >= 1),
-  -- Az igenyelt kod ennyi napig ervenyes (welcome 30, drop 7)
+  -- Az igenyelt kod ennyi napig ervenyes (welcome 14, drop 7)
   ervenyes_nap integer not null default 30 check (ervenyes_nap >= 1),
   -- 1 = hetfo ... 7 = vasarnap. Ures: minden nap.
   napok integer[],
@@ -276,7 +276,7 @@ begin
     execute $q$
       insert into public.offers (nev, tipus, partner_slug, szoveg, jelveny, mod, keret, ervenyes_nap)
       select w.partner_slug || '-welcome', 'welcome', w.partner_slug, w.pct || '% kedvezmény', w.pct || '%',
-             p.mode, 10, 30
+             p.mode, 10, 14
       from public.welcome_offers w
       join public.partners p on p.slug = w.partner_slug
       where w.active
@@ -308,7 +308,7 @@ insert into public.offers (nev, tipus, partner_slug, szoveg, jelveny, mod, keret
 values
   ('PROBA-alap-hely', 'alap', 'proba-hely', '2 jegy 1 áráért', '2=1', 'helyszini', 25, 1, 30, null, null),
   ('PROBA-alap-online', 'alap', 'proba-online', '−5 000 Ft a foglalásból', null, 'online_kod', 3, 1, 30, null, null),
-  ('PROBA-welcome', 'welcome', 'proba-hely', '50% kedvezmény', '50%', 'helyszini', 10, null, 30, null, null),
+  ('PROBA-welcome', 'welcome', 'proba-hely', '50% kedvezmény', '50%', 'helyszini', 10, null, 14, null, null),
   -- Elo drop: most indul, 3 napig tart
   ('PROBA-drop-elo', 'drop', 'proba-hely', 'Ingyen belépő 2 főre', 'FREE', 'helyszini', 15, null, 7,
     now(), now() + interval '3 days'),

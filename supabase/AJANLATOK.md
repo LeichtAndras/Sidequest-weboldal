@@ -16,7 +16,7 @@ Deploy nem kell hozzá, az oldal a következő betöltéskor már az újat mutat
 | `mod` | `helyszini` (a pultnál, teljes képernyővel) vagy `online_kod` (kód a kódbankból) |
 | `keret` | Alap és welcome: ennyi darab jár havonta. Drop: összesen ennyi. |
 | `napi_limit` | Csak alapnál: egy user egy nap ennyiszer válthatja be ennél a partnernél (általában 1) |
-| `ervenyes_nap` | Az igényelt kód ennyi napig érvényes (welcome 30, drop 7) |
+| `ervenyes_nap` | Az igényelt kód ennyi napig érvényes (welcome 14, drop 7) |
 | `napok` | Ha csak bizonyos napokon jó: pl. `{1,2,3,4,5}` = hétfőtől péntekig. Üres: minden nap. |
 | `drop_kezdes`, `drop_vege` | Csak dropnál kötelező, máshol üres |
 | `aktiv` | Kikapcsolva nem látszik és nem igényelhető |

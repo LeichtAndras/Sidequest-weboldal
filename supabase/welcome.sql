@@ -8,9 +8,10 @@
 --   - partnerenkent havi keret (offers.keret), minden honap 1-jen ujraindul;
 --     a lejart, be nem valtott valasztas nem szamit bele (visszakerul)
 --   - valasztaskor levonodik a keretbol, az ajanlat sora zarolva
---   - helyszini partnernel a valasztastol 30 napja van a pultnal bevaltani,
---     ugyanazzal a teljes kepernyovel; online partnernel valasztaskor
---     megkapja a kodot, es az mar bevaltottnak szamit
+--   - helyszini partnernel a valasztastol az ajanlat ervenyes_nap-ja
+--     (14 nap) alatt kell a pultnal bevaltani, ugyanazzal a teljes
+--     kepernyovel; online partnernel valasztaskor megkapja a kodot, es az
+--     mar bevaltottnak szamit
 --   - csak ha a partnernel be van kapcsolva az uj rendszer, vagy tesztelo
 -- =====================================================================
 
