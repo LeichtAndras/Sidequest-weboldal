@@ -120,6 +120,18 @@ A push előtt meg kell mutatni:
 - [ ] A hatálybalépés dátuma (`HATALYOS` a `src/Adatkezeles.tsx`-ben) az
       élesítés napja legyen.
 
+## 5b. E-mailek
+
+- [ ] Az új belépő e-mail sablonok beillesztése a Supabase-be
+      (Authentication → Emails → Templates): „Confirm signup” ←
+      `supabase/email/regisztracio.html`, tárgy `{{ .Token }} a kódod 🔑`;
+      „Magic Link” ← `supabase/email/belepes.html`, tárgy
+      `{{ .Token }} a belépőkódod`. Leírás: `supabase/EMAIL-BEALLITAS.md`.
+      Addig a régi sablonok mennek, mert ezek már ajándékról és dropról
+      beszélnek, amit a látogató még nem lát.
+- [ ] Az „akár 40%” a regisztrációs levélben (előnézet és szöveg) egyezzen
+      a valódi welcome ajánlatok legnagyobb százalékával.
+
 ## 6. Bekapcsolás
 
 - [ ] A `partners.json`-ban az élesítendő partnereknél `"ujBevaltas": true`.

@@ -30,52 +30,26 @@ Supabase dashboard → **SQL Editor** → New query → másold be a
 „Time-box user sessions” és az „Inactivity timeout” maradjon kikapcsolva.
 Így a belépés hosszú távon megmarad, a token magától frissül.
 
-## 3. Az e-mail sablon: kód link helyett
+## 3. Az e-mail sablonok
 
-**Authentication → Emails → Templates.** Két sablont kell átírni, mert az új
+**Authentication → Emails → Templates.** Két sablon van, mert az új
 regisztrációnál a Supabase a „Confirm signup”, a visszatérő usernél a
-„Magic Link” sablont küldi. Mindkettőben a `{{ .Token }}` legyen benne, és
-a `{{ .ConfirmationURL }}` **ne**.
+„Magic Link” sablont küldi. Mindkettőben a `{{ .Token }}` legyen benne
+(pontosan így), és a `{{ .ConfirmationURL }}` **ne**.
 
-### Magic Link
+A legtöbben nem nyitják meg a levelet, csak az értesítést látják (feladó,
+tárgy, előnézet), vagy az iOS a billentyűzet fölött felajánlja a kódot.
+Ezért a kód áll a tárgy elején, és az előnézet a HTML első szövege.
 
-Subject:
+| Sablon | Subject | Body (Source nézetben, a teljes fájl) |
+|---|---|---|
+| Confirm signup | `{{ .Token }} a kódod 🔑` | `supabase/email/regisztracio.html` |
+| Magic Link | `{{ .Token }} a belépőkódod` | `supabase/email/belepes.html` |
 
-```
-A SideQuest belépőkódod: {{ .Token }}
-```
-
-Body (Source nézetben):
-
-```html
-<div style="font-family: Arial, sans-serif; color: #0B1B3A; line-height: 1.5">
-  <h2 style="margin: 0 0 12px">Szia!</h2>
-  <p style="margin: 0 0 8px">A SideQuest belépőkódod:</p>
-  <p style="margin: 0 0 16px; font-size: 32px; font-weight: 700; letter-spacing: 6px">{{ .Token }}</p>
-  <p style="margin: 0 0 8px">Írd be a kódot a SideQuest oldalán. 10 percig érvényes.</p>
-  <p style="margin: 0; color: #555">Ha nem te kérted, nyugodtan hagyd figyelmen kívül ezt a levelet.</p>
-</div>
-```
-
-### Confirm signup
-
-Subject:
-
-```
-Üdv a SideQuestnél! A kódod: {{ .Token }}
-```
-
-Body:
-
-```html
-<div style="font-family: Arial, sans-serif; color: #0B1B3A; line-height: 1.5">
-  <h2 style="margin: 0 0 12px">Üdv a SideQuestnél!</h2>
-  <p style="margin: 0 0 8px">A regisztrációhoz ezt a kódot írd be:</p>
-  <p style="margin: 0 0 16px; font-size: 32px; font-weight: 700; letter-spacing: 6px">{{ .Token }}</p>
-  <p style="margin: 0 0 8px">A kód 10 percig érvényes.</p>
-  <p style="margin: 0; color: #555">Ha nem te kérted, nyugodtan hagyd figyelmen kívül ezt a levelet.</p>
-</div>
-```
+A feladó neve (**SideQuest**) az SMTP beállításoknál van (6. pont), a cím
+marad `noreply@sidequestbp.hu`. A logó a már élő
+`https://sidequestbp.hu/sidequest-logo-atlatszo.png`; kép nélkül a
+„SideQuest” felirat látszik helyette.
 
 Mentsd el mindkettőt.
 

@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="hu" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="x-apple-disable-message-reformatting">
+<meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
+<meta name="color-scheme" content="light dark">
+<meta name="supported-color-schemes" content="light dark">
+<title>SideQuest</title>
+<!--
+  SideQuest: belepokod. Supabase -> Authentication -> Emails ->
+  Templates -> "Magic Link". A targy es a beillesztes leirasa:
+  supabase/EMAIL-BEALLITAS.md. A kodot a Supabase irja a Token valtozo
+  helyere (lent, a matricaban).
+-->
+<style>
+  body { margin: 0; padding: 0; -webkit-text-size-adjust: 100%; }
+  img { border: 0; outline: none; text-decoration: none; }
+  @media (prefers-color-scheme: dark) {
+    .sq-lap { background-color: #10263F !important; border-color: #36B9F0 !important; }
+    .sq-cim, .sq-szoveg { color: #FFFCF3 !important; }
+    .sq-halvany { color: #A9BCD0 !important; }
+  }
+</style>
+</head>
+<body style="margin:0;padding:0;background-color:#05202E;">
+<!-- Elonezet: ez az elso szoveg, ezt mutatja az ertesites. Utana ures kitoltes, hogy mas ne szivarogjon be. -->
+<div style="display:none;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;mso-hide:all;">10 percig jó. Nézd meg, milyen új dropok várnak 👀</div>
+<div style="display:none;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;mso-hide:all;">&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;</div>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#05202E" style="background-color:#05202E;">
+  <tr>
+    <td align="center" style="padding:24px 12px 28px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:480px;border-collapse:separate;">
+
+        <!-- Fejlec: sotetkek sav a logoval. Kep nelkul az alt szoveg latszik, vilagos betuvel. -->
+        <tr>
+          <td align="center" bgcolor="#0B1B3A" style="background-color:#0B1B3A;padding:22px 24px 16px;border:2px solid #0B1B3A;border-radius:22px 22px 0 0;">
+            <img src="https://sidequestbp.hu/sidequest-logo-atlatszo.png" width="150" alt="SideQuest" style="display:block;margin:0 auto;width:150px;max-width:150px;height:auto;color:#FFFCF3;font-family:Arial,Helvetica,sans-serif;font-size:28px;font-weight:900;line-height:1.2;">
+          </td>
+        </tr>
+
+        <!-- Torzs: krem lap, also vastagabb szegely mint a gombok kemeny arnyeka -->
+        <tr>
+          <td class="sq-lap" bgcolor="#FFFCF3" style="background-color:#FFFCF3;padding:28px 24px 26px;border:2px solid #0B1B3A;border-top:0;border-bottom-width:6px;border-radius:0 0 22px 22px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,Helvetica,sans-serif;">
+            <p class="sq-cim" style="margin:0 0 10px;font-size:26px;line-height:1.2;font-weight:800;color:#0B1B3A;">Szia, újra itt 👋</p>
+            <p class="sq-szoveg" style="margin:0 0 18px;font-size:16px;line-height:1.5;color:#0B1B3A;">A belépőkódod:</p>
+
+            <!-- A kod: sima szoveg, nagyon nagy, matricaban. A betukoz csak latvany, masolaskor szokoz nelkul jon. -->
+            <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;border-collapse:separate;">
+              <tr>
+                <td align="center" bgcolor="#D7F1FC" style="background-color:#D7F1FC;padding:14px 22px 12px 30px;border:2px solid #0B1B3A;border-bottom-width:5px;border-radius:16px;font-family:'SF Mono',Menlo,Consolas,'Courier New',monospace;font-size:40px;line-height:1;font-weight:800;letter-spacing:8px;color:#0B1B3A;">{{ .Token }}</td>
+              </tr>
+            </table>
+
+            <p class="sq-halvany" style="margin:14px 0 22px;font-size:14px;line-height:1.4;text-align:center;color:#5B6B7F;">10 percig érvényes.</p>
+            <p class="sq-szoveg" style="margin:0 0 18px;font-size:16px;line-height:1.5;color:#0B1B3A;">Nézd meg, milyen <strong style="color:#FF2D78;">új dropok</strong> és kedvezmények várnak.</p>
+
+            <!-- Tipp: kis halvany doboz -->
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:separate;">
+              <tr>
+                <td class="sq-tipp" style="padding:12px 14px;border:2px dashed #36B9F0;border-radius:14px;font-size:14px;line-height:1.45;color:#0B1B3A;">
+                  <span class="sq-szoveg" style="color:#0B1B3A;"><strong>Tipp:</strong> ha Instagramról jöttél, nyisd meg az oldalt Safariban, és ott legközelebb kód nélkül is bent leszel.</span>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Lab: kicsi, halvany -->
+        <tr>
+          <td align="center" style="padding:20px 16px 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,Helvetica,sans-serif;font-size:12px;line-height:1.6;color:#A9BCD0;">
+            Ha nem te kérted, nyugodtan hagyd figyelmen kívül.<br>
+            SideQuest Budapest · <a href="https://sidequestbp.hu" style="color:#A9BCD0;text-decoration:underline;">sidequestbp.hu</a> · <a href="https://instagram.com/side_quest.bp" style="color:#A9BCD0;text-decoration:underline;">@side_quest.bp</a>
+          </td>
+        </tr>
+
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>
