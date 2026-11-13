@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { gorgetesZarolasa } from '../../fiok/gorgetesZar'
 import { createPortal } from 'react-dom'
 import type { Partner } from '../../types'
 import CouponCode from '../CouponCode'
@@ -28,10 +29,10 @@ export default function OnlineKodBlokk({ partner }: { partner: Partner }) {
 
   useEffect(() => {
     if (!kerdes) return
-    const regi = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
+    // iOS-on is biztos zar, lasd gorgetesZar.ts
+    const feloldas = gorgetesZarolasa()
     return () => {
-      document.body.style.overflow = regi
+      feloldas()
     }
   }, [kerdes])
 

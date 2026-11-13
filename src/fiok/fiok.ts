@@ -21,8 +21,18 @@ export type Fiok = {
    * Ebbol tudja a kartya, hogy van-e aktiv beváltás, es ma bevaltotta-e mar.
    */
   igenylesek: Igenyles[] | null
+  /**
+   * Az igenylesek betoltese hibara futott (pl. nincs net). Ilyenkor az
+   * igenylesek ures lista, a Fiokom oldal ujraprobalast kinal.
+   */
+  igenylesHiba: boolean
   /** Nyitva van-e a belepo ablak. */
   ablak: boolean
+  /**
+   * A belepo lap tetejen kilogo matrica szovege, ha a user a welcome
+   * popupbol jott (pl. "−50% vár rád"). Null: az altalanos SideQuest matrica.
+   */
+  ablakCimke: string | null
 }
 
 /** Egy sor a claims tablabol, ahogy a user latja. */
@@ -72,9 +82,9 @@ export function aktivWelcome(igenylesek: Igenyles[] | null, slug: string): Igeny
   return w?.statusz === 'aktiv' && w.igenyles?.partner_slug === slug ? w.igenyles : null
 }
 
-const KINT = { email: null, keresztnev: null, igenylesek: null }
+const KINT = { email: null, keresztnev: null, igenylesek: null, igenylesHiba: false }
 
-const SZERVER: Fiok = { allapot: 'ismeretlen', ...KINT, ablak: false }
+const SZERVER: Fiok = { allapot: 'ismeretlen', ...KINT, ablak: false, ablakCimke: null }
 
 let allapot: Fiok = SZERVER
 const figyelok = new Set<() => void>()
@@ -145,7 +155,9 @@ export function useFiok(): Fiok {
   )
 }
 
-export const belepesNyitasa = () => beallit({ ablak: true })
+export const belepesNyitasa = () => beallit({ ablak: true, ablakCimke: null })
+/** A welcome popupbol: a lap tetejen a valasztott ajandek matricaja. */
+export const belepesNyitasaAjandekkal = (cimke: string) => beallit({ ablak: true, ablakCimke: cimke })
 export const belepesBezarasa = () => beallit({ ablak: false })
 
 /** Felhasznalonak mutathato hiba, mindig magyarul. */
@@ -202,7 +214,7 @@ export async function igenylesekBetoltese() {
     .from('claims')
     .select('id, offer_id, partner_slug, tipus, szoveg, igenyelve, bevaltva, lejarat, kod, rovid_kod')
     .order('igenyelve', { ascending: false })
-  beallit({ igenylesek: error ? [] : ((data ?? []) as Igenyles[]) })
+  beallit({ igenylesek: error ? [] : ((data ?? []) as Igenyles[]), igenylesHiba: Boolean(error) })
 }
 
 /** A szerver valasza egy helyszini beváltásra, ezt mutatja a teljes kepernyo. */

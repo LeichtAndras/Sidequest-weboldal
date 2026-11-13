@@ -78,8 +78,20 @@ A push előtt meg kell mutatni:
       „Allow anonymous sign-ins”). 2026-11-09: a párhuzamos teszthez be-,
       utána ki lett kapcsolva; kívülről ellenőrizve
       (`anonymous_provider_disabled`). Élesítés előtt újra ellenőrizd.
-- [ ] A tesztelők listája rendben (`profiles.tesztelo`). A tesztelő
-      élesítés előtt is mindent lát; élesen ez nem zavar, de nézd át, ki az.
+- [ ] A tesztelők listája rendben (`profiles.tesztelo`). 2026-11-13 óta a
+      `supabase/teszt.sql` (lefuttatva) a `tesztelo_emailek` listán lévő
+      címeket regisztrációkor magától tesztelővé teszi, fióktörlés után is.
+      A listán most 1 cím van (a user saját címe, a dashboardon felvéve,
+      nem a repóban). Élesítés előtt nézd át, és döntsd el, maradjon-e:
+      ```sql
+      select * from public.tesztelo_emailek;
+      select u.email from public.profiles p join auth.users u on u.id = p.id where p.tesztelo;
+      ```
+- [ ] `teszt_ajandek_visszaallitas()` (tesztelő törölheti a saját welcome
+      ajándékát) élesítés után nem kell; ha nem marad, dobd el:
+      ```sql
+      drop function if exists public.teszt_ajandek_visszaallitas();
+      ```
 
 ## 3. Valódi ajánlatok és kódok
 

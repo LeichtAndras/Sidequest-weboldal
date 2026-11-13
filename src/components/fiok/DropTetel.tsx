@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { gorgetesZarolasa } from '../../fiok/gorgetesZar'
 import { createPortal } from 'react-dom'
 import Felirat from '../Felirat'
 import CouponCode from '../CouponCode'
@@ -40,10 +41,10 @@ export default function DropTetel({ ajanlat, most }: { ajanlat: Ajanlat; most: n
 
   useEffect(() => {
     if (!kerdes) return
-    const regi = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
+    // iOS-on is biztos zar, lasd gorgetesZar.ts
+    const feloldas = gorgetesZarolasa()
     return () => {
-      document.body.style.overflow = regi
+      feloldas()
     }
   }, [kerdes])
 

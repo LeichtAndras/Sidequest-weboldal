@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { gorgetesZarolasa } from '../../fiok/gorgetesZar'
 import { createPortal } from 'react-dom'
 import { ROBBANAS } from '../../robbanas'
 import type { AktivBevaltas } from '../../fiok/fiok'
@@ -49,11 +50,11 @@ export default function BevaltasKepernyo({ bevaltas, onBezar }: Props) {
       if (e.key === 'Escape') onBezar()
     }
     window.addEventListener('keydown', billentyu)
-    const regi = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
+    // iOS-on is biztos zar, lasd gorgetesZar.ts
+    const feloldas = gorgetesZarolasa()
     return () => {
       window.removeEventListener('keydown', billentyu)
-      document.body.style.overflow = regi
+      feloldas()
     }
   }, [onBezar])
 

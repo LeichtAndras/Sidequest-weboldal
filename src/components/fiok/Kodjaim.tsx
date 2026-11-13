@@ -1,21 +1,9 @@
-import { useEffect, useState } from 'react'
-import { createPortal } from 'react-dom'
-import partnersData from '../../data/partners.json'
-import type { Partner } from '../../types'
-import Felirat from '../Felirat'
-import CouponCode from '../CouponCode'
-import {
-  FiokHiba,
-  alapBevaltasa,
-  igenylesBevaltasa,
-  useFiok,
-  type AktivBevaltas,
-  type Igenyles,
-} from '../../fiok/fiok'
-import { hataridoNap, useKinalat } from '../../fiok/kinalat'
-import BevaltasKepernyo from './BevaltasKepernyo'
-
-const partnerek = new Map((partnersData as Partner[]).map((p) => [p.slug, p]))
+import { useEffect, useRef, useState } from 'react'
+import { CheckIcon, CopyIcon } from '../Icons'
+import { useFiok, type Igenyles } from '../../fiok/fiok'
+import { hataridoNap } from '../../fiok/kinalat'
+import { szazalek } from './AjandekKartya'
+import { TIPUS, csoport, kepernyoEl, partnerek, usePartnerNev } from './BevaltasFolyamat'
 
 const IDOPONT = new Intl.DateTimeFormat('hu-HU', {
   timeZone: 'Europe/Budapest',
@@ -25,200 +13,206 @@ const IDOPONT = new Intl.DateTimeFormat('hu-HU', {
   minute: '2-digit',
 })
 
-const TIPUS: Record<Igenyles['tipus'], string> = { alap: 'Kedvezmény', welcome: 'Üdvözlő ajándék', drop: 'Drop' }
+const STATUSZ = { aktiv: 'Aktív', bevaltott: 'Beváltva', lejart: 'Lejárt' } as const
 
-/** A helyszini kepernyo 5 percig el a beváltás utan. */
-const kepernyoEl = (c: Igenyles) => c.bevaltva !== null && !c.kod && Date.parse(c.bevaltva) + 5 * 60 * 1000 > Date.now()
-
-/**
- * Aktiv:     meg bevalthato (welcome, drop a pultnal), ervenyes online kod,
- *            vagy az 5 percen belul ujranyithato kepernyo
- * Beváltott: a beváltás idejevel
- * Lejárt:    be nem valtott, lejart
- */
-function csoport(c: Igenyles): 'aktiv' | 'bevaltott' | 'lejart' {
-  const most = Date.now()
-  if (c.kod) return Date.parse(c.lejarat) > most ? 'aktiv' : 'bevaltott'
-  if (c.bevaltva) return kepernyoEl(c) ? 'aktiv' : 'bevaltott'
-  return Date.parse(c.lejarat) > most ? 'aktiv' : 'lejart'
+type Props = {
+  /** A pultnal valo beváltás inditasa (useBevaltas). */
+  onBevalt: (c: Igenyles) => void
+  dolgozik: boolean
+  hiba: string | null
+  /** Az aktiv welcome ajandek id-je, ha fent, a kiemelt kartyan mar latszik. */
+  rejtett?: string | null
 }
 
 /**
- * Kódjaim a Fiókom oldalon: minden igenyles (alap, welcome, drop) harom
- * csoportban. Az aktiv, helyszini kodnal "Beváltom": megerosites, utana
- * ugyanaz a teljes kepernyo, mint a kartyan. Online kodnal a kod maga.
+ * Kódjaim a Fiókom oldalon: minden igenyles (alap, welcome, drop) egy-egy
+ * jegy kartyan. Elol az aktivak; a beváltott es a lejart jegyek egy
+ * lenyithato "Korábbiak" alatt, halvanyan. Online kodnal a kod maga,
+ * masolas gombbal; helyszininel "Beváltom", ugyanazzal a megerosito
+ * ablakkal es teljes kepernyovel, mint a kartyan.
  */
-export default function Kodjaim() {
+export default function Kodjaim({ onBevalt, dolgozik, hiba, rejtett }: Props) {
   const fiok = useFiok()
-  const kinalat = useKinalat()
-  const [kerdes, setKerdes] = useState<Igenyles | null>(null)
-  const [aktiv, setAktiv] = useState<AktivBevaltas | null>(null)
-  const [dolgozik, setDolgozik] = useState(false)
-  const [hiba, setHiba] = useState<string | null>(null)
+  const nev = usePartnerNev()
+  if (fiok.igenylesek === null) return null
 
-  useEffect(() => {
-    if (!kerdes) return
-    const regi = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => {
-      document.body.style.overflow = regi
-    }
-  }, [kerdes])
-
-  const nev = (slug: string) =>
-    partnerek.get(slug)?.name ?? kinalat?.ajanlatok.find((a) => a.partner_slug === slug)?.partner ?? slug
-
-  const bevalt = async (c: Igenyles) => {
-    setDolgozik(true)
-    setHiba(null)
-    try {
-      // Az alap kepernyo ujranyitasa az ajanlattal megy, a tobbi az igenylessel
-      const k = c.tipus === 'alap' ? (await alapBevaltasa(c.offer_id)).kepernyo : await igenylesBevaltasa(c.id)
-      setKerdes(null)
-      setAktiv(k)
-    } catch (h) {
-      setHiba(h instanceof FiokHiba ? h.message : 'Nem sikerült a beváltás. Próbáld újra.')
-    } finally {
-      setDolgozik(false)
-    }
-  }
-
-  if (fiok.igenylesek === null) return <p className="mozi-jelzes">Betöltés...</p>
-
-  const sorok = { aktiv: [] as Igenyles[], bevaltott: [] as Igenyles[], lejart: [] as Igenyles[] }
-  for (const c of fiok.igenylesek) sorok[csoport(c)].push(c)
-
-  const cim = (c: Igenyles) => (
-    <p className="bev-kod-cimke">
-      <strong>{nev(c.partner_slug)}</strong> · {TIPUS[c.tipus]}: {c.szoveg}
-    </p>
-  )
+  const lista = fiok.igenylesek.filter((c) => c.id !== rejtett)
+  const aktivak = lista.filter((c) => csoport(c) === 'aktiv')
+  const korabbiak = lista.filter((c) => csoport(c) !== 'aktiv')
 
   return (
-    <div className="tn-panel-blokk">
-      <h2 className="tn-panel-cim">
-        <Felirat szoveg="Kódjaim" kicsi valtozat="sotet" className="mozi-fejlec" />
+    <section className="fk-kartya" aria-labelledby="kodjaim-cim">
+      <h2 id="kodjaim-cim" className="fk-szakasz-cim">
+        Kódjaim
+        {aktivak.length > 0 ? <span className="fk-szam">{aktivak.length}</span> : null}
       </h2>
 
-      {fiok.igenylesek.length === 0 ? (
-        <p className="mozi-jelzes">Még nincs kódod. A helyek kártyáján váltsd be a kedvezményt, vagy nézd meg a dropot.</p>
-      ) : null}
-
-      {sorok.aktiv.length > 0 ? <h3 className="adat-alcim">Aktív</h3> : null}
-      {sorok.aktiv.map((c) => (
-        <div key={c.id} className="bev-kod-sor kodjaim-sor">
-          {cim(c)}
-          {c.kod ? (
-            <>
-              <CouponCode code={c.kod} />
-              <p className="bev-hatarido">
-                Foglaláskor írd be, {hataridoNap(c.lejarat)}-ig érvényes. 1 kód / foglalás.
-              </p>
-              {partnerek.get(c.partner_slug)?.bookingUrl ? (
-                <a
-                  className="tn-kapszula tn-kapszula-panel bev-foglalas"
-                  href={partnerek.get(c.partner_slug)!.bookingUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <span className="tn-gomb-felirat tn-gomb-felirat-sotet" style={{ fontSize: '0.9rem' }}>
-                    Foglalás az oldalukon
-                  </span>
-                </a>
-              ) : null}
-            </>
-          ) : (
-            <>
-              <p className="bev-hatarido">
-                {kepernyoEl(c) ? 'Beváltás folyamatban.' : `${hataridoNap(c.lejarat)}-ig váltható be a pultnál.`}
-              </p>
-              <button
-                type="button"
-                className="tn-kapszula bev-gomb"
-                onClick={kepernyoEl(c) ? () => void bevalt(c) : () => setKerdes(c)}
-                disabled={dolgozik}
-              >
-                <span className="tn-gomb-felirat tn-gomb-felirat-sotet bev-gomb-felirat">
-                  {kepernyoEl(c) ? 'Aktív beváltás megnyitása' : 'Beváltom'}
-                </span>
-              </button>
-            </>
-          )}
+      {lista.length === 0 ? (
+        <div className="fk-ures">
+          <svg className="fk-ures-ikon" viewBox="0 0 48 48" aria-hidden="true">
+            <path
+              d="M6 14a4 4 0 0 1 4-4h28a4 4 0 0 1 4 4v5a5 5 0 0 0 0 10v5a4 4 0 0 1-4 4H10a4 4 0 0 1-4-4v-5a5 5 0 0 0 0-10z"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+              strokeLinejoin="round"
+            />
+            <path d="M30 12v24" stroke="currentColor" strokeWidth="3" strokeDasharray="3 4" />
+          </svg>
+          <p className="fk-ures-szoveg">
+            {rejtett ? 'A fenti ajándékon kívül még nincs kódod.' : 'Még nincs kódod.'} A helyek kártyáján váltsd be a
+            kedvezményt, vagy nézd meg a dropot.
+          </p>
+          <div className="fk-gombsor">
+            <a className="fk-gomb-masod" href="/">
+              Helyek böngészése
+            </a>
+            <a className="fk-gomb-masod" href="/drop/">
+              Heti drop
+            </a>
+          </div>
         </div>
-      ))}
+      ) : null}
 
-      {sorok.bevaltott.length > 0 ? <h3 className="adat-alcim">Beváltott</h3> : null}
-      {sorok.bevaltott.length > 0 ? (
-        <ul className="fiok-lista">
-          {sorok.bevaltott.map((c) => (
+      {lista.length > 0 && aktivak.length === 0 ? (
+        <p className="fk-halvany-szoveg">Most nincs aktív kódod. A korábbiakat lent találod.</p>
+      ) : null}
+
+      {aktivak.length > 0 ? (
+        <ul className="fk-jegyek">
+          {aktivak.map((c) => (
             <li key={c.id}>
-              <span className="fiok-lista-nev">
-                {nev(c.partner_slug)}
-                <span className="kodjaim-reszlet">
-                  {TIPUS[c.tipus]}: {c.szoveg}
-                </span>
-              </span>
-              <span className="fiok-lista-adat">{IDOPONT.format(new Date(c.bevaltva ?? c.igenyelve))}</span>
+              <Jegy c={c} nev={nev(c.partner_slug)} onBevalt={onBevalt} dolgozik={dolgozik} />
             </li>
           ))}
         </ul>
       ) : null}
 
-      {sorok.lejart.length > 0 ? <h3 className="adat-alcim">Lejárt</h3> : null}
-      {sorok.lejart.length > 0 ? (
-        <ul className="fiok-lista kodjaim-lejart">
-          {sorok.lejart.map((c) => (
-            <li key={c.id}>
-              <span className="fiok-lista-nev">
-                {nev(c.partner_slug)}
-                <span className="kodjaim-reszlet">
-                  {TIPUS[c.tipus]}: {c.szoveg}
-                </span>
-              </span>
-              <span className="fiok-lista-adat">lejárt {hataridoNap(c.lejarat)}</span>
-            </li>
-          ))}
-        </ul>
+      {hiba ? (
+        <p className="mozi-hiba" role="alert">
+          {hiba}
+        </p>
       ) : null}
 
-      {hiba && !kerdes ? <p className="mozi-hiba">{hiba}</p> : null}
+      {korabbiak.length > 0 ? (
+        <details className="fk-korabbiak" open={aktivak.length === 0 ? true : undefined}>
+          <summary>
+            <span>Korábbiak ({korabbiak.length})</span>
+            <svg viewBox="0 0 24 24" width="1.1em" height="1.1em" aria-hidden="true">
+              <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </summary>
+          <ul className="fk-jegyek">
+            {korabbiak.map((c) => (
+              <li key={c.id}>
+                <Jegy c={c} nev={nev(c.partner_slug)} onBevalt={onBevalt} dolgozik={dolgozik} />
+              </li>
+            ))}
+          </ul>
+        </details>
+      ) : null}
+    </section>
+  )
+}
 
-      {kerdes
-        ? createPortal(
-            <div
-              className="fiok-retes"
-              role="dialog"
-              aria-modal="true"
-              aria-label="Beváltás megerősítése"
-              onClick={(e) => {
-                if (e.target === e.currentTarget && !dolgozik) setKerdes(null)
-              }}
-            >
-              <div className="fiok-lap mozi-oldal-panel">
-                <div className="tn-panel-belso mozi-panel fiok-lap-belso">
-                  <p className="bev-megerosites-cim">Csak a pultnál nyomd meg!</p>
-                  <p className="mozi-jelzes">
-                    {`${TIPUS[kerdes.tipus]}, ${nev(kerdes.partner_slug)}: ${kerdes.szoveg}. Egyszer használható: amint megnyomod, beváltottnak számít, és 5 percig látszik a képernyőn. Mutasd meg a pultnál. 1 kód / foglalás.`}
-                  </p>
-                  {hiba ? <p className="mozi-hiba">{hiba}</p> : null}
-                  <button type="button" className="tn-kapszula mozi-gomb" onClick={() => void bevalt(kerdes)} disabled={dolgozik}>
-                    <span className="tn-gomb-felirat tn-gomb-felirat-sotet">
-                      {dolgozik ? 'Pillanat...' : 'A pultnál vagyok, mutasd'}
-                    </span>
-                  </button>
-                  <div className="fiok-masodlagos">
-                    <button type="button" className="fiok-szoveggomb" onClick={() => setKerdes(null)} disabled={dolgozik}>
-                      Mégsem
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>,
-            document.body,
-          )
-        : null}
+function Jegy({
+  c,
+  nev,
+  onBevalt,
+  dolgozik,
+}: {
+  c: Igenyles
+  nev: string
+  onBevalt: (c: Igenyles) => void
+  dolgozik: boolean
+}) {
+  const allapot = csoport(c)
+  const sz = szazalek({ jelveny: null, szoveg: c.szoveg })
+  const foglalas = partnerek.get(c.partner_slug)?.bookingUrl
+  const el = kepernyoEl(c)
 
-      {aktiv ? <BevaltasKepernyo bevaltas={aktiv} onBezar={() => setAktiv(null)} /> : null}
+  const datum =
+    allapot === 'aktiv'
+      ? el
+        ? 'Beváltás folyamatban'
+        : `Lejár: ${hataridoNap(c.lejarat)}.`
+      : allapot === 'bevaltott'
+        ? `Beváltva: ${IDOPONT.format(new Date(c.bevaltva ?? c.igenyelve))}`
+        : `Lejárt: ${hataridoNap(c.lejarat)}.`
+
+  return (
+    <article className={`fk-jegy fk-jegy-${allapot}`}>
+      <div className="fk-jegy-fej">
+        <span className={`fk-jegy-szazalek${sz === null ? ' fk-jegy-szazalek-szo' : ''}`} aria-hidden="true">
+          {sz !== null ? `−${sz}%` : '★'}
+        </span>
+        <div className="fk-jegy-nev">
+          <h3>{nev}</h3>
+          <p>
+            {/* "15% kedvezmény" mar a matrican all, ilyenkor csak a tipus */}
+            {/^\d+\s?% kedvezmény$/i.test(c.szoveg.trim()) ? TIPUS[c.tipus] : `${TIPUS[c.tipus]} · ${c.szoveg}`}
+          </p>
+        </div>
+        <span className={`fk-chip fk-chip-${allapot}`}>{STATUSZ[allapot]}</span>
+      </div>
+
+      {c.kod && allapot === 'aktiv' ? <KodMasolo kod={c.kod} /> : null}
+      {c.kod && allapot !== 'aktiv' ? <p className="fk-jegy-kod-halvany">{c.kod}</p> : null}
+
+      <p className="fk-jegy-datum">
+        {datum}
+        {c.kod && allapot === 'aktiv' ? ' Foglaláskor írd be. 1 kód / foglalás.' : ''}
+        {!c.kod && allapot === 'aktiv' && !el ? ' A pultnál váltható be.' : ''}
+      </p>
+
+      {allapot === 'aktiv' && c.kod && foglalas ? (
+        <a className="fk-gomb-masod fk-jegy-gomb" href={foglalas} target="_blank" rel="noopener noreferrer">
+          Foglalás az oldalukon
+        </a>
+      ) : null}
+
+      {allapot === 'aktiv' && !c.kod ? (
+        <button type="button" className="tn-kapszula mozi-gomb fk-jegy-cta" onClick={() => onBevalt(c)} disabled={dolgozik}>
+          <span className="tn-gomb-felirat tn-gomb-felirat-sotet">{el ? 'Aktív beváltás megnyitása' : 'Beváltom'}</span>
+        </button>
+      ) : null}
+    </article>
+  )
+}
+
+/** A kod monospace betuvel, mellette masolas gomb (a CouponCode menete). */
+export function KodMasolo({ kod }: { kod: string }) {
+  const [kesz, setKesz] = useState(false)
+  const ido = useRef<number | undefined>(undefined)
+
+  useEffect(() => () => window.clearTimeout(ido.current), [])
+
+  async function masol() {
+    try {
+      await navigator.clipboard.writeText(kod)
+    } catch {
+      const mezo = document.createElement('textarea')
+      mezo.value = kod
+      mezo.setAttribute('readonly', '')
+      mezo.style.position = 'fixed'
+      mezo.style.opacity = '0'
+      document.body.appendChild(mezo)
+      mezo.select()
+      document.execCommand('copy')
+      document.body.removeChild(mezo)
+    }
+    setKesz(true)
+    window.clearTimeout(ido.current)
+    ido.current = window.setTimeout(() => setKesz(false), 2000)
+  }
+
+  return (
+    <div className="fk-kod">
+      <code className="fk-kod-szoveg">{kod}</code>
+      <button type="button" className="fk-kod-gomb" onClick={() => void masol()} aria-label={`${kod} kód másolása`}>
+        {kesz ? <CheckIcon className="h-4 w-4" /> : <CopyIcon className="h-4 w-4" />}
+        <span aria-live="polite">{kesz ? 'Kimásolva' : 'Másolás'}</span>
+      </button>
     </div>
   )
 }

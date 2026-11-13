@@ -1783,12 +1783,19 @@ body {
 .fiok-retes {
   position: fixed;
   inset: 0;
+  /* A teljes lathato kepernyot fedje, billentyuzet nyitaskor is (iOS) */
+  height: 100vh;
+  height: 100dvh;
+  overscroll-behavior: contain;
   z-index: 100;
   display: flex;
   align-items: flex-end;
   justify-content: center;
   padding: 0.75rem 0.75rem calc(0.75rem + env(safe-area-inset-bottom));
-  background-color: rgba(5, 32, 46, 0.82);
+  /* Sajat, atlatszatlan hatter: a lap mogotte nem latszik, igy nem is
+     ervenyesulhet, ha iOS-on billentyuzetnel elcsuszik vagy veget er */
+  background-color: var(--color-ink);
+  isolation: isolate;
 }
 
 @media (min-width: 640px) {
@@ -1803,6 +1810,39 @@ body {
   max-height: calc(100dvh - 1.5rem);
   margin-top: 0;
   overflow-y: auto;
+  /* Az ablakon beluli gorgetes ne adodjon at a lapnak */
+  overscroll-behavior: contain;
+}
+
+/*
+ * Minden ablak hattere: az oldal falfotoja elmosva es sotetitve, cover.
+ * Kicsit tullog a kepernyon, hogy az elmosas szele ne latsszon.
+ */
+.fiok-retes::before,
+.fiok-retes::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.fiok-retes::before {
+  inset: -24px;
+  background-image: url("/images/hatter/sidequest-fal-900.webp");
+  background-size: cover;
+  background-position: center;
+  filter: blur(8px);
+}
+
+.fiok-retes::after {
+  inset: 0;
+  background-color: rgba(5, 32, 46, 0.72);
+}
+
+@media (min-width: 820px) {
+  .fiok-retes::before {
+    background-image: url("/images/hatter/sidequest-fal-1500.webp");
+  }
 }
 
 .fiok-lap-belso {
@@ -2300,72 +2340,11 @@ body {
   color: rgba(11, 27, 58, 0.75);
 }
 
-/*
- * Udvozlo ajandek: a popup hattere attetszobb, hogy latsszon mogotte az
- * oldal; az /ajandek/ lista sorai gombok, az elfogyott sor szurke.
- */
+/* Udvozlo ajandek: a popup hattere attetszobb, hogy latsszon mogotte az oldal */
 .fiok-retes-attetszo {
   background-color: rgba(5, 32, 46, 0.55);
 }
 
-.ajandek-szoveg {
-  margin-bottom: 0.6rem;
-}
-
-.ajandek-lista {
-  display: flex;
-  flex-direction: column;
-  gap: 0.55rem;
-  margin: 0.8rem 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.ajandek-sor {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-  gap: 0.15rem 0.75rem;
-  width: 100%;
-  padding: 0.7rem 0.85rem;
-  border: 2px solid var(--sotetkek);
-  border-radius: 14px;
-  box-shadow: 0 3px 0 var(--sotetkek);
-  background-color: #ffffff;
-  color: var(--sotetkek);
-  text-align: left;
-  font: inherit;
-  cursor: pointer;
-}
-
-.ajandek-sor:active:not(:disabled) {
-  transform: translateY(2px);
-  box-shadow: 0 1px 0 var(--sotetkek);
-}
-
-.ajandek-sor:disabled {
-  cursor: default;
-  opacity: 0.45;
-  filter: grayscale(1);
-  box-shadow: none;
-}
-
-.ajandek-nev {
-  font-weight: 700;
-  font-size: 1rem;
-}
-
-.ajandek-pct {
-  grid-row: span 2;
-  font-family: var(--font-display);
-  font-size: 1.5rem;
-  line-height: 1;
-}
-
-.ajandek-darab {
-  font-size: 0.86rem;
-  color: rgba(11, 27, 58, 0.7);
-}
 
 /* Az ajanlat szovege a beváltó kepernyon, pl. "2 jegy 1 áráért" */
 .bev-ajanlat {
@@ -2482,8 +2461,6 @@ body {
 
 /* ---- Regisztraciora terelo popup (AjandekPopup) ---- */
 .ap-retes {
-  backdrop-filter: blur(3px);
-  -webkit-backdrop-filter: blur(3px);
   animation: ap-elsotetul 0.25s ease-out both;
 }
 
@@ -2562,7 +2539,8 @@ body {
   gap: 0.3rem;
   width: 100%;
   min-height: 5.2rem;
-  padding: 0.65rem 6rem 0.65rem 0.85rem;
+  /* Jobbra hely a matricanak (a nagyobb, kiemelt is elfer), hogy a hosszu nev ne csusszon ala */
+  padding: 0.65rem 8rem 0.65rem 0.85rem;
   border: 2px solid var(--sotetkek);
   border-radius: 16px;
   box-shadow: 0 3px 0 var(--sotetkek);
@@ -2634,47 +2612,55 @@ body {
   background-color: var(--pink);
 }
 
-.ap-robbanas {
+/*
+ * Kedvezmeny matrica a sor jobb oldalan, a "Ingyenes" cimke stilusaban:
+ * lekerekitett lap, vastag sotetkek korvonal, kemeny arnyek, enyhe dontes.
+ * Csak a szam all benne ("−40%"), a minusz jelzi a kedvezmenyt. Teli
+ * hatter, hogy a fotos kartyan is olvashato legyen. A legnagyobb
+ * kedvezmeny pink es kb. 20%-kal nagyobb, a tobbi nyugodtabb kek.
+ */
+.ap-matrica {
   position: absolute;
   top: 50%;
-  right: 0.45rem;
-  display: grid;
-  place-items: center;
-  width: 5.4rem;
-  height: 4rem;
-  margin-top: -2rem;
-  transform: rotate(-7deg);
-  animation: ap-pukkan 0.45s cubic-bezier(0.3, 1.6, 0.5, 1) both;
-  animation-delay: calc(0.35s + var(--ap-sor, 0) * 0.07s);
-}
-
-.ap-robbanas svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  filter: drop-shadow(0 2px 0 var(--sotetkek));
-}
-
-.ap-robbanas-szoveg {
-  position: relative;
+  right: 0.8rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  font-family: var(--font-display);
-  font-size: 1.2rem;
-  line-height: 1;
-  color: #ffffff;
-  text-transform: uppercase;
-  -webkit-text-stroke: 0.5px var(--sotetkek);
+  justify-content: center;
+  min-width: 4.3rem;
+  padding: 0.42rem 0.55rem 0.36rem;
+  border: 2.5px solid var(--sotetkek);
+  border-radius: 14px;
+  background-color: var(--color-accent);
+  color: var(--sotetkek);
+  box-shadow: 0 3px 0 var(--sotetkek);
+  transform: translateY(-50%) rotate(-5deg);
+  animation: ap-matrica-be 0.45s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+  animation-delay: calc(0.35s + var(--ap-sor, 0) * 0.07s);
 }
 
-/* Mint a partnerkartya robbanasan: kis "Kedvezmény" a szam alatt */
-.ap-robbanas-felirat {
-  margin-top: 0.1rem;
-  font-size: 0.42rem;
-  letter-spacing: 0.04em;
-  -webkit-text-stroke: 0;
+.ap-matrica-szam {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.ap-matrica-szo {
+  font-size: 1rem;
+}
+
+.ap-matrica-kiemelt {
+  padding: 0.5rem 0.65rem 0.44rem;
+  background-color: var(--pink);
+  color: #ffffff;
+  box-shadow: 0 4px 0 var(--sotetkek);
+  transform: translateY(-50%) rotate(-6deg);
+}
+
+.ap-matrica-kiemelt .ap-matrica-szam {
+  font-size: 1.9rem;
+  text-shadow: 0 2px 0 var(--sotetkek);
 }
 
 /* A cimben a szazalek pink, a tobbi sotet */
@@ -2752,15 +2738,1207 @@ body {
   from { opacity: 0; transform: translateY(12px); }
 }
 
-@keyframes ap-pukkan {
-  from { opacity: 0; transform: rotate(-7deg) scale(0.3); }
+@keyframes ap-matrica-be {
+  from { opacity: 0; transform: translateY(-50%) rotate(-5deg) scale(0.4); }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .ap-retes,
   .ap-lap,
   .ap-lista li,
-  .ap-robbanas {
+  .ap-matrica {
     animation: none;
+  }
+}
+
+/*
+ * A partnerkartya kedvezmenye az uj rendszerben: matrica a popup
+ * matricainak stilusaban (lasd .ap-matrica). A regi robbanas
+ * (.hk-kedvezmeny) a latogatoknak valtozatlanul megmarad.
+ */
+.hk-matrica {
+  position: absolute;
+  z-index: 5;
+  top: 4cqw;
+  right: 4cqw;
+  padding: 1.6cqw 2.6cqw 1.3cqw;
+  border: 0.65cqw solid var(--sotetkek);
+  border-radius: 3.6cqw;
+  background-color: var(--pink);
+  box-shadow: 0 0.9cqw 0 var(--sotetkek);
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-size: 7.4cqw;
+  line-height: 1;
+  white-space: nowrap;
+  text-shadow: 0 0.5cqw 0 var(--sotetkek);
+  transform: rotate(-5deg);
+}
+
+/* ---- Belepo ablak: also lap telefonon, kozepre igazitott asztalon ---- */
+.bl-keret {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+}
+
+.bl-keret .ap-lap {
+  max-width: none;
+}
+
+/* Kilogo matrica a lap teteje folott, a kedvezmeny matricak stilusaban */
+.bl-matrica {
+  position: absolute;
+  z-index: 2;
+  /* Annyira kilog, hogy a lap fogojat (kozepen fent) ne takarja */
+  top: -1.95rem;
+  left: 1.1rem;
+  padding: 0.38rem 0.75rem 0.32rem;
+  border: 2.5px solid var(--sotetkek);
+  border-radius: 14px;
+  background-color: var(--color-accent);
+  color: var(--sotetkek);
+  box-shadow: 0 3px 0 var(--sotetkek);
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  line-height: 1;
+  white-space: nowrap;
+  text-transform: uppercase;
+  transform: rotate(-6deg);
+  animation: bl-matrica-be 0.45s cubic-bezier(0.3, 1.6, 0.5, 1) 0.28s both;
+}
+
+.bl-matrica-ajandek {
+  background-color: var(--pink);
+  color: #ffffff;
+  text-shadow: 0 2px 0 var(--sotetkek);
+}
+
+@keyframes bl-matrica-be {
+  from { opacity: 0; transform: rotate(-6deg) scale(0.4); }
+}
+
+@media (max-width: 639px) {
+  /*
+   * Billentyuzet: a lap a billentyuzet tetejen ul, res nelkul. A
+   * --bill-also a billentyuzet magassaga, a --latszo-magas a lathato resz;
+   * mindkettot a visualViewport-bol szamolja a BelepesAblak.
+   */
+  .bl-retes {
+    padding-bottom: var(--bill-also, 0px);
+  }
+
+  .bl-keret {
+    max-width: none;
+  }
+
+  .bl-retes .ap-lap {
+    max-height: calc(var(--latszo-magas, 100dvh) - 2.5rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bl-matrica {
+    animation: none;
+  }
+}
+
+/* ---- Belepes: kod mezo allapotai es automatikus kitoltes ---- */
+
+/* Ellenorzes kozben halvanyabb, lassan pulzal */
+.fiok-kod-ellenoriz {
+  opacity: 0.65;
+  animation: fiok-pulzal 0.9s ease-in-out infinite alternate;
+}
+
+/* Rossz kod: megrazkodik, a szegely pink */
+.fiok-kod-rossz {
+  animation: fiok-razas 0.42s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+.fiok-kod-rossz > .fiok-kod {
+  border-color: var(--pink);
+}
+
+@keyframes fiok-pulzal {
+  to { opacity: 0.4; }
+}
+
+@keyframes fiok-razas {
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(5px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fiok-kod-ellenoriz,
+  .fiok-kod-rossz {
+    animation: none;
+  }
+}
+
+/*
+ * Automatikus kitoltes (iOS, Chrome): a bongeszo sargara festene a mezot.
+ * Belso arnyekkal a mezo krem hatteret, a betuvel a sotetkek szint tartjuk;
+ * a kemeny also arnyek is megmarad, igy pont ugy nez ki, mint beirva.
+ */
+/* Ket kulon szabaly: ha egy bongeszo valamelyik valasztot nem ismeri, ne essen ki mindketto */
+.mozi-mezo:-webkit-autofill,
+.mozi-mezo:-webkit-autofill:hover,
+.mozi-mezo:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--sotetkek);
+  caret-color: var(--sotetkek);
+  box-shadow: inset 0 0 0 1000px var(--color-cream), 0 3px 0 var(--sotetkek);
+  transition: background-color 9999s ease-out 0s;
+}
+
+.mozi-mezo:autofill {
+  -webkit-text-fill-color: var(--sotetkek);
+  caret-color: var(--sotetkek);
+  box-shadow: inset 0 0 0 1000px var(--color-cream), 0 3px 0 var(--sotetkek);
+}
+
+/*
+ * Kod mezo hat rekesszel. A valodi mezo marad alul (beillesztes, automatikus
+ * kitoltes), csak a szovege es a kurzora lathatatlan; amit latunk, az a
+ * felette allo rekesz sor. Ures rekeszben halvanyan a "NEKED!" egy betuje.
+ */
+.fiok-kod-keret {
+  position: relative;
+}
+
+.fiok-kod-keret > .fiok-kod,
+.fiok-kod-keret > .fiok-kod:-webkit-autofill,
+.fiok-kod-keret > .fiok-kod:-webkit-autofill:focus {
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  caret-color: transparent;
+}
+
+.fiok-kod-keret > .fiok-kod::selection {
+  background: transparent;
+}
+
+.fiok-kod-rekeszek {
+  position: absolute;
+  inset: 2.5px calc(0.8rem + 2.5px);
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  align-items: center;
+  pointer-events: none;
+}
+
+.fiok-kod-rekesz {
+  position: relative;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  line-height: 1;
+  color: rgba(11, 27, 58, 0.2);
+}
+
+/* A beirt szamjegy ugyanolyan, mint eddig a mezoben */
+.fiok-kod-rekesz-tele {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--sotetkek);
+}
+
+/* A kovetkezo ures rekesz alatt villogo vonal: itt tart a beiras */
+.fiok-kod-rekesz-aktiv::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -0.35rem;
+  width: 1rem;
+  height: 2px;
+  margin-left: -0.5rem;
+  border-radius: 2px;
+  background-color: var(--sotetkek);
+  animation: fiok-kurzor 1s steps(1) infinite;
+}
+
+@keyframes fiok-kurzor {
+  50% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fiok-kod-rekesz-aktiv::after {
+    animation: none;
+  }
+}
+
+/* ---- /ajandek/: a popup stilusaban (kozos AjandekKartya, ap- osztalyok) ---- */
+
+/* Sotet oldal: a falfoto 75% sotetkek es enyhe elmosas mogott */
+.aj-sotetito {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-color: rgba(5, 25, 40, 0.75);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+/* Itt a sotetito reteg sotetit; a tartalom sajat arnyeka a tartalom
+   aljanal veget erne, es alatta vilagosabb csik maradna */
+.aj-oldal .tartalom-arnyek {
+  display: none;
+}
+
+/* A krem panel ugyanaz, mint a popup lapja: sotetkek keret, kemeny arnyek */
+.mozi-oldal-panel.aj-panel {
+  border: 2px solid var(--sotetkek);
+  border-radius: 26px;
+  box-shadow: 0 5px 0 var(--sotetkek), 0 24px 50px -16px rgba(0, 0, 0, 0.85);
+}
+
+.mozi-panel.aj-belso {
+  padding: 1.35rem 1rem 1.2rem;
+}
+
+/* ---- Kozos ajandek kartya: allapotok ---- */
+
+/* Kijelolve: vilagoskek keret, kicsit felemelkedik, pipa a sarkaban */
+.ap-ajandek-kijelolt {
+  transform: translateY(-3px);
+  box-shadow: 0 0 0 3px var(--color-accent), 0 5px 0 var(--sotetkek);
+}
+
+.ap-pipa {
+  position: absolute;
+  z-index: 2;
+  top: -0.6rem;
+  left: -0.5rem;
+  display: grid;
+  place-items: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  border: 2.5px solid var(--sotetkek);
+  border-radius: 50%;
+  background-color: var(--color-accent);
+  color: var(--sotetkek);
+  font-size: 0.95rem;
+  animation: ap-pipa-be 0.3s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+
+/* Kijeloles kozben a tobbi kartya halvanyabb */
+.ap-lista-van-kijelolt .ap-ajandek:not(.ap-ajandek-kijelolt):not(.ap-ajandek-elfogyott) {
+  opacity: 0.6;
+}
+
+/* Elfogyott: szurke foto es matrica, felig attetszo, nem koppinthato */
+.ap-ajandek-elfogyott {
+  cursor: default;
+  opacity: 0.5;
+  filter: grayscale(1);
+  box-shadow: none;
+}
+
+/* A keszlet helyen: elfogyott, hatarido */
+.ap-also-sor {
+  padding: 0.12rem 0.55rem;
+  border-radius: 99px;
+  background-color: rgba(255, 255, 255, 0.16);
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.ap-ajandek-statikus {
+  cursor: default;
+}
+
+/* Kis pirulak egy sorban, az "Ingyenes" cimke stilusaban, dontes nelkul */
+.ap-pirulak {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.8rem 0 0;
+}
+
+.ap-pirulak .ap-cimke {
+  margin: 0;
+  transform: none;
+}
+
+.ap-pirulak .ap-cimke-halvany {
+  background-color: #ffffff;
+}
+
+/* Porgo a fo gombon, betoltes kozben */
+.ap-porgo {
+  width: 1rem;
+  height: 1rem;
+  border: 2.5px solid rgba(11, 27, 58, 0.25);
+  border-top-color: var(--sotetkek);
+  border-radius: 50%;
+  animation: ap-porog 0.7s linear infinite;
+}
+
+/* Ragados gomb alul, a kijelolt kartyahoz */
+.aj-cta-sav {
+  position: fixed;
+  z-index: 40;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  padding: 0.8rem 1rem calc(0.9rem + env(safe-area-inset-bottom));
+  background: linear-gradient(to top, rgba(5, 32, 46, 0.92) 55%, rgba(5, 32, 46, 0));
+  animation: aj-cta-be 0.32s cubic-bezier(0.2, 0.9, 0.25, 1.1) both;
+}
+
+.aj-cta-sav .ap-cta {
+  width: 100%;
+  max-width: 448px;
+  margin: 0;
+}
+
+/* Megerosito lap: csak 60% sotetkek es enyhe elmosas, a lista halvanyan latszik */
+.fiok-retes.aj-lap-retes {
+  background-color: transparent;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+.fiok-retes.aj-lap-retes::before {
+  display: none;
+}
+
+.fiok-retes.aj-lap-retes::after {
+  background-color: rgba(5, 25, 40, 0.6);
+}
+
+/* A hos kartya a lap tetejen */
+.aj-lap-hos {
+  margin: 0.35rem 0 0.2rem;
+}
+
+/* Konfetti a kartyabol */
+.aj-konfetti {
+  position: fixed;
+  z-index: 200;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.aj-konfetti span {
+  position: absolute;
+  width: 9px;
+  height: 14px;
+  border: 1.5px solid var(--sotetkek);
+  border-radius: 2px;
+  animation: aj-konfetti 1.4s cubic-bezier(0.15, 0.7, 0.3, 1) both;
+  animation-delay: var(--k-kesik);
+}
+
+@keyframes ap-pipa-be {
+  from { opacity: 0; transform: scale(0.3); }
+}
+
+@keyframes ap-porog {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes aj-cta-be {
+  from { opacity: 0; transform: translateY(100%); }
+}
+
+@keyframes aj-konfetti {
+  0% { opacity: 1; transform: translate(0, 0) rotate(0); }
+  55% { opacity: 1; transform: translate(var(--k-x), var(--k-y)) rotate(var(--k-r)); }
+  100% { opacity: 0; transform: translate(calc(var(--k-x) * 1.15), calc(var(--k-y) * -0.6)) rotate(calc(var(--k-r) * 2)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ap-pipa,
+  .ap-porgo,
+  .aj-cta-sav {
+    animation: none;
+  }
+
+  .aj-konfetti {
+    display: none;
+  }
+}
+
+/* ===================================================================
+ * /fiokom/ az uj rendszerben (FiokomUj). Uj szin es betu nincs: krem,
+ * sotetkek, vilagoskek, pink, Titan One es Inter; a gombok a kapszula
+ * gombok (sotetkek keret, kemeny arnyek). Elesen a regi oldal latszik.
+ * =================================================================== */
+
+/* Sotetebb fatyol a lap tetejen, hogy a "Fiókom" es a vissza gomb
+   barmilyen falreszleten olvashato legyen */
+.fk-felso-sotet {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 0;
+  height: 22rem;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(5, 25, 40, 0.88) 0%,
+    rgba(5, 25, 40, 0.7) 55%,
+    rgba(5, 25, 40, 0) 100%
+  );
+}
+
+.fk-tartalom {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: calc(1rem + env(safe-area-inset-top)) 1rem calc(3rem + env(safe-area-inset-bottom));
+}
+
+@media (min-width: 768px) {
+  .fk-tartalom {
+    gap: 1.15rem;
+    padding-top: 2.5rem;
+  }
+}
+
+/* A kapszula gombok itt fix meretet kapnak (a tn- osztalyok cqw-ben
+   mernek, itt nincs kontener) */
+.fk-oldal .tn-kapszula,
+.fk-lap .tn-kapszula {
+  min-height: 48px;
+  padding: 0.75rem 1rem;
+  border-width: 2px;
+  box-shadow: 0 3px 0 var(--sotetkek);
+  gap: 0.45rem;
+  text-decoration: none;
+}
+
+.fk-oldal .tn-kapszula:active,
+.fk-lap .tn-kapszula:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--sotetkek);
+}
+
+.fk-oldal .tn-gomb-felirat {
+  font-size: 1.02rem;
+}
+
+.fk-vissza {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 44px;
+  padding: 0 0.95rem;
+  border: 2px solid rgba(255, 252, 243, 0.28);
+  border-radius: 99px;
+  background-color: rgba(5, 25, 40, 0.85);
+  color: var(--color-cream);
+  font-size: 0.86rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.fk-oldalcim {
+  margin: 0.35rem 0 -0.35rem;
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+
+/* ---- Fejlec ---- */
+.fk-fejlec {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-bottom: 0.25rem;
+}
+
+.fk-fejlec-szoveg {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.fk-avatar {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 3.6rem;
+  height: 3.6rem;
+  border: 2.5px solid var(--sotetkek);
+  border-radius: 50%;
+  background-color: var(--color-accent);
+  box-shadow: 0 3px 0 var(--sotetkek);
+  color: var(--sotetkek);
+  font-family: var(--font-display);
+  font-size: 1.65rem;
+  line-height: 1;
+}
+
+.fk-nev {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.55rem, 7.4vw, 2.1rem);
+  line-height: 1.05;
+  color: #ffffff;
+  overflow-wrap: anywhere;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85), 0 2px 14px rgba(0, 0, 0, 0.6);
+}
+
+.fk-email {
+  margin: 0.25rem 0 0;
+  overflow: hidden;
+  font-size: 0.9rem;
+  color: rgba(255, 252, 243, 0.8);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+
+/* ---- Kartyak ---- */
+.fk-kartya {
+  padding: 1.1rem 1rem 1.2rem;
+  border: 2px solid var(--sotetkek);
+  border-radius: 22px;
+  background-color: var(--color-cream);
+  color: var(--sotetkek);
+  box-shadow: 0 4px 0 var(--sotetkek), 0 18px 38px -18px rgba(0, 0, 0, 0.9);
+}
+
+@media (min-width: 768px) {
+  .fk-kartya {
+    padding: 1.35rem 1.35rem 1.45rem;
+  }
+}
+
+.fk-kartya-halvany {
+  background-color: #ebe7da;
+  box-shadow: 0 18px 38px -18px rgba(0, 0, 0, 0.9);
+}
+
+.fk-szakasz-fej {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-bottom: 0.8rem;
+}
+
+.fk-szakasz-cim {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 400;
+  line-height: 1.1;
+  text-transform: uppercase;
+  color: var(--sotetkek);
+}
+
+.fk-szam {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  padding: 0 0.4rem;
+  border-radius: 99px;
+  background-color: var(--sotetkek);
+  color: var(--color-cream);
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.fk-szoveg {
+  margin: 0.7rem 0 0;
+  font-size: 0.93rem;
+  line-height: 1.5;
+  color: rgba(11, 27, 58, 0.82);
+}
+
+.fk-fo-gomb.mozi-gomb {
+  margin-top: 1rem;
+}
+
+.fk-halvany-szoveg {
+  margin: 0.6rem 0 0;
+  font-size: 0.88rem;
+  color: rgba(11, 27, 58, 0.75);
+}
+
+/* Masodlagos gomb: feher kapszula, sotetkek keret */
+.fk-gomb-masod {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 1.1rem;
+  border: 2px solid var(--sotetkek);
+  border-radius: 99px;
+  background-color: #ffffff;
+  box-shadow: 0 3px 0 var(--sotetkek);
+  color: var(--sotetkek);
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 120ms ease;
+}
+
+.fk-gomb-masod:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--sotetkek);
+}
+
+.fk-gomb-masod:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.fk-kartya > .fk-gomb-masod {
+  margin-top: 0.9rem;
+}
+
+/* Allapot cimkek */
+.fk-chip {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.6rem;
+  padding: 0 0.6rem;
+  border: 2px solid var(--sotetkek);
+  border-radius: 99px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.fk-chip-aktiv {
+  background-color: var(--color-accent);
+  color: var(--sotetkek);
+}
+
+.fk-chip-bevaltott {
+  background-color: var(--sotetkek);
+  color: var(--color-cream);
+}
+
+.fk-chip-lejart {
+  border-color: rgba(11, 27, 58, 0.4);
+  background-color: transparent;
+  color: rgba(11, 27, 58, 0.78);
+}
+
+/* ---- Udvozlo ajandek, meg nem valasztott: kek kartya ---- */
+.fk-ajandek {
+  position: relative;
+  margin-top: 0.6rem;
+  padding: 1.15rem 1rem 1.2rem;
+  border: 2px solid var(--sotetkek);
+  border-radius: 22px;
+  background-color: var(--color-accent);
+  color: var(--sotetkek);
+  box-shadow: 0 5px 0 var(--sotetkek), 0 18px 38px -18px rgba(0, 0, 0, 0.9);
+}
+
+.fk-ajandek-matrica {
+  position: absolute;
+  top: -0.8rem;
+  right: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.35rem 0.65rem 0.4rem;
+  border: 2.5px solid var(--sotetkek);
+  border-radius: 14px;
+  background-color: var(--pink);
+  box-shadow: 0 4px 0 var(--sotetkek);
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  line-height: 1;
+  text-shadow: 0 2px 0 var(--sotetkek);
+  transform: rotate(6deg);
+}
+
+.fk-ajandek-matrica small {
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-shadow: none;
+}
+
+.fk-ajandek-cim {
+  margin: 0.1rem 0 0;
+  padding-right: 6rem;
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  font-weight: 400;
+  line-height: 1.08;
+  text-transform: uppercase;
+}
+
+.fk-ajandek-szoveg {
+  margin: 0.5rem 0 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.fk-ajandek .fk-ajandek-cta {
+  margin-top: 1rem;
+  background-color: var(--color-cream);
+  color: var(--sotetkek);
+}
+
+/* ---- Kódjaim: jegyek ---- */
+.fk-jegyek {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 0.85rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fk-jegy {
+  padding: 0.85rem 0.85rem 0.9rem;
+  border: 2px solid var(--sotetkek);
+  border-radius: 16px;
+  background-color: #ffffff;
+  box-shadow: 0 3px 0 var(--sotetkek);
+}
+
+.fk-jegy-fej {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.fk-jegy-szazalek {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 3.4rem;
+  height: 3.4rem;
+  border: 2px solid var(--sotetkek);
+  border-radius: 12px;
+  background-color: var(--pink);
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  text-shadow: 0 1.5px 0 var(--sotetkek);
+  transform: rotate(-4deg);
+}
+
+.fk-jegy-nev {
+  flex: 1;
+  min-width: 0;
+}
+
+.fk-jegy-nev h3 {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.25;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.fk-jegy-nev p {
+  display: -webkit-box;
+  margin: 0.1rem 0 0;
+  overflow: hidden;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  color: rgba(11, 27, 58, 0.75);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.fk-jegy-datum {
+  margin: 0.7rem 0 0;
+  font-size: 0.84rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: rgba(11, 27, 58, 0.78);
+}
+
+.fk-jegy .fk-jegy-cta {
+  margin-top: 0.75rem;
+}
+
+.fk-jegy .fk-jegy-gomb {
+  width: 100%;
+  margin-top: 0.75rem;
+}
+
+/* Beváltott es lejart: halvany, arnyek es kiemeles nelkul */
+.fk-jegy-bevaltott,
+.fk-jegy-lejart {
+  border-color: rgba(11, 27, 58, 0.22);
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.fk-jegy-lejart {
+  border-style: dashed;
+}
+
+.fk-jegy-bevaltott .fk-jegy-szazalek,
+.fk-jegy-lejart .fk-jegy-szazalek {
+  border-color: rgba(11, 27, 58, 0.25);
+  background-color: rgba(11, 27, 58, 0.08);
+  color: rgba(11, 27, 58, 0.75);
+  text-shadow: none;
+  transform: none;
+}
+
+.fk-jegy-kod-halvany {
+  margin: 0.6rem 0 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.9rem;
+  letter-spacing: 0.06em;
+  color: rgba(11, 27, 58, 0.72);
+}
+
+/* Online kod masolas gombbal */
+.fk-kod {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.8rem;
+}
+
+.fk-kod-szoveg {
+  flex: 1;
+  min-width: 0;
+  padding: 0.6rem 0.75rem;
+  border: 2px dashed var(--sotetkek);
+  border-radius: 12px;
+  background-color: rgba(54, 185, 240, 0.14);
+  color: var(--sotetkek);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.fk-kod-gomb {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 44px;
+  padding: 0 0.85rem;
+  border: 2px solid var(--sotetkek);
+  border-radius: 12px;
+  background-color: var(--sotetkek);
+  color: var(--color-cream);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Korabbiak: lenyithato */
+.fk-korabbiak {
+  margin-top: 1rem;
+  padding-top: 0.25rem;
+  border-top: 1px solid rgba(11, 27, 58, 0.14);
+}
+
+.fk-korabbiak summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--sotetkek);
+  list-style: none;
+  cursor: pointer;
+}
+
+.fk-korabbiak summary::-webkit-details-marker {
+  display: none;
+}
+
+.fk-korabbiak summary svg {
+  transition: transform 160ms ease;
+}
+
+.fk-korabbiak[open] summary svg {
+  transform: rotate(180deg);
+}
+
+.fk-korabbiak .fk-jegyek {
+  margin-top: 0.35rem;
+}
+
+/* Ures allapot */
+.fk-ures {
+  padding: 0.3rem 0 0.1rem;
+  text-align: center;
+}
+
+.fk-ures-ikon {
+  display: block;
+  width: 3rem;
+  height: 3rem;
+  margin: 0.6rem auto 0;
+  color: rgba(11, 27, 58, 0.45);
+}
+
+.fk-ures-szoveg {
+  max-width: 32ch;
+  margin: 0.5rem auto 0;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: rgba(11, 27, 58, 0.8);
+}
+
+.fk-gombsor {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+
+.fk-gombsor .fk-gomb-masod {
+  flex: 1 1 auto;
+  white-space: nowrap;
+}
+
+/* Betoltesi hiba */
+.fk-hiba-kartya {
+  text-align: center;
+}
+
+.fk-hiba-kartya .fk-szakasz-cim {
+  justify-content: center;
+}
+
+.fk-hiba-ikon {
+  display: inline-grid;
+  place-items: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  margin-bottom: 0.6rem;
+  border: 2px solid var(--sotetkek);
+  border-radius: 50%;
+  background-color: var(--pink);
+  box-shadow: 0 2px 0 var(--sotetkek);
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+}
+
+/* ---- Kijelentkezes es torles, legalul a falon ---- */
+.fk-muveletek {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.fk-gomb-szellem {
+  width: 100%;
+  min-height: 48px;
+  border: 2px solid rgba(255, 252, 243, 0.85);
+  border-radius: 99px;
+  background-color: rgba(5, 25, 40, 0.55);
+  color: var(--color-cream);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 140ms ease;
+}
+
+.fk-gomb-szellem:hover {
+  background-color: rgba(5, 25, 40, 0.8);
+}
+
+.fk-gomb-szellem:disabled,
+.fk-torles-link:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.fk-torles-link {
+  min-height: 44px;
+  padding: 0 0.9rem;
+  border: 0;
+  border-radius: 99px;
+  background-color: rgba(5, 25, 40, 0.6);
+  color: #ff9dbb;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+/* ---- Ablakok (beváltás, torles) ---- */
+.fk-modal-cim {
+  margin: 0 2.8rem 0 0;
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 400;
+  line-height: 1.1;
+  text-transform: uppercase;
+  color: var(--sotetkek);
+}
+
+.fk-gomb-veszely {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 48px;
+  margin-top: 1.1rem;
+  border: 2px solid var(--sotetkek);
+  border-radius: 99px;
+  background-color: #c8124f;
+  box-shadow: 0 3px 0 var(--sotetkek);
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.fk-gomb-veszely:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.fk-porgo-feher {
+  border-color: rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
+}
+
+.fk-lap-also {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.4rem;
+}
+
+.fk-szoveggomb {
+  min-height: 44px;
+  padding: 0 1rem;
+}
+
+/* ---- Fokusz: krem feluleten sotetkek, a falon vilagoskek ---- */
+.fk-kartya :focus-visible,
+.fk-ajandek :focus-visible,
+.fk-lap :focus-visible {
+  outline: 3px solid var(--sotetkek);
+  outline-offset: 3px;
+}
+
+.fk-vissza:focus-visible,
+.fk-gomb-szellem:focus-visible,
+.fk-torles-link:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+/* ---- Betoltes: csillano korvonalak ---- */
+.fk-vaz {
+  display: block;
+  border-radius: 8px;
+  background: linear-gradient(90deg, rgba(11, 27, 58, 0.07) 25%, rgba(11, 27, 58, 0.15) 50%, rgba(11, 27, 58, 0.07) 75%);
+  background-size: 200% 100%;
+  animation: fk-csillan 1.3s linear infinite;
+}
+
+.fk-fejlec .fk-vaz,
+.fk-vaz-kor {
+  background: linear-gradient(90deg, rgba(255, 252, 243, 0.12) 25%, rgba(255, 252, 243, 0.26) 50%, rgba(255, 252, 243, 0.12) 75%);
+  background-size: 200% 100%;
+  animation: fk-csillan 1.3s linear infinite;
+}
+
+.fk-vaz-kor {
+  border-color: rgba(255, 252, 243, 0.25);
+  box-shadow: none;
+}
+
+.fk-vaz-nev {
+  width: 11rem;
+  height: 1.7rem;
+}
+
+.fk-vaz-email {
+  width: 8rem;
+  height: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.fk-vaz-cim {
+  width: 40%;
+  height: 1.15rem;
+}
+
+.fk-vaz-doboz {
+  height: 4.5rem;
+  margin-top: 0.9rem;
+  border-radius: 14px;
+}
+
+.fk-vaz-doboz-magas {
+  height: 6rem;
+}
+
+.fk-vaz-sor {
+  width: 70%;
+  height: 0.9rem;
+  margin-top: 0.9rem;
+}
+
+@keyframes fk-csillan {
+  from { background-position: 100% 0; }
+  to { background-position: -100% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fk-vaz,
+  .fk-fejlec .fk-vaz,
+  .fk-vaz-kor {
+    animation: none;
+  }
+
+  .fk-korabbiak summary svg,
+  .fk-gomb-masod,
+  .fk-gomb-szellem {
+    transition: none;
   }
 }

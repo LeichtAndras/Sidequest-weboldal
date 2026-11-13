@@ -1,23 +1,25 @@
 import { useState } from 'react'
 import Felirat from './components/Felirat'
 import BelepesAblak from './components/fiok/BelepesAblak'
-import Kodjaim from './components/fiok/Kodjaim'
+import FiokomUj from './components/fiok/FiokomUj'
 import { useUjRendszer } from './fiok/kapcsolo'
-import { FiokHiba, belepesNyitasa, fiokTorlese, kijelentkezes, useFiok, valaszthat, welcomeAllapot } from './fiok/fiok'
+import { FiokHiba, belepesNyitasa, fiokTorlese, kijelentkezes, useFiok } from './fiok/fiok'
 
 /**
- * Fiokom oldal. A keret ugyanaz, mint a kulon /mozi oldale: vissza link,
- * nagy cim a falon, alatta a krem panel.
- *
- * Az uj rendszerben: Kódjaim (aktiv, bevaltott, lejart igenylesek), es
- * amig nem valasztott welcome ajandekot (vagy lejart), innen jut el az
- * /ajandek/ oldalra. Az uj reszek csak tesztelonek latszanak, amig nincs
- * elesites; a belepes es a fioktorles mindenkinek.
+ * Fiokom oldal. Az uj rendszerben (?uj=1, tesztelo) az uj megjelenes
+ * (FiokomUj: fejlec, udvozlo ajandek, Kódjaim). Kulonben a regi, amit az
+ * elo oldal latogatoja lat: a keret ugyanaz, mint a kulon /mozi oldale,
+ * vissza link, nagy cim a falon, alatta a krem panel, csak belepes,
+ * kijelentkezes es fioktorles.
  */
 export default function Fiokom() {
-  const fiok = useFiok()
   const uj = useUjRendszer()
-  const w = welcomeAllapot(fiok.igenylesek)
+  // Az uj megjelenes csak az uj rendszerben (?uj=1, tesztelo); elesen a regi marad
+  return uj ? <FiokomUj /> : <RegiFiokom />
+}
+
+function RegiFiokom() {
+  const fiok = useFiok()
   const [torlesKerdes, setTorlesKerdes] = useState(false)
   const [dolgozik, setDolgozik] = useState(false)
   const [hiba, setHiba] = useState<string | null>(null)
@@ -85,25 +87,6 @@ export default function Fiokom() {
                     <Felirat szoveg={`Szia, ${fiok.keresztnev}!`} kicsi valtozat="sotet" className="mozi-fejlec" />
                   </h2>
                   {fiok.email ? <p className="mozi-jelzes">{fiok.email}</p> : null}
-
-                  {/* Az uj rendszer reszei csak tesztelonek (vagy elesites utan) latszanak */}
-                  {uj && valaszthat(w) ? (
-                    <div className="tn-panel-blokk">
-                      <h2 className="tn-panel-cim">
-                        <Felirat szoveg="Üdvözlő ajándék" kicsi valtozat="sotet" className="mozi-fejlec" />
-                      </h2>
-                      <p className="mozi-jelzes">
-                        {w?.statusz === 'lejart'
-                          ? 'Az ajándékod lejárt, mert nem váltottad be időben. Válassz újat.'
-                          : 'Még nem választottál üdvözlő ajándékot.'}
-                      </p>
-                      <a className="tn-kapszula mozi-gomb" href="/ajandek/">
-                        <span className="tn-gomb-felirat tn-gomb-felirat-sotet">Ajándék választása</span>
-                      </a>
-                    </div>
-                  ) : null}
-
-                  {uj ? <Kodjaim /> : null}
 
                   {hiba ? <p className="mozi-hiba">{hiba}</p> : null}
 

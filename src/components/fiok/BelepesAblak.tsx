@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react'
+import { gorgetesZarolasa } from '../../fiok/gorgetesZar'
 import Felirat from '../Felirat'
 import {
   FiokHiba,
@@ -14,6 +15,9 @@ type Lepes = 'email' | 'kod' | 'profil' | 'kesz'
 
 /** Ennyi masodpercig nem lehet uj kodot kerni, hogy ne fussunk bele a korlatba. */
 const UJ_KOD_VARAKOZAS = 60
+
+/** A kod mezo helykitoltoje, rekeszenkent egy betu. */
+const KOD_HELYKITOLTO = ['N', 'E', 'K', 'E', 'D', '!']
 
 /** A kod ennyi ideig ervenyes (Supabase: Email OTP Expiration = 600 mp). */
 const KOD_ERVENYES = 10 * 60 * 1000
@@ -43,7 +47,10 @@ export default function BelepesAblak() {
   const [dolgozik, setDolgozik] = useState(false)
   const [hiba, setHiba] = useState<string | null>(null)
   const [varakozas, setVarakozas] = useState(0)
+  const [rossz, setRossz] = useState(false)
+  const [kodFokusz, setKodFokusz] = useState(false)
   const elsoMezo = useRef<HTMLInputElement>(null)
+  const retes = useRef<HTMLDivElement>(null)
   // Kod lepes: mikor ment ki a kod, fut-e mar ellenorzes (szinkron, a dolgozik
   // mellett, hogy a gepeles es a beillesztes egyszerre se kuldje ketszer), es
   // az utolso rossz kod, amit nem kuldunk be ujra magatol
@@ -65,11 +72,34 @@ export default function BelepesAblak() {
       if (e.key === 'Escape') belepesBezarasa()
     }
     window.addEventListener('keydown', billentyu)
-    const regi = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
+    // iOS-on is biztos zar, lasd gorgetesZar.ts
+    const feloldas = gorgetesZarolasa()
     return () => {
       window.removeEventListener('keydown', billentyu)
-      document.body.style.overflow = regi
+      feloldas()
+    }
+  }, [fiok.ablak])
+
+  // Billentyuzet (iOS): a visualViewport megmondja, mekkora a lathato resz.
+  // A lap aljat a billentyuzet tetejere emeljuk (--bill-also), a magassagat
+  // a lathato reszhez szabjuk (--latszo-magas). Ha az iOS el is tolja a
+  // lathato reszt (offsetTop), az is benne van, igy nem marad res.
+  useEffect(() => {
+    if (!fiok.ablak) return
+    const vv = window.visualViewport
+    const elem = retes.current
+    if (!vv || !elem) return
+    const igazit = () => {
+      const also = Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop))
+      elem.style.setProperty('--bill-also', `${also}px`)
+      elem.style.setProperty('--latszo-magas', `${Math.round(vv.height)}px`)
+    }
+    igazit()
+    vv.addEventListener('resize', igazit)
+    vv.addEventListener('scroll', igazit)
+    return () => {
+      vv.removeEventListener('resize', igazit)
+      vv.removeEventListener('scroll', igazit)
     }
   }, [fiok.ablak])
 
@@ -110,6 +140,14 @@ export default function BelepesAblak() {
     })
   }
 
+  // Rossz kodnal megrazza a mezot: az osztalyt levesszuk, es a kovetkezo
+  // kepkockan visszatesszuk, igy minden rossz kodnal ujraindul. A mezot nem
+  // rajzoljuk ujra, mert akkor elveszne a fokusz (es a billentyuzet).
+  const razas = () => {
+    setRossz(false)
+    requestAnimationFrame(() => setRossz(true))
+  }
+
   // A kod ellenorzese. Egyszerre csak egy fut. Rossz kodnal (a 10 perces
   // ervenyessegen belul) a mezo kiurul, es a fokusz marad, igy a billentyuzet
   // nyitva marad; lejart kodnal a regi uzenet jon.
@@ -127,6 +165,7 @@ export default function BelepesAblak() {
           setHiba('Hibás kód, próbáld újra')
           utolsoRossz.current = beirt
           setKod('')
+          razas()
           elsoMezo.current?.focus()
         } else {
           setHiba(uzenet(h))
@@ -149,6 +188,8 @@ export default function BelepesAblak() {
   const kodValtozas = (ertek: string) => {
     const tiszta = ertek.replace(/\D/g, '').slice(0, 6)
     setKod(tiszta)
+    // Uj gepelesnel a rossz kod jelzese (pink szegely) eltunik
+    if (tiszta.length > 0) setRossz(false)
     if (uj && tiszta.length === 6 && tiszta !== utolsoRossz.current) ellenoriz(tiszta)
   }
 
@@ -172,7 +213,8 @@ export default function BelepesAblak() {
 
   return (
     <div
-      className="fiok-retes"
+      ref={retes}
+      className="fiok-retes ap-retes bl-retes"
       role="dialog"
       aria-modal="true"
       aria-labelledby={`${azon}-cim`}
@@ -180,163 +222,203 @@ export default function BelepesAblak() {
         if (e.target === e.currentTarget) belepesBezarasa()
       }}
     >
-      <div className="fiok-lap mozi-oldal-panel">
-        <div className="tn-panel-belso mozi-panel fiok-lap-belso">
-          <button type="button" className="fiok-zaro" onClick={belepesBezarasa} aria-label="Bezárás">
-            <svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true">
-              <path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
-            </svg>
-          </button>
+      {/* A keret azert kell, hogy a matrica kilohessen a lap fole: a lap gorog, igy levagna */}
+      <div className="bl-keret">
+        <span className={`bl-matrica${fiok.ablakCimke ? ' bl-matrica-ajandek' : ''}`} aria-hidden="true">
+          {fiok.ablakCimke ?? 'SideQuest'}
+        </span>
+        <div className="fiok-lap mozi-oldal-panel ap-lap">
+          <div className="tn-panel-belso mozi-panel fiok-lap-belso ap-belso">
+            <span className="ap-fogo" aria-hidden="true" />
+            <button type="button" className="fiok-zaro" onClick={belepesBezarasa} aria-label="Bezárás">
+              <svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true">
+                <path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+              </svg>
+            </button>
 
-          {lepes === 'email' ? (
-            <form onSubmit={kuldes} noValidate>
-              <h2 id={`${azon}-cim`} className="tn-panel-cim">
-                <Felirat szoveg="Belépés" kicsi valtozat="sotet" className="mozi-fejlec" />
-              </h2>
-              <p className="mozi-jelzes">
-                Írd be az e-mail-címed, és küldünk egy 6 jegyű kódot. Jelszó nem kell, és ha még nincs fiókod,
-                ezzel létre is hozod.
-              </p>
-              <label className="mozi-cimke" htmlFor={`${azon}-email`}>
-                E-mail-cím
-              </label>
-              <input
-                ref={elsoMezo}
-                id={`${azon}-email`}
-                className="mozi-mezo fiok-mezo"
-                type="email"
-                inputMode="email"
-                autoComplete="email"
-                autoCapitalize="off"
-                spellCheck={false}
-                placeholder="pelda@gmail.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={dolgozik}
-              />
-              {hiba ? <p className="mozi-hiba">{hiba}</p> : null}
-              <button
-                type="submit"
-                className="tn-kapszula mozi-gomb"
-                disabled={dolgozik || !/^\S+@\S+\.\S+$/.test(email.trim())}
-              >
-                <span className="tn-gomb-felirat tn-gomb-felirat-sotet">{dolgozik ? 'Küldés...' : 'Kód küldése'}</span>
-              </button>
-            </form>
-          ) : null}
-
-          {lepes === 'kod' ? (
-            <form onSubmit={ellenorzes} noValidate>
-              <h2 id={`${azon}-cim`} className="tn-panel-cim">
-                <Felirat szoveg="Írd be a kódot" kicsi valtozat="sotet" className="mozi-fejlec" />
-              </h2>
-              <p className="mozi-jelzes">
-                Elküldtük a 6 jegyű kódot ide: <strong>{email.trim()}</strong>. Ha nem látod, nézd meg a spam mappát is.
-              </p>
-              <label className="mozi-cimke" htmlFor={`${azon}-kod`}>
-                Kód
-              </label>
-              <input
-                ref={elsoMezo}
-                id={`${azon}-kod`}
-                className="mozi-mezo fiok-mezo fiok-kod"
-                type="text"
-                inputMode="numeric"
-                autoComplete="one-time-code"
-                pattern="\d{6}"
-                placeholder="123456"
-                value={kod}
-                onChange={(e) => kodValtozas(e.target.value)}
-                // Ellenorzes kozben csak olvashato, nem tiltott: igy a fokusz es
-                // a billentyuzet megmarad
-                readOnly={dolgozik}
-              />
-              {hiba ? <p className="mozi-hiba">{hiba}</p> : null}
-              <button type="submit" className="tn-kapszula mozi-gomb" disabled={dolgozik || !kodJo}>
-                <span className="tn-gomb-felirat tn-gomb-felirat-sotet">{dolgozik ? 'Ellenőrzés...' : 'Belépés'}</span>
-              </button>
-              <div className="fiok-masodlagos">
-                <button type="button" className="fiok-szoveggomb" onClick={() => kuldes()} disabled={dolgozik || varakozas > 0}>
-                  {varakozas > 0 ? `Új kód ${varakozas} mp múlva` : 'Új kód küldése'}
-                </button>
-                <button
-                  type="button"
-                  className="fiok-szoveggomb"
-                  onClick={() => {
-                    setHiba(null)
-                    setLepes('email')
-                  }}
-                  disabled={dolgozik}
-                >
-                  Másik e-mail-cím
-                </button>
-              </div>
-            </form>
-          ) : null}
-
-          {lepes === 'profil' ? (
-            <form onSubmit={mentes} noValidate>
-              <h2 id={`${azon}-cim`} className="tn-panel-cim">
-                <Felirat szoveg="Még egy lépés" kicsi valtozat="sotet" className="mozi-fejlec" />
-              </h2>
-              <p className="mozi-jelzes">A keresztneved a kedvezmény beváltásakor jelenik meg, ezt látja a pénztáros.</p>
-              <label className="mozi-cimke" htmlFor={`${azon}-nev`}>
-                Keresztnév
-              </label>
-              <input
-                ref={elsoMezo}
-                id={`${azon}-nev`}
-                className="mozi-mezo fiok-mezo"
-                type="text"
-                autoComplete="given-name"
-                maxLength={40}
-                placeholder="Pl. Anna"
-                value={nev}
-                onChange={(e) => setNev(e.target.value)}
-                disabled={dolgozik}
-              />
-
-              <label className="fiok-pipa">
-                <input type="checkbox" checked={elmult16} onChange={(e) => setElmult16(e.target.checked)} disabled={dolgozik} />
-                <span>Elmúltam 16 éves</span>
-              </label>
-              <label className="fiok-pipa">
+            {lepes === 'email' ? (
+              <form onSubmit={kuldes} noValidate>
+                <h2 id={`${azon}-cim`} className="tn-panel-cim">
+                  <Felirat szoveg="Belépés" kicsi valtozat="sotet" className="mozi-fejlec" />
+                </h2>
+                <p className="mozi-jelzes">
+                  Írd be az e-mail-címed, és küldünk egy 6 jegyű kódot. Nincs jelszó, és ha még nincs fiókod,
+                  ezzel létre is hozod.
+                </p>
+                <label className="mozi-cimke" htmlFor={`${azon}-email`}>
+                  E-mail-cím
+                </label>
                 <input
-                  type="checkbox"
-                  checked={elfogadja}
-                  onChange={(e) => setElfogadja(e.target.checked)}
+                  ref={elsoMezo}
+                  id={`${azon}-email`}
+                  className="mozi-mezo fiok-mezo"
+                  type="email"
+                  inputMode="email"
+                  enterKeyHint="go"
+                  autoComplete="email"
+                  autoCapitalize="off"
+                  spellCheck={false}
+                  placeholder="pelda@gmail.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   disabled={dolgozik}
                 />
-                <span>
-                  Elfogadom az{' '}
-                  <a href="/adatkezeles/" target="_blank" rel="noopener">
-                    adatkezelési tájékoztatót
-                  </a>
-                </span>
-              </label>
+                {hiba ? <p className="mozi-hiba">{hiba}</p> : null}
+                <button
+                  type="submit"
+                  className="tn-kapszula mozi-gomb"
+                  disabled={dolgozik || !/^\S+@\S+\.\S+$/.test(email.trim())}
+                >
+                  <span className="tn-gomb-felirat tn-gomb-felirat-sotet">{dolgozik ? 'Küldés...' : 'Kód küldése'}</span>
+                </button>
+              </form>
+            ) : null}
 
-              {hiba ? <p className="mozi-hiba">{hiba}</p> : null}
-              <button
-                type="submit"
-                className="tn-kapszula mozi-gomb"
-                disabled={dolgozik || nev.trim() === '' || !elmult16 || !elfogadja}
-              >
-                <span className="tn-gomb-felirat tn-gomb-felirat-sotet">{dolgozik ? 'Mentés...' : 'Kész'}</span>
-              </button>
-            </form>
-          ) : null}
+            {lepes === 'kod' ? (
+              <form onSubmit={ellenorzes} noValidate>
+                <h2 id={`${azon}-cim`} className="tn-panel-cim">
+                  <Felirat szoveg="Írd be a kódot" kicsi valtozat="sotet" className="mozi-fejlec" />
+                </h2>
+                <p className="mozi-jelzes">
+                  Elküldtük a 6 jegyű kódot ide: <strong>{email.trim()}</strong>. Ha nem látod, nézd meg a spam mappát is.
+                </p>
+                <label className="mozi-cimke" htmlFor={`${azon}-kod`}>
+                  Kód
+                </label>
+                {/*
+                  Egy mezo marad (beillesztes, iOS automatikus kitoltes), de a szoveget
+                  a felette allo 6 rekesz mutatja: a beirt szamjegy, vagy halvanyan a
+                  "NEKED!" egy betuje. A mezo sajat szovege es kurzora lathatatlan.
+                */}
+                <div className={`fiok-kod-keret${dolgozik ? ' fiok-kod-ellenoriz' : ''}${rossz ? ' fiok-kod-rossz' : ''}`}>
+                  <input
+                    ref={elsoMezo}
+                    id={`${azon}-kod`}
+                    className="mozi-mezo fiok-mezo fiok-kod"
+                    aria-label="6 jegyű kód"
+                    onFocus={() => setKodFokusz(true)}
+                    onBlur={() => setKodFokusz(false)}
+                    type="text"
+                    inputMode="numeric"
+                    enterKeyHint="go"
+                    autoComplete="one-time-code"
+                    maxLength={6}
+                    pattern="[0-9]*"
+                    aria-busy={dolgozik}
+                    value={kod}
+                    onChange={(e) => kodValtozas(e.target.value)}
+                    // A maxLength a beillesztett "596 466"-ot "596 46"-ra vagna, mielott
+                    // a szokozt kiszedhetnenk: ezert a beillesztett szoveget itt tisztitjuk
+                    onPaste={(e) => {
+                      const szoveg = e.clipboardData.getData('text')
+                      if (!szoveg) return
+                      e.preventDefault()
+                      kodValtozas(szoveg)
+                    }}
+                    // Ellenorzes kozben csak olvashato, nem tiltott: igy a fokusz es
+                    // a billentyuzet megmarad
+                    readOnly={dolgozik}
+                  />
+                  <span className="fiok-kod-rekeszek" aria-hidden="true">
+                    {KOD_HELYKITOLTO.map((betu, i) => (
+                      <span
+                        key={i}
+                        className={`fiok-kod-rekesz${kod[i] ? ' fiok-kod-rekesz-tele' : ''}${
+                          kodFokusz && !dolgozik && i === Math.min(kod.length, 5) && !kod[i] ? ' fiok-kod-rekesz-aktiv' : ''
+                        }`}
+                      >
+                        {kod[i] ?? betu}
+                      </span>
+                    ))}
+                  </span>
+                </div>
+                {hiba ? <p className="mozi-hiba">{hiba}</p> : null}
+                <button type="submit" className="tn-kapszula mozi-gomb" disabled={dolgozik || !kodJo}>
+                  <span className="tn-gomb-felirat tn-gomb-felirat-sotet">{dolgozik ? 'Ellenőrzés...' : 'Belépés'}</span>
+                </button>
+                <div className="fiok-masodlagos">
+                  <button type="button" className="fiok-szoveggomb" onClick={() => kuldes()} disabled={dolgozik || varakozas > 0}>
+                    {varakozas > 0 ? `Új kód ${varakozas} mp múlva` : 'Új kód küldése'}
+                  </button>
+                  <button
+                    type="button"
+                    className="fiok-szoveggomb"
+                    onClick={() => {
+                      setHiba(null)
+                      setLepes('email')
+                    }}
+                    disabled={dolgozik}
+                  >
+                    Másik e-mail-cím
+                  </button>
+                </div>
+              </form>
+            ) : null}
 
-          {lepes === 'kesz' ? (
-            <div>
-              <h2 id={`${azon}-cim`} className="tn-panel-cim">
-                <Felirat szoveg={`Szia, ${fiok.keresztnev ?? ''}!`} kicsi valtozat="sotet" className="mozi-fejlec" />
-              </h2>
-              <p className="mozi-jelzes">Be vagy lépve. Ezen a telefonon bejelentkezve maradsz, nem kell mindig újra belépned.</p>
-              <button type="button" className="tn-kapszula mozi-gomb" onClick={belepesBezarasa}>
-                <span className="tn-gomb-felirat tn-gomb-felirat-sotet">Mehet</span>
-              </button>
-            </div>
-          ) : null}
+            {lepes === 'profil' ? (
+              <form onSubmit={mentes} noValidate>
+                <h2 id={`${azon}-cim`} className="tn-panel-cim">
+                  <Felirat szoveg="Még egy lépés" kicsi valtozat="sotet" className="mozi-fejlec" />
+                </h2>
+                <p className="mozi-jelzes">A keresztneved a kedvezmény beváltásakor jelenik meg, ezt látja a pénztáros.</p>
+                <label className="mozi-cimke" htmlFor={`${azon}-nev`}>
+                  Keresztnév
+                </label>
+                <input
+                  ref={elsoMezo}
+                  id={`${azon}-nev`}
+                  className="mozi-mezo fiok-mezo"
+                  type="text"
+                  autoComplete="given-name"
+                  maxLength={40}
+                  placeholder="Pl. Anna"
+                  value={nev}
+                  onChange={(e) => setNev(e.target.value)}
+                  disabled={dolgozik}
+                />
+
+                <label className="fiok-pipa">
+                  <input type="checkbox" checked={elmult16} onChange={(e) => setElmult16(e.target.checked)} disabled={dolgozik} />
+                  <span>Elmúltam 16 éves</span>
+                </label>
+                <label className="fiok-pipa">
+                  <input
+                    type="checkbox"
+                    checked={elfogadja}
+                    onChange={(e) => setElfogadja(e.target.checked)}
+                    disabled={dolgozik}
+                  />
+                  <span>
+                    Elfogadom az{' '}
+                    <a href="/adatkezeles/" target="_blank" rel="noopener">
+                      adatkezelési tájékoztatót
+                    </a>
+                  </span>
+                </label>
+
+                {hiba ? <p className="mozi-hiba">{hiba}</p> : null}
+                <button
+                  type="submit"
+                  className="tn-kapszula mozi-gomb"
+                  disabled={dolgozik || nev.trim() === '' || !elmult16 || !elfogadja}
+                >
+                  <span className="tn-gomb-felirat tn-gomb-felirat-sotet">{dolgozik ? 'Mentés...' : 'Kész'}</span>
+                </button>
+              </form>
+            ) : null}
+
+            {lepes === 'kesz' ? (
+              <div>
+                <h2 id={`${azon}-cim`} className="tn-panel-cim">
+                  <Felirat szoveg={`Szia, ${fiok.keresztnev ?? ''}!`} kicsi valtozat="sotet" className="mozi-fejlec" />
+                </h2>
+                <p className="mozi-jelzes">Be vagy lépve. Ezen a telefonon bejelentkezve maradsz, nem kell mindig újra belépned.</p>
+                <button type="button" className="tn-kapszula mozi-gomb" onClick={belepesBezarasa}>
+                  <span className="tn-gomb-felirat tn-gomb-felirat-sotet">Mehet</span>
+                </button>
+              </div>
+            ) : null}
+          </div>
         </div>
       </div>
     </div>

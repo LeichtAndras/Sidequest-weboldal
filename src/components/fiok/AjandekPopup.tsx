@@ -1,20 +1,8 @@
 import { useEffect, useId, useState } from 'react'
-import { belepesNyitasa, useFiok } from '../../fiok/fiok'
-import { alapAjanlat, useKinalat, type Ajanlat } from '../../fiok/kinalat'
-import { ROBBANAS } from '../../robbanas'
-import partnersData from '../../data/partners.json'
-import type { Partner } from '../../types'
-
-const partnerek = new Map((partnersData as Partner[]).map((p) => [p.slug, p]))
-
-/** A szazalek egy ajanlatbol (elobb a jelvenybol, aztan a szovegbol), pl. 40. */
-function szazalek(a: Ajanlat | null): number | null {
-  for (const forras of [a?.jelveny, a?.szoveg]) {
-    const talalat = forras?.match(/(\d+)\s?%/)
-    if (talalat) return Number(talalat[1])
-  }
-  return null
-}
+import { gorgetesZarolasa } from '../../fiok/gorgetesZar'
+import { belepesNyitasaAjandekkal, useFiok } from '../../fiok/fiok'
+import { alapAjanlat, useKinalat } from '../../fiok/kinalat'
+import AjandekKartya, { legnagyobbSzazalek, szazalek } from './AjandekKartya'
 
 const KULCS = 'sq-ajandek-popup'
 /** Bezaras utan ennyi ideig nem jon fel ujra: egy nap. */
@@ -23,6 +11,9 @@ const SZUNET = 24 * 60 * 60 * 1000
 const TILTOTT = ['fiokom', 'adatkezeles', 'ajandek']
 
 function nemregBezarta(): boolean {
+  // Fejlesztoi szerveren (teszteles) nincs egynapos szunet: minden
+  // betolteskor ujra feljon. Az eles oldalon marad az egy nap.
+  if (import.meta.env.DEV) return false
   try {
     const mikor = Number(localStorage.getItem(KULCS))
     return Number.isFinite(mikor) && Date.now() - mikor < SZUNET
@@ -85,27 +76,28 @@ function Ablak({ onBezar }: { onBezar: () => void }) {
       if (e.key === 'Escape') mostNem()
     }
     window.addEventListener('keydown', billentyu)
-    const regi = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
+    // iOS-on is biztos zar, lasd gorgetesZar.ts
+    const feloldas = gorgetesZarolasa()
     return () => {
       window.removeEventListener('keydown', billentyu)
-      document.body.style.overflow = regi
+      feloldas()
     }
   }, [nyitva]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!nyitva) return null
 
-  const regisztral = () => {
+  // A belepo lap tetejen a valasztott ajandek matricaja: sorra koppintva
+  // annak a szazaleka, a nagy gombbal a legnagyobb
+  const regisztral = (cimke: string) => {
     onBezar()
-    belepesNyitasa()
+    belepesNyitasaAjandekkal(cimke)
   }
   // Ha minden ajanlatnal ugyanannyi a bevaltasi ido, kiirjuk
   const napok = new Set(ajanlatok.map((a) => a.ervenyes_nap))
   const nap = napok.size === 1 ? [...napok][0] : null
 
   // A legnagyobb welcome szazalek a cimbe
-  const welcomeSzazalekok = ajanlatok.map(szazalek).filter((x): x is number => x !== null)
-  const max = welcomeSzazalekok.length > 0 ? Math.max(...welcomeSzazalekok) : null
+  const max = legnagyobbSzazalek(ajanlatok)
 
   // Osszevetes a sima (alap) kedvezmennyel ugyanezeknel a helyeknel. Ha
   // nincs mihez merni, vagy nem nagyobb, a sor elmarad.
@@ -159,41 +151,14 @@ function Ablak({ onBezar }: { onBezar: () => void }) {
 
           <ul className="ap-lista">
             {ajanlatok.map((a, i) => {
-              const partner = partnerek.get(a.partner_slug)
-              const kep = partner?.venue ? `/venues/${partner.venue.replace(/(\.\w+)$/, '-640$1')}` : null
-              const arany = a.keret > 0 ? Math.max(0.06, Math.min(1, a.szabad / a.keret)) : 1
-              const keves = a.szabad <= 3
+              const sz = szazalek(a)
               return (
                 <li key={a.id} style={{ '--ap-sor': i } as React.CSSProperties}>
-                  <button
-                    type="button"
-                    className="ap-ajandek"
-                    onClick={regisztral}
-                    style={kep ? { backgroundImage: `url(${kep})` } : undefined}
-                  >
-                    <span className="ap-ajandek-nev">{a.partner}</span>
-                    {/* A robbanasban csak a szam all; a teljes ajanlat a kepolvasonak */}
-                    <span className="sr-only">{a.szoveg}</span>
-                    <span className={`ap-keszlet${keves ? ' ap-keszlet-keves' : ''}`}>
-                      <span className="ap-sav" aria-hidden="true">
-                        <span style={{ width: `${arany * 100}%` }} />
-                      </span>
-                      {keves ? `Már csak ${a.szabad} db!` : `Még ${a.szabad} db`}
-                    </span>
-                    <span className="ap-robbanas" aria-hidden="true">
-                      <svg viewBox="0 0 140 100" aria-hidden="true">
-                        <path d={ROBBANAS} fill="#FF2D78" stroke="#0B1B3A" strokeWidth="4" strokeLinejoin="round" />
-                      </svg>
-                      {szazalek(a) !== null ? (
-                        <span className="ap-robbanas-szoveg">
-                          <span>{szazalek(a)}%</span>
-                          <span className="ap-robbanas-felirat">Kedvezmény</span>
-                        </span>
-                      ) : (
-                        <span className="ap-robbanas-szoveg">Ajándék</span>
-                      )}
-                    </span>
-                  </button>
+                  <AjandekKartya
+                    ajanlat={a}
+                    max={max}
+                    onClick={() => regisztral(sz !== null ? `−${sz}% vár rád` : 'Ajándék vár rád')}
+                  />
                 </li>
               )
             })}
@@ -201,7 +166,11 @@ function Ablak({ onBezar }: { onBezar: () => void }) {
 
           {osszevetes ? <p className="ap-osszevetes">{osszevetes}</p> : null}
 
-          <button type="button" className="tn-kapszula mozi-gomb ap-cta" onClick={regisztral}>
+          <button
+            type="button"
+            className="tn-kapszula mozi-gomb ap-cta"
+            onClick={() => regisztral(max !== null ? `Akár −${max}% vár rád` : 'Ajándék vár rád')}
+          >
             <span className="tn-gomb-felirat tn-gomb-felirat-sotet">Kérem az ajándékom</span>
             <svg viewBox="0 0 24 24" width="1.1em" height="1.1em" aria-hidden="true">
               <path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
